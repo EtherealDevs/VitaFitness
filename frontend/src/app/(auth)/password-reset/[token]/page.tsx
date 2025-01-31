@@ -1,7 +1,7 @@
 'use client'
 
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
+import Button from '@/components/ui/button'
+import Input from '@/components/ui/input'
 import InputError from '@/components/ui/InputError'
 import Label from '@/components/ui/Label'
 import { useAuth } from '@/hooks/auth'
@@ -18,9 +18,9 @@ const PasswordReset = () => {
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
     const [errors, setErrors] = useState<{
-        email?: string[];
-        password?: string[];
-        password_confirmation?: string[];
+        email?: string[]
+        password?: string[]
+        password_confirmation?: string[]
     }>({})
     const [status, setStatus] = useState(null)
 
@@ -37,11 +37,11 @@ const PasswordReset = () => {
     }
 
     useEffect(() => {
-        const emailParam = searchParams.get('email');
+        const emailParam = searchParams.get('email')
         if (emailParam) {
-            setEmail(emailParam);
+            setEmail(emailParam)
         }
-    }, [searchParams.get('email')]);
+    }, [searchParams.get('email')])
 
     return (
         <>
@@ -80,10 +80,7 @@ const PasswordReset = () => {
                         required
                     />
 
-                    <InputError
-                        messages={errors.password}
-                        className="mt-2"
-                    />
+                    <InputError messages={errors.password} className="mt-2" />
                 </div>
 
                 {/* Confirm Password */}
