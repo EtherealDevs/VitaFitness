@@ -1,7 +1,13 @@
-"use client"
+'use client'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import Button from "@/components/ui/Button"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import Button from '@/components/ui/button'
+import Image from 'next/image'
 
 interface PlanModalProps {
     isOpen: boolean
@@ -20,12 +26,16 @@ export function PlanModal({ isOpen, onClose, plan }: PlanModalProps) {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="bg-gray-900 text-white border-gray-800">
                 <DialogHeader>
-                    <DialogTitle className="gradient-text">{plan.title}</DialogTitle>
+                    <DialogTitle className="gradient-text">
+                        {plan.title}
+                    </DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4">
-                    <img
-                        src={plan.image || "/placeholder.svg"}
+                    <Image
+                        src={plan.image || '/placeholder.svg'}
                         alt={plan.title}
+                        width={600}
+                        height={400}
                         className="w-full h-48 object-cover rounded-lg"
                     />
                     <p className="text-gray-300">{plan.description}</p>
@@ -38,12 +48,15 @@ export function PlanModal({ isOpen, onClose, plan }: PlanModalProps) {
                         ))}
                     </ul>
                     <div className="flex justify-between items-center">
-                        <span className="text-2xl font-bold gradient-text">{plan.price}</span>
-                        <Button className="bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90">Comenzar ahora</Button>
+                        <span className="text-2xl font-bold gradient-text">
+                            {plan.price}
+                        </span>
+                        <Button className="bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90">
+                            Comenzar ahora
+                        </Button>
                     </div>
                 </div>
             </DialogContent>
         </Dialog>
     )
 }
-
