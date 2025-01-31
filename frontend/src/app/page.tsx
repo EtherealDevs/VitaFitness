@@ -6,11 +6,13 @@ import Reviews from "@/components/interface/Reviews"
 import Faq from "@/components/interface/Faq"
 import Contact from "@/components/interface/Contact"
 import Footer from "@/components/Footer"
+import LoginLinks from '@/app/LoginLinks'
 
 export default function Home() {
     return (
         <div>
             <Navbar />
+            <LoginLinks/>
             <main>
                 <Hero />
                 <Services />
