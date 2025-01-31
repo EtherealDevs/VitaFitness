@@ -6,6 +6,6 @@ interface GradientTitleProps {
 }
 
 export function GradientTitle({ children, className = "" }: GradientTitleProps) {
-  return <h2 className={`text-4xl font-bold gradient-underline mb-8 ${className}`}>{children}</h2>
+  return <h2 className={`text-4xl impact-title gradient-underline mb-8 ${className}`}>{children}</h2>
 }
 

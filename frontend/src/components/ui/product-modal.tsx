@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+import Button from "@/components/ui/Button"
 
 interface ProductModalProps {
     isOpen: boolean
@@ -35,7 +35,7 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
                             <h4 className="font-semibold mb-2">Tallas disponibles</h4>
                             <div className="flex gap-2">
                                 {product.sizes.map((size) => (
-                                    <Button key={size} variant="outline" className="border-gray-700 hover:border-purple-500">
+                                    <Button key={size} className="border-gray-700 hover:border-purple-500">
                                         {size}
                                     </Button>
                                 ))}

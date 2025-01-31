@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  @font-face {
+    font-family: "Impact";
+    src: local("Impact");
+  }
+}
+
 :root {
   --gradient-start: #4ade80;
   --gradient-end: #a855f7;
@@ -29,11 +36,9 @@
   border-radius: 2px;
 }
 
-.card-hover {
-  transition: transform 0.3s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-5px);
+.impact-title {
+  font-family: "Impact", system-ui, -apple-system, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
