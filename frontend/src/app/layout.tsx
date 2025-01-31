@@ -1,20 +1,22 @@
-"use client";
-import "../styles/globals.css";
+import { Nunito } from 'next/font/google'
+import '@/app/global.css'
+import { ReactNode } from 'react'
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+const nunitoFont = Nunito({
+    subsets: ['latin'],
+    display: 'swap',
+})
+
+const RootLayout = ({ children }: { children: ReactNode }) => {
     return (
-        <html lang="en">
-            <body>
-                {/* Fondo con Stars */}
-
-                <main className="relative z-10 min-h-screen bg-transparent">
-                    {children}
-                </main>
-            </body>
+        <html lang="en" className={nunitoFont.className}>
+            <body className="antialiased">{children}</body>
         </html>
-    );
+    )
 }
+
+export const metadata = {
+    title: 'Laravel',
+}
+
+export default RootLayout
