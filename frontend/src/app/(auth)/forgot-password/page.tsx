@@ -1,7 +1,7 @@
 'use client'
 
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
+import Button from '@/components/ui/button'
+import Input from '@/components/ui/input'
 import InputError from '@/components/ui/InputError'
 import Label from '@/components/ui/Label'
 import { useAuth } from '@/hooks/auth'
@@ -10,7 +10,7 @@ import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
 
 // Define el tipo de errores
 interface Errors {
-    email?: string[]; // Propiedad email que puede ser un array de strings
+    email?: string[] // Propiedad email que puede ser un array de strings
 }
 
 const Page = () => {
@@ -33,8 +33,8 @@ const Page = () => {
         <>
             <div className="mb-4 text-sm text-gray-600">
                 Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that
-                will allow you to choose a new one.
+                address and we will email you a password reset link that will
+                allow you to choose a new one.
             </div>
 
             {/* Session Status */}
@@ -43,7 +43,9 @@ const Page = () => {
             <form onSubmit={submitForm}>
                 {/* Email Address */}
                 <div>
-                    <Label htmlFor="email" className="your-class-name">Email</Label>
+                    <Label htmlFor="email" className="your-class-name">
+                        Email
+                    </Label>
                     <Input
                         id="email"
                         type="email"

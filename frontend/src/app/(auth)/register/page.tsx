@@ -1,7 +1,7 @@
 'use client'
 
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
+import Button from '@/components/ui/button'
+import Input from '@/components/ui/input'
 import InputError from '@/components/ui/InputError'
 import Label from '@/components/ui/Label'
 import Link from 'next/link'
@@ -19,10 +19,10 @@ const Page = () => {
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
     const [errors, setErrors] = useState<{
-        email?: string[];
-        password?: string[];
-        password_confirmation?: string[];
-        name?: string[];
+        email?: string[]
+        password?: string[]
+        password_confirmation?: string[]
+        name?: string[]
     }>({})
 
     const submitForm = (event: React.FormEvent<HTMLFormElement>) => {
@@ -94,9 +94,7 @@ const Page = () => {
 
             {/* Confirm Password */}
             <div className="mt-4">
-                <Label htmlFor="passwordConfirmation">
-                    Confirm Password
-                </Label>
+                <Label htmlFor="passwordConfirmation">Confirm Password</Label>
 
                 <Input
                     id="passwordConfirmation"
@@ -104,7 +102,9 @@ const Page = () => {
                     type="password"
                     value={passwordConfirmation}
                     className="block mt-1 w-full"
-                    onChange={event => setPasswordConfirmation(event.target.value)}
+                    onChange={event =>
+                        setPasswordConfirmation(event.target.value)
+                    }
                     required
                 />
 
