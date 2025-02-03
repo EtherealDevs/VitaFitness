@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Button from '@/components/ui/button'
+import Button from '@/components/ui/Button'
 
 const images = [
     '/placeholder.svg?height=1080&width=1920&text=Gym+1',
@@ -24,9 +24,8 @@ export default function Hero() {
             {images.map((img, index) => (
                 <div
                     key={index}
-                    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-                        index === currentImage ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${index === currentImage ? 'opacity-100' : 'opacity-0'
+                        }`}
                     style={{ backgroundImage: `url(${img})` }}
                 />
             ))}

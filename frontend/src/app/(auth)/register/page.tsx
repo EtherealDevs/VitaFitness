@@ -1,6 +1,6 @@
 'use client'
 
-import Button from '@/components/ui/button'
+import Button from '@/components/ui/Button'
 import Input from '@/components/ui/input'
 import InputError from '@/components/ui/InputError'
 import Label from '@/components/ui/Label'
