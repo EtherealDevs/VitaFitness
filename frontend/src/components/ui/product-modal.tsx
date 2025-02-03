@@ -75,7 +75,7 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
                             {product.price}
                         </span>
                         <Button className="bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90">
-                            Añadir al carrito
+                            Consultar en Whatsapp
                         </Button>
                     </div>
                 </div>

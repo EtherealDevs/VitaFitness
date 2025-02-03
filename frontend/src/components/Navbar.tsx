@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Button from './ui/Button'
+import LoginLinks from '@/app/LoginLinks'
 
 const Navbar = () => {
     return (
@@ -32,6 +33,7 @@ const Navbar = () => {
                     <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                         Únete ahora
                     </Button>
+                    <LoginLinks />
                 </div>
             </div>
         </nav>

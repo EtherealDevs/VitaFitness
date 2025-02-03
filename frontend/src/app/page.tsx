@@ -6,23 +6,32 @@ import Reviews from "@/components/interface/Reviews"
 import Faq from "@/components/interface/Faq"
 import Contact from "@/components/interface/Contact"
 import Footer from "@/components/Footer"
-import LoginLinks from '@/app/LoginLinks'
 
 export default function Home() {
     return (
         <div>
             <Navbar />
-            <LoginLinks/>
             <main>
-                <Hero />
-                <Services />
-                <Commitment />
-                <Reviews />
-                <Contact />
-                <Faq />
+                <section id="hero">
+                    <Hero />
+                </section>
+                <section id="services">
+                    <Services />
+                </section>
+                <section id="commitment">
+                    <Commitment />
+                </section>
+                <section id="reviews">
+                    <Reviews />
+                </section>
+                <section id="contact">
+                    <Contact />
+                </section>
+                <section id="faq">
+                    <Faq />
+                </section>
             </main>
             <Footer />
         </div>
     )
 }
-

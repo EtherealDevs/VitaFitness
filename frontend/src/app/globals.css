@@ -3,42 +3,57 @@
 @tailwind utilities;
 
 @layer base {
-  @font-face {
-    font-family: "Impact";
-    src: local("Impact");
-  }
+    @font-face {
+        font-family: 'Impact';
+        src: local('Impact');
+    }
 }
 
 :root {
-  --gradient-start: #4ade80;
-  --gradient-end: #a855f7;
+    --gradient-start: #4ade80;
+    --gradient-end: #a855f7;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 .gradient-text {
-  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+    background: linear-gradient(
+        to right,
+        var(--gradient-start),
+        var(--gradient-end)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .gradient-underline {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 .gradient-underline::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -5px;
-  height: 4px;
-  width: 100%;
-  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
-  border-radius: 2px;
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    height: 4px;
+    width: 100%;
+    background: linear-gradient(
+        to right,
+        var(--gradient-start),
+        var(--gradient-end)
+    );
+    border-radius: 2px;
 }
 
 .impact-title {
-  font-family: "Impact", system-ui, -apple-system, sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+    font-family:
+        'Impact',
+        system-ui,
+        -apple-system,
+        sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
-
