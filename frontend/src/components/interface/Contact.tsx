@@ -3,7 +3,8 @@
 import { GradientTitle } from '@/components/ui/gradient-title'
 import { Title } from '@/components/ui/title'
 import Button from '@/components/ui/Button'
-import { Facebook, Instagram, Linkedin, MessageCircle } from 'lucide-react'
+import { Facebook, Instagram, MessageCircle } from 'lucide-react'
+import Link from "next/link"
 
 export default function Contact() {
     return (
@@ -26,26 +27,21 @@ export default function Contact() {
                                 REDES SOCIALES
                             </Title>
                             <div className="flex gap-4">
-                                <a
-                                    href="#"
-                                    className="w-12 h-12 rounded-full bg-[#0077B5] bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
-                                    <Linkedin className="w-6 h-6 text-[#0077B5]" />
-                                </a>
-                                <a
-                                    href="#"
-                                    className="w-12 h-12 rounded-full bg-[#1877F2] bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
+                                <Link
+                                    href="https://www.facebook.com/vitafitness.ctes/?locale=es_LA"
+                                    target='_blank' className="w-12 h-12 rounded-full bg-[#1877F2] bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
                                     <Facebook className="w-6 h-6 text-[#1877F2]" />
-                                </a>
-                                <a
-                                    href="#"
-                                    className="w-12 h-12 rounded-full bg-[#E4405F] bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
+                                </Link>
+                                <Link
+                                    href="https://www.instagram.com/vitafitness.ctes/"
+                                    target='_blank' className="w-12 h-12 rounded-full bg-[#E4405F] bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
                                     <Instagram className="w-6 h-6 text-[#E4405F]" />
-                                </a>
-                                <a
-                                    href="#"
-                                    className="w-12 h-12 rounded-full bg-[#25D366] bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
+                                </Link>
+                                <Link
+                                    href="https://api.whatsapp.com/send/?phone=543794558125&text=Hola+Vita+Fitness%21%EF%BF%BD+quisiera+recibir+informaci%C3%B3n+sobre...&type=phone_number&app_absent=0"
+                                    target='_blank' className="w-12 h-12 rounded-full bg-[#25D366] bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
                                     <MessageCircle className="w-6 h-6 text-[#25D366]" />
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>

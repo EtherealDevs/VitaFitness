@@ -10,7 +10,7 @@ const Footer = () => {
                         <p>Transformando vidas a través del fitness y el bienestar.</p>
                     </div>
                     <div>
-                        <h3 className="text-xl font-semibold mb-4">Enlaces rápidos</h3>
+                        {/* <h3 className="text-xl font-semibold mb-4">Enlaces rápidos</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link href="#services" className="hover:text-green-400">
@@ -32,25 +32,33 @@ const Footer = () => {
                                     Contacto
                                 </Link>
                             </li>
-                        </ul>
+                        </ul> */}
                     </div>
                     <div>
                         <h3 className="text-xl font-semibold mb-4">Síguenos</h3>
                         <div className="flex space-x-4">
-                            <a href="#" className="text-white hover:text-green-400">
+                            <Link href="#" target='_blank' className="text-white hover:text-green-400">
                                 Facebook
-                            </a>
-                            <a href="#" className="text-white hover:text-green-400">
+                            </Link>
+                            <Link href="https://www.instagram.com/vitafitness.ctes/" target='_blank' className="text-white hover:text-green-400">
                                 Instagram
-                            </a>
-                            <a href="#" className="text-white hover:text-green-400">
-                                Twitter
-                            </a>
+                            </Link>
+                            <Link href="#" target='_blank' className="text-white hover:text-green-400">
+                                WhatsApp
+                            </Link>
                         </div>
                     </div>
                 </div>
                 <div className="mt-8 text-center">
-                    <p>&copy; 2023 Vita Fitness GYM. Todos los derechos reservados.</p>
+                    <p>&copy; 2025 Vita Fitness GYM. Todos los derechos reservados.</p>
+                </div>
+                <div className="mt-8 text-center text-sm text-gray-600">
+                    <p>
+                        <span className='mr-2' />Desarrolado por {' '}
+                        <a href='https://www.etherealdevs.com/' target='_blank' className='italic hover:text-blue-600'>
+                            Ethereal Devs
+                        </a>
+                    </p>
                 </div>
             </div>
         </footer>

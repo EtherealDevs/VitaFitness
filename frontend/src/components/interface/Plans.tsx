@@ -17,7 +17,7 @@ const plans = [
             'Seguimiento personalizado',
             'Acceso a app de ejercicios',
         ],
-        price: '$49.99/mes',
+        price: 'Consultar',
         image: '/placeholder.svg?height=400&width=600',
     },
     {
@@ -29,7 +29,7 @@ const plans = [
             'Rutinas personalizadas',
             'Evaluación mensual',
         ],
-        price: '$39.99/mes',
+        price: 'Ha',
         image: '/placeholder.svg?height=400&width=600',
     },
 ]
