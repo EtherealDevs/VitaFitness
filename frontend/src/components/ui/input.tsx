@@ -22,6 +22,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ autoComplete, ..
     );
 });
 
-Input.displayName = 'Input';
-
 export default Input;
