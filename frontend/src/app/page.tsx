@@ -24,11 +24,11 @@ export default function Home() {
                 <section id="reviews">
                     <Reviews />
                 </section>
-                <section id="contact">
-                    <Contact />
-                </section>
                 <section id="faq">
                     <Faq />
+                </section>
+                <section id="contact">
+                    <Contact />
                 </section>
             </main>
             <Footer />
