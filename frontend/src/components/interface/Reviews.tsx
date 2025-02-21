@@ -176,7 +176,7 @@ function ReviewCard({
     avatar: string
 }) {
     return (
-        <Card className="p-4 bg-black/50 backdrop-blur-sm border border-zinc-800">
+        <Card className="p-4 bg-{#0a0a0a71} backdrop-blur-sm ">
             <div className="flex items-center gap-3 mb-3">
                 <Image src={avatar || "/placeholder.svg"} alt={name} width={32} height={32} className="rounded-full" />
                 <div>
