@@ -77,7 +77,7 @@ const Reviews = () => {
     }, [nextImage])
 
     return (
-        <section className="min-h-screen bg-gradient-to-b from-black via-black to-zinc-900">
+        <section className="min-h-screen ">
             <div className="relative p-4">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-900/10 to-transparent" />
 
