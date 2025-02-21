@@ -6,5 +6,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
 {
-    //
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'dni',
+        'last_name',
+        'branch_id',
+        'registration_date',
+    ];
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function plans()
+    {
+        return $this->belongsToMany(Plan::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }
