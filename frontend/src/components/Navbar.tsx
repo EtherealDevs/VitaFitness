@@ -1,39 +1,39 @@
 import Link from 'next/link'
-import Button from './ui/Button'
-import LoginLinks from '@/app/LoginLinks'
+import Image from 'next/image'
 
 const Navbar = () => {
     return (
-        <nav className="bg-black py-4">
+        <nav className="bg-black py-4 px-8">
             <div className="container mx-auto flex justify-between items-center">
-                <Link href="/" className="text-2xl font-bold text-white">
-                    Vita Fitness GYM
+                {/* Logo */}
+                <Link href="/">
+                    <Image
+                        src="/img/LogoVita.png"
+                        alt="Vita Fitness Logo"
+                        width={100}
+                        height={40}
+                        className="object-contain"
+                    />
                 </Link>
-                <div className="space-x-4">
-                    <Link
-                        href="#services"
-                        className="text-white hover:text-green-400">
-                        Servicios
-                    </Link>
-                    <Link
-                        href="#commitment"
-                        className="text-white hover:text-green-400">
-                        Compromiso
-                    </Link>
-                    <Link
-                        href="#reviews"
-                        className="text-white hover:text-green-400">
-                        Reseñas
-                    </Link>
-                    <Link
-                        href="#contact"
-                        className="text-white hover:text-green-400">
-                        Contacto
-                    </Link>
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                        Únete ahora
-                    </Button>
-                    <LoginLinks />
+
+                {/* Menú de navegación */}
+                <div className="flex space-x-8 text-white text-sm font-semibold">
+                    <Link href="/" className="hover:text-gray-300">Inicio</Link>
+                    <Link href="#services" className="hover:text-gray-300">Planes</Link>
+                    <Link href="#productos" className="hover:text-gray-300">Productos</Link>
+                    <Link href="#compromiso" className="hover:text-gray-300">Nuestro Compromiso</Link>
+                    <Link href="#contact" className="hover:text-gray-300">Contacto</Link>
+                </div>
+
+                {/* Avatar */}
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                    <Image
+                        src="/avatar.png"
+                        alt="Usuario"
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                    />
                 </div>
             </div>
         </nav>
