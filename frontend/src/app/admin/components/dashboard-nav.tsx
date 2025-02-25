@@ -17,15 +17,24 @@ const navigation = [
 export function DashboardNav() {
   const pathname = usePathname()
 
+  // Función para verificar si una ruta está activa, incluyendo subrutas
+  const isActive = (href: string) => {
+    if (href === "/admin/dashboard" && pathname === "/admin") {
+      return true
+    }
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
   return (
-    <nav className="grid gap-1">
+    <nav className="grid gap-1 py-4">
       {navigation.map((item) => {
         const Icon = item.icon
+        const active = isActive(item.href)
         return (
           <Button
             key={item.href}
-            variant={pathname === item.href ? "secondary" : "ghost"}
-            className={cn("w-full justify-start gap-2", pathname === item.href && "bg-secondary")}
+            variant={active ? "secondary" : "ghost"}
+            className={cn("w-full justify-start gap-2", active && "bg-secondary")}
             asChild
           >
             <Link href={item.href}>
