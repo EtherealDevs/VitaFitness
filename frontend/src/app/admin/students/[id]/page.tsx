@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "../../components/ui/button"
 
 export default function StudentProfile({ params }: { params: { id: string } }) {
   const student = {

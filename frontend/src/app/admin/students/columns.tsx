@@ -1,8 +1,8 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "../components/ui/badge"
+import { Button } from "../components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "../components/ui/dropdown-menu"
 import { MoreHorizontal, Pencil, Trash } from "lucide-react"
 import Link from "next/link"
 

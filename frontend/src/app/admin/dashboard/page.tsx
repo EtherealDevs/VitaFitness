@@ -1,6 +1,7 @@
-import { DashboardMetrics } from "../components/dashboard-metrics"
+"use client"
+import { DashboardMetrics } from "../components/main-metrics"
 import { QuickAccess } from "../components/quick-access"
-import { Statistics } from "../components/statistics"
+import { Statistics } from "../components/statiscs"
 
 export default function DashboardPage() {
   return (

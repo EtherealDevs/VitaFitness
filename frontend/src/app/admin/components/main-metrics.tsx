@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Users, Calendar, DollarSign, Activity } from "lucide-react"
 
 export function DashboardMetrics() {

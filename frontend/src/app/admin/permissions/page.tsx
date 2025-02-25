@@ -1,9 +1,12 @@
-import { DataTable } from "@/components/data-table"
-import { Button } from "@/components/ui/button"
+"use client"
+
+import { DataTable } from "../components/ui/data-table"
+import { Button } from "../components/ui/button"
 import { Plus } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "../components/ui/badge"
 
+// Definimos el tipo Permission
 type Permission = {
   id: string
   name: string
@@ -12,6 +15,7 @@ type Permission = {
   lastUpdated: string
 }
 
+// Definimos las columnas con el tipo correcto
 const columns: ColumnDef<Permission>[] = [
   {
     accessorKey: "name",
@@ -24,18 +28,22 @@ const columns: ColumnDef<Permission>[] = [
   {
     accessorKey: "status",
     header: "Estado",
-    cell: ({ row }) => (
-      <Badge variant={row.original.status === "active" ? "default" : "destructive"}>
-        {row.original.status === "active" ? "Activo" : "Inactivo"}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string
+      return (
+        <Badge variant={status === "active" ? "success" : "destructive"}>
+          {status === "active" ? "Activo" : "Inactivo"}
+        </Badge>
+      )
+    },
   },
   {
     accessorKey: "lastUpdated",
-    header: "Última actualización",
+    header: "Última Actualización",
   },
 ]
 
+// Asegúrate de que los datos coincidan con el tipo Permission
 const data: Permission[] = [
   {
     id: "1",
@@ -58,6 +66,20 @@ const data: Permission[] = [
     status: "active",
     lastUpdated: "2023-01-01",
   },
+  {
+    id: "4",
+    name: "Ver reportes",
+    role: "Supervisor",
+    status: "active",
+    lastUpdated: "2023-02-15",
+  },
+  {
+    id: "5",
+    name: "Gestionar clases",
+    role: "Instructor",
+    status: "active",
+    lastUpdated: "2023-03-10",
+  },
 ]
 
 export default function PermissionsPage() {
@@ -71,7 +93,7 @@ export default function PermissionsPage() {
         </Button>
       </div>
       <div className="mt-6">
-        <DataTable columns={columns} data={data} />
+        <DataTable columns={columns} data={data} filterColumn="name" filterPlaceholder="Filtrar permisos..." />
       </div>
     </div>
   )
