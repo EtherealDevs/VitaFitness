@@ -14,6 +14,14 @@ class StudentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'name' => $this->name,
+            'last_name' => $this->last_name,
+            'registration_date' => $this->registration_date,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'dni' => $this->dni,
+            'branches' => BranchResource::collection($this->whenLoaded('branches')),
+        ];
     }
 }
