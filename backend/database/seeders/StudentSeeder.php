@@ -21,7 +21,7 @@ class StudentSeeder extends Seeder
             'email' => 'student@example.com',
             'phone' => '+573123456789',
             'dni' => 'Student DNI (123456789)',
-            'branches_id' => Branch::all()->random(1)->first()->id,
+            'branch_id' => Branch::all()->random(1)->first()->id,
         ]);
     }
 }

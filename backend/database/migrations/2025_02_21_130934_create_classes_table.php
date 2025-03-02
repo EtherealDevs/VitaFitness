@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teacher_schedules_id')->constrained('teacher_schedules');
-            $table->foreignId('branches_id')->constrained('branches');
+            $table->foreignId('branch_id')->constrained('branches');
             $table->time('time');
             $table->date('day');
             $table->integer('max_students');

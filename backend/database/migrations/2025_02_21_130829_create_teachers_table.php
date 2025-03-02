@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone');
             $table->string('dni')->unique();
-            $table->foreignId('branches_id')->constrained('branches');
+            $table->foreignId('branch_id')->constrained('branches');
             $table->timestamps();
         });
     }

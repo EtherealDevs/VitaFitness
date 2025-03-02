@@ -34,9 +34,9 @@ class StudentsTest extends TestCase
             'email' => 'student@example.com',
             'dni' => '123456789',
             'phone' => '123456789',
-            'branches_id' => $branch_id,
+            'branch_id' => $branch_id,
         ])->id;
-        $user = User::factory()->create();
+        $user = User::first();
         $response = $this->actingAs($user)->get('/api/students/'.$id);
         $response->assertStatus(200);
     }
@@ -51,7 +51,7 @@ class StudentsTest extends TestCase
             'email' => 'john@example.com',
             'dni' => '123456781',
             'phone' => '123456789',
-            'branches_id' => $branch->id,
+            'branch_id' => $branch->id,
         ]);
         $response->assertStatus(201);
     }
@@ -66,7 +66,7 @@ class StudentsTest extends TestCase
             'email' => 'jane@example.com',
             'dni' => '987654321',
             'phone' => '987654321',
-            'branches_id' => 1,
+            'branch_id' => 1,
         ]);
         $response->assertStatus(204);
     }
