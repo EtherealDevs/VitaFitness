@@ -15,10 +15,10 @@ class Teacher extends Model
 
     public function plans()
     {
-        return $this->belongsToMany(Plan::class);
+        return $this->belongsToMany(Plan::class, 'teacher_plans');
     }
 
-    public function teacherSchedule()
+    public function schedules()
     {
         return $this->hasMany(TeacherSchedules::class);
     }

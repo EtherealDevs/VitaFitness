@@ -17,17 +17,11 @@ class StudentsTest extends TestCase
     public function test_get_students(): void
     {
         $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get('/api/students');
-        $response->assertStatus(200);
-    }
-    public function test_get_student_by_id(): void
-    {
         $branch_id = Branch::create([
             'name' => 'Branch Name',
             'address' => 'Branch Address',
         ])->id;
-        $id = Student::create([
+        $student = Student::create([
             'name' => 'Student name',
             'last_name' => 'Student last name',
             'registration_date' => now(),
@@ -35,7 +29,14 @@ class StudentsTest extends TestCase
             'dni' => '123456789',
             'phone' => '123456789',
             'branch_id' => $branch_id,
-        ])->id;
+        ]);
+
+        $response = $this->actingAs($user)->get('/api/students');
+        $response->assertStatus(200);
+    }
+    public function test_get_student_by_id(): void
+    {
+        $id = Student::first()->id;
         $user = User::first();
         $response = $this->actingAs($user)->get('/api/students/'.$id);
         $response->assertStatus(200);
@@ -76,5 +77,52 @@ class StudentsTest extends TestCase
         $student = Student::find(2);
         $response = $this->actingAs($user)->delete('/api/students/'.$student->id);
         $response->assertStatus(204);
+    }
+    public function test_get_all_students_with_related(): void
+    {
+        $user = User::first();
+        $response = $this->actingAs($user)->get('/api/students');
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            "students" => [
+                [
+                    "id",
+                    "name",
+                    "last_name",
+                    "registration_date",
+                    "email",
+                    "dni",
+                    "phone",
+                    "branch" => [
+                        "id",
+                        "name",
+                        "address",
+                    ],
+                ],
+            ]
+        ]);
+    }
+    public function test_get_student_with_related(): void
+    {
+        $user = User::first();
+        $student = Student::with(['branch'])->first();
+        $response = $this->actingAs($user)->get('/api/students/'.$student->id);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            "student" => [
+                'id',
+                'name',
+                'last_name',
+               'registration_date',
+                'email',
+                'dni',
+                'phone',
+                'branch' => [
+                    'id',
+                    'name',
+                    'address',
+                ],
+            ]
+    ]);
     }
 }

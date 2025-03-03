@@ -19,7 +19,7 @@ class TeacherSchedules extends Model
         return $this->belongsTo(Teacher::class);
     }
 
-    public function classe()
+    public function classes()
     {
         return $this->hasMany(Classe::class);
     }

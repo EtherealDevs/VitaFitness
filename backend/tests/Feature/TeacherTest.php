@@ -17,24 +17,26 @@ class TeacherTest extends TestCase
     public function test_get_teachers(): void
     {
         $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get('/api/teachers');
-        $response->assertStatus(200);
-    }
-    public function test_get_teacher_by_id(): void
-    {
         $branch_id = Branch::create([
             'name' => 'Teacher Branch',
             'address' => 'Branch Address',
         ])->id;
-        $id = Teacher::create([
+        Teacher::create([
             'name' => 'Teacher name',
             'last_name' => 'Teacher last name',
             'email' => 'teacher@example.com',
             'phone' => '123456789',
             'dni' => '123456789',
             'branch_id' => $branch_id,
-        ])->id;
+        ]);
+
+        $response = $this->actingAs($user)->get('/api/teachers');
+        $response->assertStatus(200);
+    }
+    public function test_get_teacher_by_id(): void
+    {
+        $branch_id = Branch::first()->id;
+        $id = Teacher::first()->id;
         $user = User::first();
         $response = $this->actingAs($user)->get('/api/teachers/'.$id);
         $response->assertStatus(200);
@@ -75,5 +77,28 @@ class TeacherTest extends TestCase
         $teacher = Teacher::where('name', '=', 'Updated Teacher name')->first();
         $response = $this->actingAs($user)->delete('/api/teachers/'.$teacher->id);
         $response->assertStatus(204);
+    }
+    public function test_get_all_teachers_with_related(): void
+    {
+        $user = User::first();
+        $response = $this->actingAs($user)->get('/api/teachers');
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            "teachers" => [
+                [
+                    'id',
+                    'name',
+                    'last_name' ,
+                    'email',
+                    'phone',
+                    'dni',
+                    "branch" => [
+                        "id",
+                        "name",
+                        "address",
+                    ],
+                ],
+            ]
+        ]);
     }
 }

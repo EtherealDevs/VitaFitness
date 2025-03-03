@@ -17,6 +17,7 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+        $teachers->load('branch', 'plans', 'schedules');
         $teachers = TeacherResource::collection($teachers);
 
         $data = [
@@ -35,6 +36,7 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+        $teacher->load('branch', 'plans', 'schedules');
         $teacher = new TeacherResource($teacher);
 
         $data = [
@@ -61,6 +63,7 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+        $teacher->load('branch', 'plans', 'schedules');
         $teacher = new TeacherResource($teacher);
 
         $data = [
@@ -88,6 +91,7 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+        $teacher->load('branch', 'plans', 'schedules');
         $teacher = new TeacherResource($teacher);
 
         $data = [

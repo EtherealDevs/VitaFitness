@@ -19,7 +19,8 @@ class StudentController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $students = StudentResource::collection(Student::all());
+        $students->load('branch');
+        $students = StudentResource::collection($students);
         $data = [
             'students' => $students,
             'message' => 'Succesfully retrieved students',
@@ -33,9 +34,11 @@ class StudentController extends Controller
         // Return the retrieved student as a JSON response
         try {
             $student = Student::find($id);
+            $student->load('branch');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+        
         $student = new StudentResource($student);
         $data = [
             'student' => $student,

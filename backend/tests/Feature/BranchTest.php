@@ -55,4 +55,57 @@ class BranchTest extends TestCase
 
         $response->assertStatus(204);
     }
+    public function test_get_all_branches_with_related(): void
+    {
+        $user = User::first();
+        $response = $this->actingAs($user)->get('/api/branches');
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            "branches" => [
+                "*" => [
+                    "id",
+                    "name",
+                    "address",
+                    "students" => [
+                        "*" => [
+                            "id",
+                            "name",
+                            "age",
+                            "gender",
+                            "created_at",
+                            "updated_at",
+                            "branch_id",
+                            "teacher_id",
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+    public function test_get_branch_with_related(): void
+    {
+        $user = User::first();
+        $branch = Branch::first();
+        $response = $this->actingAs($user)->get('/api/branches/'.$branch->id);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            "branch" => [
+                "id",
+                "name",
+                "address",
+                "students" => [
+                    "*" => [
+                        "id",
+                        "name",
+                        "age",
+                        "gender",
+                        "created_at",
+                        "updated_at",
+                        "branch_id",
+                        "teacher_id",
+                    ],
+                ],
+            ],
+        ]);
+    }
 }
