@@ -17,26 +17,27 @@ class StudentsTest extends TestCase
     public function test_get_students(): void
     {
         $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get('/api/students');
-        $response->assertStatus(200);
-    }
-    public function test_get_student_by_id(): void
-    {
         $branch_id = Branch::create([
             'name' => 'Branch Name',
             'address' => 'Branch Address',
         ])->id;
-        $id = Student::create([
+        $student = Student::create([
             'name' => 'Student name',
             'last_name' => 'Student last name',
             'registration_date' => now(),
             'email' => 'student@example.com',
             'dni' => '123456789',
             'phone' => '123456789',
-            'branches_id' => $branch_id,
-        ])->id;
-        $user = User::factory()->create();
+            'branch_id' => $branch_id,
+        ]);
+
+        $response = $this->actingAs($user)->get('/api/students');
+        $response->assertStatus(200);
+    }
+    public function test_get_student_by_id(): void
+    {
+        $id = Student::first()->id;
+        $user = User::first();
         $response = $this->actingAs($user)->get('/api/students/'.$id);
         $response->assertStatus(200);
     }
@@ -51,7 +52,7 @@ class StudentsTest extends TestCase
             'email' => 'john@example.com',
             'dni' => '123456781',
             'phone' => '123456789',
-            'branches_id' => $branch->id,
+            'branch_id' => $branch->id,
         ]);
         $response->assertStatus(201);
     }
@@ -66,7 +67,7 @@ class StudentsTest extends TestCase
             'email' => 'jane@example.com',
             'dni' => '987654321',
             'phone' => '987654321',
-            'branches_id' => 1,
+            'branch_id' => 1,
         ]);
         $response->assertStatus(204);
     }
@@ -76,5 +77,52 @@ class StudentsTest extends TestCase
         $student = Student::find(2);
         $response = $this->actingAs($user)->delete('/api/students/'.$student->id);
         $response->assertStatus(204);
+    }
+    public function test_get_all_students_with_related(): void
+    {
+        $user = User::first();
+        $response = $this->actingAs($user)->get('/api/students');
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            "students" => [
+                [
+                    "id",
+                    "name",
+                    "last_name",
+                    "registration_date",
+                    "email",
+                    "dni",
+                    "phone",
+                    "branch" => [
+                        "id",
+                        "name",
+                        "address",
+                    ],
+                ],
+            ]
+        ]);
+    }
+    public function test_get_student_with_related(): void
+    {
+        $user = User::first();
+        $student = Student::with(['branch'])->first();
+        $response = $this->actingAs($user)->get('/api/students/'.$student->id);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            "student" => [
+                'id',
+                'name',
+                'last_name',
+               'registration_date',
+                'email',
+                'dni',
+                'phone',
+                'branch' => [
+                    'id',
+                    'name',
+                    'address',
+                ],
+            ]
+    ]);
     }
 }

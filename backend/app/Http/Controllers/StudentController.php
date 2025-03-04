@@ -16,10 +16,11 @@ class StudentController extends Controller
         // Return the retrieved students as a JSON response
         try {
             $students = Student::all();
-        } catch (\Throwable $th) {
-            throw $th;
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-        $students = StudentResource::collection(Student::all());
+        $students->load('branch');
+        $students = StudentResource::collection($students);
         $data = [
             'students' => $students,
             'message' => 'Succesfully retrieved students',
@@ -33,9 +34,11 @@ class StudentController extends Controller
         // Return the retrieved student as a JSON response
         try {
             $student = Student::find($id);
-        } catch (\Throwable $th) {
-            throw $th;
+            $student->load('branch');
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
+        
         $student = new StudentResource($student);
         $data = [
             'student' => $student,
@@ -55,7 +58,7 @@ class StudentController extends Controller
             'email' => 'email|unique:students,email|nullable',
             'phone' => 'required|string|max:12',
             'dni' => 'required|string|unique:students,dni',
-            'branches_id' => [Rule::in($branches_ids), 'required'],
+            'branch_id' => [Rule::in($branches_ids), 'required'],
         ]);
         try {
             $student = Student::create([
@@ -65,10 +68,10 @@ class StudentController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'dni' => $request->dni,
-                'branches_id' => $request->branches_id,
+                'branch_id' => $request->branch_id,
             ]);
-        } catch (\Throwable $th) {
-            throw $th;
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
         $student = new StudentResource($student);
         $data = [
@@ -86,10 +89,10 @@ class StudentController extends Controller
         $request->validate([
             'name' =>'required|string',
             'last_name' => 'required|string',
-            'email' => 'email|nullable|unique:students,email,',
+            'email' => 'email|nullable|unique:students,email,' . $id,
             'phone' => 'required|string|max:12',
-            'dni' => 'required|string|unique:students,dni',
-            'branches_id' => [Rule::in($branches_ids), 'required'],
+            'dni' => 'required|string|unique:students,dni,' . $id,
+            'branch_id' => [Rule::in($branches_ids), 'required'],
         ]);
         $student = Student::find($id);
         if ($student != null) {

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Teacher extends Model
 {
-    protected $fillable = ['name', 'email', 'phone', 'dni', 'branches_id', 'last_name'];
+    protected $fillable = ['name', 'email', 'phone', 'dni', 'branch_id', 'last_name'];
 
     public function branch()
     {
@@ -15,10 +15,10 @@ class Teacher extends Model
 
     public function plans()
     {
-        return $this->belongsToMany(Plan::class);
+        return $this->belongsToMany(Plan::class, 'teacher_plans');
     }
 
-    public function teacherSchedule()
+    public function schedules()
     {
         return $this->hasMany(TeacherSchedules::class);
     }

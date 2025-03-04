@@ -15,9 +15,12 @@ class BranchResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'name' => $request->name,
             'address' => $request->address,
-            'students' => StudentResource::collection($this->whenLoaded('students'))
+            'students' => StudentResource::collection($this->whenLoaded('students')),
+            'classes' => ClasseResource::collection($this->whenLoaded('classes')),
+            'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
         ];
     }
 }

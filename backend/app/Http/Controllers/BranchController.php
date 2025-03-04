@@ -17,9 +17,10 @@ class BranchController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+        $branches->load(['classes', 'teachers', 'students']);
         $branches = BranchResource::collection($branches);
         $data = [
-            'data' => $branches,
+            'branches' => $branches,
            'message' => 'Branches retrieved successfully',
            'status' => 'success (200)'
         ];
@@ -34,9 +35,10 @@ class BranchController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+        $branch->load('classes', 'teachers', 'students');
         $branch = new BranchResource($branch);
         $data = [
-            'data' => $branch,
+            'branch' => $branch,
            'message' => 'Branch retrieved successfully',
            'status' => 'success (200)'
         ];
@@ -55,9 +57,10 @@ class BranchController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+        $branch->load('classes', 'teachers', 'students');
         $branch = new BranchResource($branch);
         $data = [
-            'data' => $branch,
+            'branch' => $branch,
            'message' => 'Branch created successfully',
            'status' => 'success, resource created (201)'
         ];
@@ -77,9 +80,10 @@ class BranchController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+        $branch->load('classes', 'teachers', 'students');
         $branch = new BranchResource($branch);
         $data = [
-            'data' => $branch,
+            'branch' => $branch,
            'message' => 'Branch updated successfully',
            'status' => 'success, resource modified (204)'
         ];
