@@ -6,12 +6,14 @@ import Reviews from "@/components/interface/Reviews"
 import Faq from "@/components/interface/Faq"
 import Contact from "@/components/interface/Contact"
 import Footer from "@/components/Footer"
+import NavigationGuide from "@/components/NavigationGuide"
 
 export default function Home() {
     return (
         <div>
             <Navbar />
             <main>
+            <NavigationGuide />
                 <section id="hero">
                     <Hero />
                 </section>

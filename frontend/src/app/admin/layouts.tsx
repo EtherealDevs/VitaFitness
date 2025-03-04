@@ -1,6 +1,6 @@
 import type React from "react"
-import { DashboardHeader } from "@/components/dashboard-header"
-import { DashboardNav } from "@/components/dashboard-nav"
+import { DashboardHeader } from "../../components/dashboard-header"
+/* import { DashboardNav } from "../components/dashboard-nav" */
 
 export default function DashboardLayout({
     children,
@@ -13,7 +13,7 @@ export default function DashboardLayout({
             <div className="flex-1">
                 <div className="container grid md:grid-cols-[200px_1fr] md:gap-6 md:py-6">
                     <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 border-r md:sticky md:block">
-                        <DashboardNav />
+                       {/*  <DashboardNav /> */}
                     </aside>
                     <main>{children}</main>
                 </div>

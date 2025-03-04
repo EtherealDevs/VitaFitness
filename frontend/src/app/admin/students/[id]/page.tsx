@@ -1,6 +1,11 @@
 import { Button } from "../../components/ui/button"
+import { PageProps } from "next"
 
-export default function StudentProfile({ params }: { params: { id: string } }) {
+type Props = PageProps<{
+  id: string
+}>
+
+export default function StudentProfile({ params }: Props) {
   const student = {
     id: params.id,
     name: "Juan Pérez",
@@ -25,3 +30,6 @@ export default function StudentProfile({ params }: { params: { id: string } }) {
   )
 }
 
+export async function generateStaticParams() {
+  return []
+}
