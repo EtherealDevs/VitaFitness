@@ -2,13 +2,15 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Settings, Users, FileText, BarChart2 } from "lucide-react"
+import { Home, Settings, UserRound, FileText, BarChart2, CornerUpLeft, UserRoundPen } from "lucide-react"
 import { cn } from "../lib/utils"
 import { Button } from "./ui/button"
 
 const navigation = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: Home },
-  { name: "Alumnos", href: "/admin/students", icon: Users },
+  { name: "Volver a la Pagina", href: "/", icon: CornerUpLeft },
+  { name: "Inicio", href: "/admin/dashboard", icon: Home },
+  { name: "Alumnos", href: "/admin/students", icon: UserRound },
+  { name: "Profesores", href: "/admin/teachers", icon: UserRoundPen },
   { name: "Permisos", href: "/admin/permissions", icon: FileText },
   { name: "Estadísticas", href: "/admin/statistics", icon: BarChart2 },
   { name: "Configuración", href: "/admin/configuration", icon: Settings },
