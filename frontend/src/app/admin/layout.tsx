@@ -4,6 +4,7 @@ import { ThemeProvider } from "./providers/theme-provider"
 import "./styles/admin.css"
 import { DashboardHeader } from "./components/dashboard-header"
 import { DashboardNav } from "./components/dashboard-nav"
+import Image from "next/image"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,7 +20,7 @@ export default function AdminLayout({
           {/* Sidebar */}
           <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-gray-200 bg-white md:block">
             <div className="flex h-14 items-center border-b px-4">
-              <img src="/placeholder.svg?height=32&width=32" alt="Logo" className="h-8 w-8" />
+              <Image src="/placeholder.svg?height=32&width=32" alt="Logo" width={"8"} height={"8"} className="h-8 w-8" />
               <span className="ml-2 text-lg font-semibold">Training App</span>
             </div>
             <DashboardNav />

@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Settings, Users, FileText, BarChart2, BookOpen, Calendar, CreditCard, ArrowLeft } from "lucide-react"
+import { Home, Settings, Users, FileText, BarChart2, BookOpen, Calendar, CreditCard, ArrowLeft, UserRoundPen } from "lucide-react"
 import { cn } from "../lib/utils"
 
 const navigation = [
   { name: "Volver a la Pagina", href: "/", icon: ArrowLeft },
   { name: "Inicio", href: "/admin/dashboard", icon: Home },
   { name: "Alumnos", href: "/admin/students", icon: Users },
+  { name: "Profesores", href: "/admin/teachers", icon: UserRoundPen },
   { name: "Clases", href: "/admin/classes", icon: BookOpen },
   { name: "Calendario", href: "/admin/calendar", icon: Calendar },
   { name: "Pagos", href: "/admin/payments", icon: CreditCard },
