@@ -16,8 +16,8 @@ class BranchResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $request->name,
-            'address' => $request->address,
+            'name' => $this->name,
+            'address' => $this->address,
             'students' => StudentResource::collection($this->whenLoaded('students')),
             'classes' => ClasseResource::collection($this->whenLoaded('classes')),
             'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),

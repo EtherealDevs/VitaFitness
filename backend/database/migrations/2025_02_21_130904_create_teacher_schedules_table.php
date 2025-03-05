@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained('teachers');
             $table->time('start_time');
             $table->time('end_time');
-            $table->date('day');
+            $table->string('day');
             $table->timestamps();
         });
     }
