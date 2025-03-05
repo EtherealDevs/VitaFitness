@@ -1,48 +1,46 @@
 "use client"
 
-import Link from "next/link"
-import { ModeToggle } from "./client/mode-toggle"
-import { Menu } from "lucide-react"
+import { UserNav } from "./user-nav"
+import { Menu, Search } from "lucide-react"
 import { Button } from "./ui/button"
-import { useState } from "react"
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
 import { DashboardNav } from "./dashboard-nav"
+import { Input } from "./ui/input"
 import Image from "next/image"
 
 export function DashboardHeader() {
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
-
   return (
-    <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-            >
+    <header className="sticky top-0 z-30 flex h-14 w-full items-center border-b bg-white px-4 dark:bg-gray-900">
+      <div className="flex flex-1 items-center gap-4">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
-            <Link href="/admin/dashboard" className="flex items-center gap-2">
-              <Image src="/logo.svg" width={12} height={12} alt="Logo" className="h-8 w-8" />
-              <span className="text-lg font-semibold">Training App</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <ModeToggle />
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0">
+            <div className="flex h-14 items-center border-b px-4">
+              <Image src="/logo.svg" alt="Logo" className="h-8 w-8" />
+              <span className="ml-2 text-lg font-semibold">Panel de Administracion</span>
+            </div>
             <DashboardNav />
+          </SheetContent>
+        </Sheet>
+
+        {/* Search bar */}
+        <div className="flex flex-1 items-center md:ml-4">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+            <Input type="search" placeholder="Buscar..." className="w-full bg-gray-50 pl-8 dark:bg-gray-800" />
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Mobile navigation */}
-      {showMobileMenu && (
-        <div className="fixed inset-0 top-14 z-40 bg-background md:hidden">
-          <DashboardNav />
-        </div>
-      )}
-    </>
+      <div className="ml-auto flex items-center gap-2">
+        <UserNav />
+      </div>
+    </header>
   )
 }
+

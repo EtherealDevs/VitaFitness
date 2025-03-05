@@ -2,15 +2,16 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Settings, UserRound, FileText, BarChart2, CornerUpLeft, UserRoundPen } from "lucide-react"
+import { Home, Settings, Users, FileText, BarChart2, BookOpen, Calendar, CreditCard, ArrowLeft } from "lucide-react"
 import { cn } from "../lib/utils"
-import { Button } from "./ui/button"
 
 const navigation = [
-  { name: "Volver a la Pagina", href: "/", icon: CornerUpLeft },
+  { name: "Volver a la Pagina", href: "/", icon: ArrowLeft },
   { name: "Inicio", href: "/admin/dashboard", icon: Home },
-  { name: "Alumnos", href: "/admin/students", icon: UserRound },
-  { name: "Profesores", href: "/admin/teachers", icon: UserRoundPen },
+  { name: "Alumnos", href: "/admin/students", icon: Users },
+  { name: "Clases", href: "/admin/classes", icon: BookOpen },
+  { name: "Calendario", href: "/admin/calendar", icon: Calendar },
+  { name: "Pagos", href: "/admin/payments", icon: CreditCard },
   { name: "Permisos", href: "/admin/permissions", icon: FileText },
   { name: "Estadísticas", href: "/admin/statistics", icon: BarChart2 },
   { name: "Configuración", href: "/admin/configuration", icon: Settings },
@@ -19,31 +20,33 @@ const navigation = [
 export function DashboardNav() {
   const pathname = usePathname()
 
-  // Función para verificar si una ruta está activa, incluyendo subrutas
-  const isActive = (href: string) => {
-    if (href === "/admin/dashboard" && pathname === "/admin") {
-      return true
-    }
-    return pathname === href || pathname.startsWith(`${href}/`)
-  }
-
   return (
-    <nav className="grid gap-1 py-4">
+    <nav className="space-y-1 p-4">
       {navigation.map((item) => {
         const Icon = item.icon
-        const active = isActive(item.href)
+        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+
         return (
-          <Button
+          <Link
             key={item.href}
-            variant={active ? "secondary" : "ghost"}
-            className={cn("w-full justify-start gap-2", active && "bg-secondary")}
-            asChild
+            href={item.href}
+            className={cn(
+              "group flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800",
+              isActive
+                ? "bg-gray-50 text-blue-600 dark:bg-gray-800 dark:text-blue-400"
+                : "text-gray-700 dark:text-gray-400",
+            )}
           >
-            <Link href={item.href}>
-              <Icon className="h-4 w-4" />
-              {item.name}
-            </Link>
-          </Button>
+            <Icon
+              className={cn(
+                "mr-3 h-5 w-5",
+                isActive
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-400 group-hover:text-gray-500 dark:text-gray-400",
+              )}
+            />
+            {item.name}
+          </Link>
         )
       })}
     </nav>

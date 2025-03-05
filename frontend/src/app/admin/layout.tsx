@@ -13,17 +13,22 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className={`admin ${inter.className}`}>
+    <div className={`admin ${inter.className} min-h-screen bg-[#f8f9fa]`}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <div className="relative flex min-h-screen flex-col">
-          <DashboardHeader />
-          <div className="flex-1">
-            <div className="container grid md:grid-cols-[200px_1fr] md:gap-6 md:py-6">
-              <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto border-r md:sticky md:block">
-                <DashboardNav />
-              </aside>
-              <main>{children}</main>
+        <div className="relative flex min-h-screen">
+          {/* Sidebar */}
+          <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-gray-200 bg-white md:block">
+            <div className="flex h-14 items-center border-b px-4">
+              <img src="/placeholder.svg?height=32&width=32" alt="Logo" className="h-8 w-8" />
+              <span className="ml-2 text-lg font-semibold">Training App</span>
             </div>
+            <DashboardNav />
+          </aside>
+
+          {/* Main content */}
+          <div className="flex-1 md:ml-64">
+            <DashboardHeader />
+            <main className="container p-4 md:p-6 lg:p-8">{children}</main>
           </div>
         </div>
       </ThemeProvider>
