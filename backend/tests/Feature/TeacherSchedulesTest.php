@@ -44,8 +44,8 @@ class TeacherSchedulesTest extends TestCase
         $teacher = Teacher::first();
         $response = $this->actingAs($user)->post('/api/teacherSchedules', [
             'teacher_id' => $teacher->id,
-            'start_time' => now()->format('H:i:s'),
-            'end_time' => now()->format('H:i:s'),
+            'start_time' => now()->format('H:i'),
+            'end_time' => now()->format('H:i'),
             'day' => 'tuesday',
         ]);
         $response->assertStatus(201);
@@ -57,8 +57,8 @@ class TeacherSchedulesTest extends TestCase
         $schedule = $teacher->schedules()->first();
         $response = $this->actingAs($user)->put('/api/teacherSchedules/'.$schedule->id, [
             'teacher_id' => $teacher->id,
-            'start_time' => now()->format('H:i:s'),
-            'end_time' => now()->format('H:i:s'),
+            'start_time' => now()->format('H:i'),
+            'end_time' => now()->format('H:i'),
             'day' => 'tuesday',
         ]);
         $response->assertStatus(204);

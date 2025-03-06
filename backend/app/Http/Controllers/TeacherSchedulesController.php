@@ -49,8 +49,8 @@ class TeacherSchedulesController extends Controller
         $request->validate([
             'teacher_id' => 'required|integer',
             'day' => 'required|string',
-            'start_time' => 'required|date_format:H:i:s',
-            'end_time' => 'required|date_format:H:i:s',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i',
         ]);
         try {
             $schedule = TeacherSchedules::create($request->all());
@@ -73,8 +73,8 @@ class TeacherSchedulesController extends Controller
         $request->validate([
             'teacher_id' => 'integer|required',
             'day' => 'string|required',
-            'start_time' => 'required|date_format:H:i:s',
-            'end_time' => 'required|date_format:H:i:s',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i',
         ]);
         try {
             $schedule = TeacherSchedules::find($id);

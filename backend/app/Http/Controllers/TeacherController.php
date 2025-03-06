@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Resources\TeacherResource;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class TeacherController extends Controller
 {
@@ -77,7 +79,8 @@ class TeacherController extends Controller
     {
         // Update an existing teacher in the database
         // Return the updated teacher as a JSON response
-        $request->validate([
+        Log::alert("request and shit", ['id' => $id, 'all' => $request->all()]);
+        $validator = Validator::make($request->all(), [
             'name' =>'required|string',
             'last_name' =>'required|string',
             'email' => 'email|nullable|unique:teachers,email,' . $id,
@@ -85,6 +88,21 @@ class TeacherController extends Controller
             'dni' =>'required|string|unique:teachers,dni,' . $id,
             'branch_id' =>'required|integer',
         ]);
+        if ($validator->fails()) {
+            $data = [
+                'error' => $validator->messages(),
+                'status' => 422
+            ];
+            return response()->json($data, 422);
+        }
+        // $request->validate([
+        //     'name' =>'required|string',
+        //     'last_name' =>'required|string',
+        //     'email' => 'email|nullable|unique:teachers,email,' . $id,
+        //     'phone' =>'required|string|max:12',
+        //     'dni' =>'required|string|unique:teachers,dni,' . $id,
+        //     'branch_id' =>'required|integer',
+        // ]);
         try {
             $teacher = Teacher::find($id);
             $teacher->update($request->all());
