@@ -1,12 +1,11 @@
 "use client"
 
 import { UserNav } from "./user-nav"
-import { Menu, Search } from "lucide-react"
+import { Menu } from "lucide-react"
 import { Button } from "./ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
 import { DashboardNav } from "./dashboard-nav"
-import { Input } from "./ui/input"
-import Image from "next/image"
+import { ModeToggle } from "./client/mode-toggle"
 
 export function DashboardHeader() {
   return (
@@ -21,23 +20,23 @@ export function DashboardHeader() {
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
             <div className="flex h-14 items-center border-b px-4">
-              <Image src="/logo.svg" alt="Logo" className="h-8 w-8" />
-              <span className="ml-2 text-lg font-semibold">Panel de Administracion</span>
+              <img src="/placeholder.svg?height=32&width=32" alt="Logo" className="h-8 w-8" />
+              <span className="ml-2 text-lg font-semibold">Training App</span>
             </div>
             <DashboardNav />
           </SheetContent>
         </Sheet>
 
-        {/* Search bar */}
-        <div className="flex flex-1 items-center md:ml-4">
-          <div className="relative w-full max-w-md">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-            <Input type="search" placeholder="Buscar..." className="w-full bg-gray-50 pl-8 dark:bg-gray-800" />
-          </div>
+        {/* Logo y nombre de la aplicación */}
+        <div className="hidden md:flex md:items-center">
+          <img src="/placeholder.svg?height=32&width=32" alt="Logo" className="h-8 w-8" />
+          <span className="ml-2 text-lg font-semibold">Training App</span>
         </div>
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        {/* Botón de cambio de tema */}
+        <ModeToggle />
         <UserNav />
       </div>
     </header>

@@ -2,15 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Settings, Users, FileText, BarChart2, BookOpen, Calendar, CreditCard, ArrowLeft, UserRoundPen } from "lucide-react"
+import { Home, Settings, Users, FileText, BarChart2, BookOpen, Calendar, CreditCard } from "lucide-react"
 import { cn } from "../lib/utils"
 
 const navigation = [
-  { name: "Volver a la Pagina", href: "/", icon: ArrowLeft },
-  { name: "Inicio", href: "/admin/dashboard", icon: Home },
+  { name: "Dashboard", href: "/admin/dashboard", icon: Home },
   { name: "Alumnos", href: "/admin/students", icon: Users },
-  { name: "Profesores", href: "/admin/teachers", icon: UserRoundPen },
-  { name: "Clases", href: "/admin/classes", icon: BookOpen },
+  { name: "Profesores", href: "/admin/teachers", icon: BookOpen },
   { name: "Calendario", href: "/admin/calendar", icon: Calendar },
   { name: "Pagos", href: "/admin/payments", icon: CreditCard },
   { name: "Permisos", href: "/admin/permissions", icon: FileText },
@@ -32,18 +30,16 @@ export function DashboardNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "group flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800",
+              "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               isActive
-                ? "bg-gray-50 text-blue-600 dark:bg-gray-800 dark:text-blue-400"
-                : "text-gray-700 dark:text-gray-400",
+                ? "bg-accent text-accent-foreground"
+                : "text-foreground/60 hover:bg-accent/50 hover:text-accent-foreground",
             )}
           >
             <Icon
               className={cn(
                 "mr-3 h-5 w-5",
-                isActive
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-400 group-hover:text-gray-500 dark:text-gray-400",
+                isActive ? "text-accent-foreground" : "text-foreground/60 group-hover:text-accent-foreground",
               )}
             />
             {item.name}
