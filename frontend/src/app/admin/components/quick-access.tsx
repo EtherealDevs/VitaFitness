@@ -6,7 +6,7 @@ import { Plus, UserPlus, FileText, Settings } from "lucide-react"
 const quickActions = [
   {
     title: "Nuevo Alumno",
-    description: "Registrar un nuevo alumno en el sistema",
+    description: "Registrar alumnos en el sistema",
     icon: UserPlus,
     href: "/admin/students/new",
   },
@@ -45,7 +45,7 @@ export function QuickAccess() {
               <CardDescription>{action.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" asChild>
+              <Button className="w-full cursor-pointer bg-slate-900 hover:bg-slate-900 hover:shadow-xl hover:shadow-slate-800" asChild>
                 <a href={action.href}>Acceder</a>
               </Button>
             </CardContent>
