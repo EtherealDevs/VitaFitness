@@ -1,26 +1,27 @@
 'use client'
 import { Product, useProducts } from '@/hooks/products'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 export default function ProductsPage() {
     const { getProducts, deleteProduct } = useProducts()
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(false)
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true)
-            try {
-                const response = await getProducts()
-                console.log(response)
-                setProducts(response.products)
-            } catch (error) {
-                console.error(error)
-            } finally {
-                setLoading(false)
-            }
+    async function fetchProducts() {
+        setLoading(true)
+        try {
+            const response = await getProducts()
+            console.log(response)
+            setProducts(response.products)
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false)
         }
+    }
+    useEffect(() => {
         fetchProducts()
-    }, [getProducts])
+    }, [])
 
     const handleDelete = async (id: string) => {
         try {
@@ -42,9 +43,11 @@ export default function ProductsPage() {
                         filtros
                     </button>
                 </div>
-                <button className="py-2 px-4 bg-blue-600  rounded-xl">
-                    nuevo producto
-                </button>
+                <Link href="/admin/products/create">
+                    <button className="py-2 px-4 bg-blue-600  rounded-xl">
+                        nuevo producto
+                    </button>
+                </Link>
             </div>
 
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg bg-white">
