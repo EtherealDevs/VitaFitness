@@ -1,7 +1,9 @@
-import useSWR from 'swr'
+/* import useSWR from 'swr' */
 import axios from '@/lib/axios'
-import { useEffect } from 'react'
+/* import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+
+ */
 
 
 export const useTeachers = () => {
@@ -59,6 +61,7 @@ export const useTeachers = () => {
   }
     return {
         getTeachers,
+        getTeacher,
         createTeacher,
         updateTeacher,
         deleteTeacher,

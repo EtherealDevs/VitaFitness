@@ -20,10 +20,10 @@ export default function Home() {
                 <section id="services">
                     <Services />
                 </section>
-                <section id="commitment">
+                <section id="compromiso">
                     <Commitment />
                 </section>
-                <section id="reviews">
+                <section id="resenas">
                     <Reviews />
                 </section>
                 <section id="faq">

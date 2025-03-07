@@ -22,6 +22,7 @@ const Navbar = () => {
                     <Link href="#services" className="hover:text-gray-300">Planes</Link>
                     <Link href="#productos" className="hover:text-gray-300">Productos</Link>
                     <Link href="#compromiso" className="hover:text-gray-300">Nuestro Compromiso</Link>
+                    <Link href="#resenas" className="hover:text-gray-300">Reseñas</Link>
                     <Link href="#contact" className="hover:text-gray-300">Contacto</Link>
                 </div>
 

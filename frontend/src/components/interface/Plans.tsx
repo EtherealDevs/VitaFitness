@@ -90,7 +90,7 @@ export default function Services() {
                             ))}
                         </div>
                     </div>
-                    <div>
+                    <div id='productos'>
                         <GradientTitle>Tienda</GradientTitle>
                         <div className="grid grid-cols-2 gap-4">
                             {products.map((product, index) => (

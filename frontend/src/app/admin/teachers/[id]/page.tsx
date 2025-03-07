@@ -48,7 +48,7 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
         }
 
         fetchData()
-    }, [params.id, getTeacher])
+    }, [params.id, getTeacher, getTeacherSchedules])
 
     const handleUpdateTeacher = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
