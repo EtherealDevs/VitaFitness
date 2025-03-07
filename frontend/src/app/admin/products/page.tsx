@@ -6,22 +6,21 @@ export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(false)
 
-    const fetchProducts = async () => {
-        setLoading(true)
-        try {
-            const response = await getProducts()
-            console.log(response)
-            setProducts(response.products)
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     useEffect(() => {
+        const fetchProducts = async () => {
+            setLoading(true)
+            try {
+                const response = await getProducts()
+                console.log(response)
+                setProducts(response.products)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setLoading(false)
+            }
+        }
         fetchProducts()
-    }, [])
+    }, [getProducts])
 
     const handleDelete = async (id: string) => {
         try {
@@ -46,59 +45,6 @@ export default function ProductsPage() {
                 <button className="py-2 px-4 bg-blue-600  rounded-xl">
                     nuevo producto
                 </button>
-            </div>
-            <div className="bg-white p-5 rounded-2xl">
-                <table>
-                    <thead>
-                        <tr>
-                            <th className="border border-gray-300 p-4">id</th>
-                            <th className="border border-gray-300 p-4">
-                                nombre
-                            </th>
-                            <th className="border border-gray-300 p-4">
-                                precio
-                            </th>
-                            <th className="border border-gray-300 p-4">
-                                stock
-                            </th>
-                            <th className="border border-gray-300 p-4">
-                                acciones
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {products.map(product => (
-                            <tr key={product.id}>
-                                <td className="border border-gray-300 p-4">
-                                    {product.id}
-                                </td>
-                                <td className="border border-gray-300 p-4">
-                                    {product.name}
-                                </td>
-
-                                <td className="border border-gray-300 p-4">
-                                    {product.price}
-                                </td>
-                                <td className="border border-gray-300 p-4">
-                                    {product.stock}
-                                </td>
-                                <td className="border border-gray-300 p-4">
-                                    <button
-                                        onClick={() => handleDelete(product.id)}
-                                        className="py-2 px-4 bg-red-600 rounded-xl">
-                                        eliminar
-                                    </button>
-                                </td>
-
-                                <td className="border border-gray-300 p-4">
-                                    <button className="py-2 px-4 bg-blue-600 rounded-xl">
-                                        editar
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
             </div>
 
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg bg-white">
@@ -134,7 +80,9 @@ export default function ProductsPage() {
                                 </td>
                                 <td className="px-6 py-4">${product.price}</td>
                                 <td className="border border-gray-300 p-4">
-                                    <button className="py-2 px-4 bg-red-600 rounded-xl">
+                                    <button
+                                        onClick={() => handleDelete(product.id)}
+                                        className="py-2 px-4 bg-red-600 rounded-xl">
                                         Eliminar
                                     </button>
                                 </td>
