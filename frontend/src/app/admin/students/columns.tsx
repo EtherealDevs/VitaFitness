@@ -17,10 +17,12 @@ import Link from "next/link"
 export type Student = {
     id: string
     name: string
-    status: "active" | "inactive" | "pending"
+    last_name: string
+    registration_date: string
+    status: "activo" | "inactivo" | "pendiente"
     email: string
     phone: string
-    joinDate: string
+    dni: string
 }
 
 export const columns: ColumnDef<Student>[] = [
@@ -30,7 +32,7 @@ export const columns: ColumnDef<Student>[] = [
         cell: ({ row }) => {
             return (
                 <div className="flex items-center">
-                    <Link href={`/dashboard/alumnos/${row.original.id}`} className="font-medium">
+                    <Link href={`/admin/students/${row.original.id}`} className="font-medium">
                         {row.getValue("name")}
                     </Link>
                 </div>
@@ -38,13 +40,17 @@ export const columns: ColumnDef<Student>[] = [
         },
     },
     {
+        accessorKey: 'last_name',
+        header: "Apellido",
+    },
+    {
         accessorKey: "status",
         header: "Estado",
         cell: ({ row }) => {
             const status = row.getValue("status") as string
             return (
-                <Badge variant={status === "active" ? "success" : status === "pending" ? "warning" : "destructive"}>
-                    {status === "active" ? "Activo" : status === "pending" ? "Pendiente" : "Inactivo"}
+                <Badge variant={status === "activo" ? "success" : status === "pendiente" ? "warning" : "destructive"}>
+                    {status === "activo" ? "Activo" : status === "pendiente" ? "Pendiente" : "Inactivo"}
                 </Badge>
             )
         },
@@ -54,12 +60,16 @@ export const columns: ColumnDef<Student>[] = [
         header: "Email",
     },
     {
+        accessorKey: "dni",
+        header: "DNI",
+    },
+    {
         accessorKey: "phone",
         header: "Teléfono",
     },
     {
-        accessorKey: "joinDate",
-        header: "Fecha de Alta",
+        accessorKey: "registration_date",
+        header: "Fecha de registro",
     },
     {
         id: "actions",
