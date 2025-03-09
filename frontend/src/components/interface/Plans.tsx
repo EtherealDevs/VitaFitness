@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { GradientTitle } from "@/components/ui/gradient-title"
 import { PlanModal } from "@/components/ui/plan-modal"
 import { ProductModal } from "@/components/ui/product-modal"
 import { CatalogModal } from "@/components/ui/catalog-modal"
 import Image from "next/image"
-import { Clock, Dumbbell, Battery, User, ArrowRight } from "lucide-react"
+import { Clock, Dumbbell, Battery, User, ArrowRight, ShoppingCart, Tag, Star } from "lucide-react"
 import Button from "@/components/ui/Button"
 
 // Lista ampliada de planes
@@ -91,7 +91,8 @@ const plans = [
   },
 ]
 
-const products = [
+// Lista ampliada de productos
+const allProducts = [
   {
     title: "Conjunto Deportivo",
     description: "Conjunto deportivo de alta calidad para máximo rendimiento",
@@ -99,18 +100,19 @@ const products = [
     image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000",
     sizes: ["S", "M", "L", "XL"],
     colors: ["#000000", "#ffffff", "#ff0000"],
+    rating: 4.8,
+    category: "Ropa",
+    discount: "20%",
   },
   {
     title: "Suplementos Premium",
     description: "Suplementos de alta calidad para optimizar tus resultados",
     price: "$29.99",
     image: "https://images.unsplash.com/photo-1579722821273-0f6c1b5d28b0?q=80&w=1000",
+    rating: 4.5,
+    category: "Nutrición",
+    discount: "15%",
   },
-]
-
-// Catálogo completo con más productos para el modal
-const fullCatalog = [
-  ...products,
   {
     title: "Zapatillas Deportivas",
     description: "Zapatillas con soporte y amortiguación para entrenamientos intensos",
@@ -118,6 +120,9 @@ const fullCatalog = [
     image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000",
     sizes: ["39", "40", "41", "42", "43", "44"],
     colors: ["#000000", "#ffffff", "#ff0000"],
+    rating: 4.9,
+    category: "Calzado",
+    discount: "10%",
   },
   {
     title: "Remera Técnica",
@@ -126,12 +131,17 @@ const fullCatalog = [
     image: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=1000",
     sizes: ["S", "M", "L", "XL"],
     colors: ["#000000", "#ffffff", "#0000ff"],
+    rating: 4.6,
+    category: "Ropa",
   },
   {
     title: "Proteína Whey",
     description: "Proteína de suero de leche de alta calidad para recuperación muscular",
     price: "$49.99",
     image: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?q=80&w=1000",
+    rating: 4.7,
+    category: "Nutrición",
+    discount: "25%",
   },
   {
     title: "Botella Deportiva",
@@ -139,6 +149,8 @@ const fullCatalog = [
     price: "$19.99",
     image: "https://images.unsplash.com/photo-1523362628745-0c100150b504?q=80&w=1000",
     colors: ["#000000", "#ff0000", "#0000ff"],
+    rating: 4.4,
+    category: "Accesorios",
   },
   {
     title: "Guantes de Entrenamiento",
@@ -146,24 +158,91 @@ const fullCatalog = [
     price: "$24.99",
     image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=1000",
     sizes: ["S", "M", "L"],
+    rating: 4.3,
+    category: "Accesorios",
   },
   {
     title: "Banda de Resistencia",
     description: "Set de bandas elásticas con diferentes niveles de resistencia",
     price: "$19.99",
     image: "https://images.unsplash.com/photo-1598289431512-b97b0917affc?q=80&w=1000",
+    rating: 4.5,
+    category: "Accesorios",
+    discount: "15%",
+  },
+  {
+    title: "Mancuernas Ajustables",
+    description: "Set de mancuernas con pesos intercambiables para entrenamientos versátiles",
+    price: "$129.99",
+    image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?q=80&w=1000",
+    rating: 4.9,
+    category: "Equipamiento",
+    discount: "5%",
+  },
+  {
+    title: "Esterilla de Yoga",
+    description: "Esterilla antideslizante de alta densidad para yoga y pilates",
+    price: "$39.99",
+    image: "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?q=80&w=1000",
+    colors: ["#6a0dad", "#008000", "#000000"],
+    rating: 4.7,
+    category: "Accesorios",
+  },
+  {
+    title: "Cuerda de Saltar",
+    description: "Cuerda de saltar ajustable con contador digital y empuñaduras ergonómicas",
+    price: "$15.99",
+    image: "https://images.unsplash.com/photo-1598289431969-9b3a4a8a3908?q=80&w=1000",
+    rating: 4.2,
+    category: "Accesorios",
+    discount: "30%",
+  },
+  {
+    title: "Cinturón de Levantamiento",
+    description: "Cinturón de cuero para soporte lumbar durante levantamientos pesados",
+    price: "$45.99",
+    image: "https://images.unsplash.com/photo-1620188467120-5042ed1eb5da?q=80&w=1000",
+    sizes: ["S", "M", "L", "XL"],
+    rating: 4.8,
+    category: "Equipamiento",
+  },
+]
+
+// Catálogo completo para el modal
+const fullCatalog = [
+  ...allProducts,
+  {
+    title: "Bolsa Deportiva",
+    description: "Bolsa espaciosa con compartimentos para equipo y ropa de entrenamiento",
+    price: "$49.99",
+    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1000",
+    colors: ["#000000", "#0000ff", "#ff0000"],
+    rating: 4.4,
+    category: "Accesorios",
+  },
+  {
+    title: "Auriculares Deportivos",
+    description: "Auriculares inalámbricos resistentes al agua y sudor para entrenamientos intensos",
+    price: "$79.99",
+    image: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=1000",
+    colors: ["#000000", "#ffffff"],
+    rating: 4.6,
+    category: "Tecnología",
+    discount: "10%",
   },
 ]
 
 export default function Services() {
   const [selectedPlan, setSelectedPlan] = useState<(typeof plans)[0] | null>(null)
-  const [selectedProduct, setSelectedProduct] = useState<(typeof products)[0] | null>(null)
+  const [selectedProduct, setSelectedProduct] = useState<(typeof allProducts)[0] | null>(null)
   const [isCatalogOpen, setIsCatalogOpen] = useState(false)
   const [visiblePlans, setVisiblePlans] = useState<number>(2)
+  const [visibleProducts, setVisibleProducts] = useState<number>(4)
   const plansContainerRef = useRef<HTMLDivElement>(null)
+  const productsContainerRef = useRef<HTMLDivElement>(null)
 
   // Función para manejar el scroll dentro del contenedor de planes
-  const handleScroll = () => {
+  const handlePlansScroll = () => {
     if (!plansContainerRef.current) return
 
     const { scrollTop, scrollHeight, clientHeight } = plansContainerRef.current
@@ -172,6 +251,19 @@ export default function Services() {
     // Si estamos cerca del final del scroll, mostrar más planes
     if (scrollHeight - scrollPosition < 100 && visiblePlans < plans.length) {
       setVisiblePlans((prev) => Math.min(prev + 1, plans.length))
+    }
+  }
+
+  // Función para manejar el scroll dentro del contenedor de productos
+  const handleProductsScroll = () => {
+    if (!productsContainerRef.current) return
+
+    const { scrollTop, scrollHeight, clientHeight } = productsContainerRef.current
+    const scrollPosition = scrollTop + clientHeight
+
+    // Si estamos cerca del final del scroll, mostrar más productos
+    if (scrollHeight - scrollPosition < 100 && visibleProducts < allProducts.length) {
+      setVisibleProducts((prev) => Math.min(prev + 2, allProducts.length))
     }
   }
 
@@ -191,7 +283,7 @@ export default function Services() {
             <div
               ref={plansContainerRef}
               className="h-[600px] overflow-y-auto pr-2 custom-scrollbar"
-              onScroll={handleScroll}
+              onScroll={handlePlansScroll}
             >
               <div className="grid gap-6">
                 {plans.slice(0, visiblePlans).map((plan, index) => (
@@ -297,40 +389,92 @@ export default function Services() {
               Encuentra tus productos favoritos para el gym aquí. Desde ropa deportiva diseñada para maximizar tu
               comodidad y rendimiento, hasta accesorios esenciales para tus entrenamientos.
             </p>
-            <div className="grid grid-cols-2 gap-4">
-              {products.map((product, index) => (
-                <Card
-                  key={index}
-                  className="bg-gray-900 border-gray-800 hover:border-green-400 transition-all duration-300 cursor-pointer overflow-hidden"
-                  onClick={() => setSelectedProduct(product)}
-                >
-                  <CardHeader className="p-0">
+
+            {/* Contenedor con scroll propio para productos */}
+            <div
+              ref={productsContainerRef}
+              className="h-[600px] overflow-y-auto pr-2 custom-scrollbar"
+              onScroll={handleProductsScroll}
+            >
+              <div className="grid grid-cols-2 gap-4">
+                {allProducts.slice(0, visibleProducts).map((product, index) => (
+                  <Card
+                    key={index}
+                    className="relative bg-gray-900 border-gray-800 hover:border-green-400 transition-all duration-300 cursor-pointer overflow-hidden animate-fadeIn"
+                    style={{
+                      animationDelay: `${index * 150}ms`,
+                      opacity: 0,
+                      animation: `fadeIn 0.5s ease-out ${index * 150}ms forwards`,
+                    }}
+                    onClick={() => setSelectedProduct(product)}
+                  >
                     <div className="aspect-square relative overflow-hidden">
                       <Image
                         src={product.image || "/placeholder.svg"}
                         alt={product.title}
                         fill
-                        className="object-cover transition-transform duration-500 hover:scale-110"
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-60"></div>
-                      <div className="absolute top-2 left-2 bg-purple-500 px-2 py-1 rounded text-xs font-bold text-white">
-                        OFERTA
+                      <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
+
+                      {/* Etiquetas y badges */}
+                      <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-start">
+                        {product.discount && (
+                          <div className="bg-green-500 px-2 py-1 rounded text-xs font-bold text-white">
+                            {product.discount} OFF
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1 bg-black/50 px-2 py-1 rounded-full">
+                          <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                          <span className="text-xs text-white">{product.rating}</span>
+                        </div>
+                      </div>
+
+                      {/* Categoría */}
+                      <div className="absolute bottom-3 left-3">
+                        <div className="flex items-center gap-1 bg-black/50 px-2 py-1 rounded-full">
+                          <Tag className="w-3 h-3 text-gray-300" />
+                          <span className="text-xs text-white">{product.category}</span>
+                        </div>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <h3 className="font-bold text-white mb-1 uppercase">{product.title}</h3>
-                    <div className="flex justify-between items-center">
-                      <span className="gradient-text font-bold">{product.price}</span>
-                      <div className="flex items-center text-gray-400 hover:text-white transition-colors">
-                        <span className="text-sm">Ver detalles</span>
-                        <ArrowRight className="w-4 h-4 ml-1" />
+
+                    <CardContent className="p-4">
+                      <h3 className="font-bold text-white mb-1 uppercase">{product.title}</h3>
+                      <p className="text-gray-400 text-xs line-clamp-2 mb-2">{product.description}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="gradient-text font-bold">{product.price}</span>
+                        <button className="flex items-center gap-1 text-gray-400 hover:text-green-400 transition-colors text-sm">
+                          <ShoppingCart className="w-4 h-4" />
+                          <span>Comprar</span>
+                        </button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Indicador de carga si hay más productos por mostrar */}
+              {visibleProducts < allProducts.length && (
+                <div className="flex justify-center py-4 mt-4">
+                  <div className="loader">
+                    <div
+                      className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
+
             <div className="mt-8 text-center">
               <Button
                 className="bg-transparent border rounded-xl hover:opacity-90"
