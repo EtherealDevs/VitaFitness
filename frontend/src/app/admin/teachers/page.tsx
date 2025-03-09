@@ -22,18 +22,22 @@ export default function TeacherIndex() {
     const [isOpen, setIsOpen] = useState(false)
     const [scheduleModalIsOpen, setScheduleModalIsOpen] = useState(false)
     const [search, setSearch] = useState("")
+    const [selectedTeacher, setSelectedTeacher] = useState();
+    const [selectedTeacherSchedule, setSelectedTeacherSchedule] = useState();
     const { getTeachers, createTeacher, updateTeacher, deleteTeacher } = useTeachers()
     const { getTeacherSchedules, updateTeacherSchedule, deleteTeacherSchedule } = useTeacherSchedules()
     const { getBranches } = useBranches()
 
-    function open() {
+    function open(id: number) {
         setIsOpen(true)
+        setSelectedTeacher(teachers.find((teacher) => teacher.id === id))
     }
     function close() {
         setIsOpen(false)
     }
-    function openScheduleModal() {
+    function openScheduleModal(id: number) {
         setScheduleModalIsOpen(true)
+        setSelectedTeacherSchedule(teacherSchedules.find((schedule) => schedule.id === id))
     }
     function closeScheduleModal() {
         setScheduleModalIsOpen(false)
@@ -77,51 +81,6 @@ export default function TeacherIndex() {
         await updateTeacherSchedule(e.currentTarget.id.value, formData)
         closeScheduleModal()
         fetchData()
-    }
-
-    function populateUpdateTeacherForm(id: number) {
-        if (teachers?.length > 0) {
-            var teacher: any
-            teachers.forEach((element: any) => {
-                if (element.id === id) {
-                    teacher = element
-                    return
-                }
-            })
-            var form = document.getElementById("updateTeacherForm") as HTMLFormElement
-            if (form) {
-                var elements = form.elements
-                    ; (elements.namedItem("id") as HTMLInputElement).value = teacher.id
-                    ; (elements.namedItem("name") as HTMLInputElement).value = teacher.name
-                    ; (elements.namedItem("last_name") as HTMLInputElement).value = teacher.last_name
-                    ; (elements.namedItem("email") as HTMLInputElement).value = teacher.email
-                    ; (elements.namedItem("phone") as HTMLInputElement).value = teacher.phone
-                    ; (elements.namedItem("dni") as HTMLInputElement).value = teacher.dni
-                    ; (elements.namedItem("branch_id") as HTMLSelectElement).value = teacher.branch.id
-            }
-            open()
-        }
-    }
-
-    function populateUpdateTeacherSchedulesForm(id: number) {
-        if (teacherSchedules?.length > 0) {
-            var schedule: any
-            teacherSchedules.forEach((element: any) => {
-                if (element.id === id) {
-                    schedule = element
-                }
-            })
-            var form = document.getElementById("updateTeacherSchedulesForm") as HTMLFormElement
-            if (form) {
-                var elements = form.elements
-                    ; (elements.namedItem("id") as HTMLInputElement).value = schedule.id
-                    ; (elements.namedItem("start_time") as HTMLInputElement).value = schedule.start_time
-                    ; (elements.namedItem("end_time") as HTMLInputElement).value = schedule.end_time
-                    ; (elements.namedItem("day") as HTMLInputElement).value = schedule.day
-                    ; (elements.namedItem("teacher_id") as HTMLSelectElement).value = schedule.teacher.id
-            }
-            openScheduleModal()
-        }
     }
 
     async function handleDeleteTeacher(id: number) {
@@ -168,6 +127,7 @@ export default function TeacherIndex() {
 
     return (
         <div className="space-y-6 p-6">
+            <form className="hidden" id="updateTeacherStub"><input type="hidden" name="id" /></form>
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold">Profesores</h1>
                 <Button>
@@ -221,7 +181,7 @@ export default function TeacherIndex() {
                                         <TableCell>{teacher.branch?.name}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
-                                                <Button variant="outline" size="sm" onClick={() => populateUpdateTeacherForm(teacher.id)}>
+                                                <Button variant="outline" size="sm" onClick={() => open(teacher.id)}>
                                                     <Edit2 className="h-4 w-4" />
                                                 </Button>
                                                 <Button variant="destructive" size="sm" onClick={() => handleDeleteTeacher(teacher.id)}>
@@ -270,7 +230,7 @@ export default function TeacherIndex() {
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => populateUpdateTeacherSchedulesForm(schedule.id)}
+                                                    onClick={() => openScheduleModal(schedule.id)}
                                                 >
                                                     <Edit2 className="h-4 w-4" />
                                                 </Button>
@@ -298,27 +258,27 @@ export default function TeacherIndex() {
                         <DialogTitle>Editar Profesor</DialogTitle>
                     </DialogHeader>
                     <form id="updateTeacherForm" onSubmit={handleUpdateTeacherForm} className="space-y-4">
-                        <input type="hidden" name="id" />
+                        <input type="hidden" name="id" value={selectedTeacher?.id}/>
                         <div className="grid gap-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Nombre</Label>
-                                <Input id="name" name="name" placeholder="Nombre" />
+                                <Input id="name" name="name" placeholder="Nombre" defaultValue={selectedTeacher?.name} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="last_name">Apellido</Label>
-                                <Input id="last_name" name="last_name" placeholder="Apellido" />
+                                <Input id="last_name" name="last_name" placeholder="Apellido" defaultValue={selectedTeacher?.last_name} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input id="email" name="email" type="email" placeholder="Email" />
+                                <Input id="email" name="email" type="email" placeholder="Email" defaultValue={selectedTeacher?.email} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="phone">Teléfono</Label>
-                                <Input id="phone" name="phone" placeholder="Teléfono" />
+                                <Input id="phone" name="phone" placeholder="Teléfono" defaultValue={selectedTeacher?.phone}/>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="dni">DNI</Label>
-                                <Input id="dni" name="dni" placeholder="DNI" />
+                                <Input id="dni" name="dni" placeholder="DNI" defaultValue={selectedTeacher?.dni} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="branch_id">Sucursal</Label>
@@ -326,6 +286,7 @@ export default function TeacherIndex() {
                                     id="branch_id"
                                     name="branch_id"
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    defaultValue={selectedTeacher?.branch.id}
                                 >
                                     <option value="">Seleccione una sucursal</option>
                                     {branches?.map((branch: any) => (
@@ -353,19 +314,19 @@ export default function TeacherIndex() {
                         <DialogTitle>Editar Horario</DialogTitle>
                     </DialogHeader>
                     <form id="updateTeacherSchedulesForm" onSubmit={handleUpdateTeacherSchedulesForm} className="space-y-4">
-                        <input type="hidden" name="id" />
+                        <input type="hidden" name="id" value={selectedTeacherSchedule?.id}/>
                         <div className="grid gap-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="start_time">Horario de Inicio</Label>
-                                <Input id="start_time" name="start_time" type="time" />
+                                <Input id="start_time" name="start_time" type="time" defaultValue={selectedTeacherSchedule?.start_time}/>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="end_time">Horario de Finalización</Label>
-                                <Input id="end_time" name="end_time" type="time" />
+                                <Input id="end_time" name="end_time" type="time" defaultValue={selectedTeacherSchedule?.end_time} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="day">Día</Label>
-                                <Input id="day" name="day" placeholder="Día" />
+                                <Input id="day" name="day" placeholder="Día" defaultValue={selectedTeacherSchedule?.day}/>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="teacher_id">Profesor</Label>
@@ -373,6 +334,7 @@ export default function TeacherIndex() {
                                     id="teacher_id"
                                     name="teacher_id"
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    defaultValue={selectedTeacherSchedule?.teacher.id}
                                 >
                                     <option value="">Seleccione un profesor</option>
                                     {teachers?.map((teacher: any) => (
