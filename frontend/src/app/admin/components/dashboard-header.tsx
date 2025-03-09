@@ -10,7 +10,7 @@ import Image from 'next/image'
 
 export function DashboardHeader() {
     return (
-        <header className="sticky top-0 z-30 flex h-14 w-full items-center border-b bg-white px-4 dark:bg-zinc-950">
+        <header className="sticky top-0 z-30 flex h-14 w-full items-center bg-white px-4 dark:bg-zinc-950">
             <div className="flex flex-1 items-center gap-4 ">
                 <Sheet>
                     <SheetTrigger asChild>
