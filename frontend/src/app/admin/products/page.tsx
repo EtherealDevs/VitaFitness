@@ -35,8 +35,8 @@ export default function ProductsPage() {
     return loading ? (
         <div>loading...</div>
     ) : (
-        <div className="">
-            <div className=" flex justify-between">
+        <div className="space-y-4">
+            <div className=" flex justify-between align-bottom">
                 <div className="flex space-x-4">
                     <h1 className="text-2xl font-extrabold">Productos</h1>
                     <button className="py-2 px-4 bg-blue-600  rounded-xl">
@@ -50,10 +50,10 @@ export default function ProductsPage() {
                 </Link>
             </div>
 
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg bg-white">
-                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <div className="relative overflow-x-auto shadow-md sm:rounded-lg bg-white p-4">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 rounded-lg">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
+                        <tr className="rounded-lg">
                             <th scope="col" className="px-6 py-3">
                                 Product name
                             </th>
@@ -63,7 +63,10 @@ export default function ProductsPage() {
                             <th scope="col" className="px-6 py-3">
                                 Price
                             </th>
-                            <th scope="col" className="px-6 py-3">
+                            <th
+                                scope="col"
+                                colSpan={2}
+                                className="px-6 py-3 text-center">
                                 Action
                             </th>
                         </tr>
@@ -82,19 +85,19 @@ export default function ProductsPage() {
                                     {product.description}
                                 </td>
                                 <td className="px-6 py-4">${product.price}</td>
-                                <td className="border border-gray-300 p-4">
+                                <td className=" p-4">
                                     <button
                                         onClick={() => handleDelete(product.id)}
                                         className="py-2 px-4 bg-red-600 rounded-xl">
                                         Eliminar
                                     </button>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <a
-                                        href="#"
+                                <td className="p-4">
+                                    <Link
+                                        href={`/admin/products/edit/${product.id}`}
                                         className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
                                         Edit
-                                    </a>
+                                    </Link>
                                 </td>
                             </tr>
                         ))}

@@ -60,18 +60,18 @@ class ProductController extends Controller
             'stock' => 'required|numeric',
             'options' => 'array',
             'images' => 'required|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            // 'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
         try {
             $product = new Product();
             $product->name = $request->name;
             $product->description = $request->description;
             $product->price = $request->price;
-            $product->options = $request->options;
+            $product->options = json_encode($request->options);
             $product->stock = $request->stock;
             $product->save();
             foreach ($request->file('images') as $image) {
-                $name = Str::random(10) . '.' . $image->getClientOriginalName() . 'webp';
+                $name = Str::random(10) . '_' . $image->getClientOriginalName();
                 $path = Storage::putFileAs('products', $image, $name);
                 Image::read($image)->scale(width: 1200)->save(public_path('storage/' . $path));
                 $product->images()->create(['url' => $path]);
