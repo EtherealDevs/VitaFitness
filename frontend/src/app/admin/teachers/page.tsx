@@ -19,13 +19,18 @@ export default function TeacherIndex() {
     const [teachers, setTeachers] = useState<any>([])
     const [teacherSchedules, setTeacherSchedules] = useState<any>([])
     const [branches, setBranches] = useState<any>([])
+
     const [isOpen, setIsOpen] = useState(false)
+    const [createTeacherModalIsOpen, setCreateTeacherModalIsOpen] = useState(false)
+    
     const [scheduleModalIsOpen, setScheduleModalIsOpen] = useState(false)
+    const [createScheduleModalIsOpen, setCreateScheduleModalIsOpen] = useState(false)
+    
     const [search, setSearch] = useState("")
     const [selectedTeacher, setSelectedTeacher] = useState();
     const [selectedTeacherSchedule, setSelectedTeacherSchedule] = useState();
     const { getTeachers, createTeacher, updateTeacher, deleteTeacher } = useTeachers()
-    const { getTeacherSchedules, updateTeacherSchedule, deleteTeacherSchedule } = useTeacherSchedules()
+    const { getTeacherSchedules, createTeacherSchedule, updateTeacherSchedule, deleteTeacherSchedule } = useTeacherSchedules()
     const { getBranches } = useBranches()
 
     function open(id: number) {
@@ -35,12 +40,25 @@ export default function TeacherIndex() {
     function close() {
         setIsOpen(false)
     }
+    function openCreateTeacherModal() {
+        setCreateTeacherModalIsOpen(true)
+    }
+    function closeCreateTeacherModal() {
+        setCreateTeacherModalIsOpen(false)
+    }
+
     function openScheduleModal(id: number) {
         setScheduleModalIsOpen(true)
         setSelectedTeacherSchedule(teacherSchedules.find((schedule) => schedule.id === id))
     }
     function closeScheduleModal() {
         setScheduleModalIsOpen(false)
+    }
+    function openCreateScheduleModal() {
+        setCreateScheduleModalIsOpen(true)
+    }
+    function closeCreateScheduleModal() {
+        setCreateScheduleModalIsOpen(false)
     }
 
     const fetchData = async () => {
@@ -67,6 +85,15 @@ export default function TeacherIndex() {
         }
     }
 
+    //--------- Teacher ----------//
+    async function handleCreateTeacherForm(e: React.FormEvent<HTMLFormElement>)
+    {
+        e.preventDefault()
+        var formData = new FormData(e.currentTarget)
+        await createTeacher(formData)
+        closeCreateTeacherModal()
+        fetchData()
+    }
     async function handleUpdateTeacherForm(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         var formData = new FormData(e.currentTarget)
@@ -74,15 +101,6 @@ export default function TeacherIndex() {
         close()
         fetchData()
     }
-
-    async function handleUpdateTeacherSchedulesForm(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        var formData = new FormData(e.currentTarget)
-        await updateTeacherSchedule(e.currentTarget.id.value, formData)
-        closeScheduleModal()
-        fetchData()
-    }
-
     async function handleDeleteTeacher(id: number) {
         const confirmDelete = confirm("¿Estás seguro de que deseas eliminar este profesor?")
         if (!confirmDelete) return
@@ -90,6 +108,7 @@ export default function TeacherIndex() {
         try {
             await deleteTeacher(String(id))
             alert("Profesor eliminado correctamente")
+            fetchData();
             setTeachers((prevTeachers: any[]) => prevTeachers.filter((teacher) => teacher.id !== id))
         } catch (error) {
             console.error("Error al eliminar el profesor:", error)
@@ -97,6 +116,22 @@ export default function TeacherIndex() {
         }
     }
 
+    //--------- Schedule ----------//
+    async function handleCreateTeacherSchedulesForm(e: React.FormEvent<HTMLFormElement>)
+    {
+        e.preventDefault()
+        var formData = new FormData(e.currentTarget)
+        await createTeacherSchedule(formData)
+        closeCreateScheduleModal()
+        fetchData()
+    }
+    async function handleUpdateTeacherSchedulesForm(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        var formData = new FormData(e.currentTarget)
+        await updateTeacherSchedule(e.currentTarget.id.value, formData)
+        closeScheduleModal()
+        fetchData()
+    }
     async function handleDeleteTeacherSchedule(id: number) {
         const confirmDelete = confirm("¿Estás seguro de que deseas eliminar este horario?")
         if (!confirmDelete) return
@@ -104,6 +139,7 @@ export default function TeacherIndex() {
         try {
             await deleteTeacherSchedule(String(id))
             alert("Horario eliminado correctamente")
+            fetchData();
             setTeacherSchedules((prevTeacherSchedules: any[]) =>
                 prevTeacherSchedules.filter((teacherSchedule) => teacherSchedule.id !== id),
             )
@@ -127,10 +163,9 @@ export default function TeacherIndex() {
 
     return (
         <div className="space-y-6 p-6">
-            <form className="hidden" id="updateTeacherStub"><input type="hidden" name="id" /></form>
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold">Profesores</h1>
-                <Button>
+                <Button onClick={openCreateTeacherModal}>
                     <Plus className="mr-2 h-4 w-4" />
                     Nuevo Profesor
                 </Button>
@@ -201,6 +236,10 @@ export default function TeacherIndex() {
             <Card>
                 <CardHeader>
                     <CardTitle>Horarios de Profesores</CardTitle>
+                    <Button onClick={openCreateScheduleModal}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Horario
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border">
@@ -251,6 +290,59 @@ export default function TeacherIndex() {
                 </CardContent>
             </Card>
 
+            {/* Modal para agregar profesor */}
+            <Dialog open={createTeacherModalIsOpen} onOpenChange={setCreateTeacherModalIsOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Agregar Profesor</DialogTitle>
+                    </DialogHeader>
+                    <form id="createTeacherForm" onSubmit={handleCreateTeacherForm} className="space-y-4">
+                        <div className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Nombre</Label>
+                                <Input id="name" name="name" placeholder="Nombre" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="last_name">Apellido</Label>
+                                <Input id="last_name" name="last_name" placeholder="Apellido" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input id="email" name="email" type="email" placeholder="Email" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">Teléfono</Label>
+                                <Input id="phone" name="phone" placeholder="Teléfono"/>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="dni">DNI</Label>
+                                <Input id="dni" name="dni" placeholder="DNI" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="branch_id">Sucursal</Label>
+                                <select
+                                    id="branch_id"
+                                    name="branch_id"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="">Seleccione una sucursal</option>
+                                    {branches?.map((branch: any) => (
+                                        <option key={branch.id} value={branch.id}>
+                                            {branch.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={close}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit">Guardar Cambios</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
             {/* Modal para editar profesor */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="sm:max-w-[425px]">
@@ -307,7 +399,64 @@ export default function TeacherIndex() {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal para editar horario */}
+            {/* Modal para agregar horario */}
+            <Dialog open={createScheduleModalIsOpen} onOpenChange={setCreateScheduleModalIsOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Editar Horario</DialogTitle>
+                    </DialogHeader>
+                    <form id="updateTeacherSchedulesForm" onSubmit={handleCreateTeacherSchedulesForm} className="space-y-4">
+                        <div className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="start_time">Horario de Inicio</Label>
+                                <Input id="start_time" name="start_time" type="time"/>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="end_time">Horario de Finalización</Label>
+                                <Input id="end_time" name="end_time" type="time"/>
+                            </div>
+                            <div className="grid gap-2">
+                            <Label htmlFor="day">Dia</Label>
+                                <select
+                                    id="day"
+                                    name="day"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="">Día...</option>
+                                    <option value="lunes">Lunes</option>
+                                    <option value="martes">Martes</option>
+                                    <option value="miercoles">Miércoles</option>
+                                    <option value="jueves">Jueves</option>
+                                    <option value="viernes">Viernes</option>
+                                    <option value="sabado">Sábado</option>
+                                    <option value="domingo">Domingo</option>
+                                </select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="teacher_id">Profesor</Label>
+                                <select
+                                    id="teacher_id"
+                                    name="teacher_id"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="">Seleccione un profesor</option>
+                                    {teachers?.map((teacher: any) => (
+                                        <option key={teacher.id} value={teacher.id}>
+                                            {teacher.name} {teacher.last_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={closeScheduleModal}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit">Guardar Cambios</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
             <Dialog open={scheduleModalIsOpen} onOpenChange={setScheduleModalIsOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
@@ -325,8 +474,22 @@ export default function TeacherIndex() {
                                 <Input id="end_time" name="end_time" type="time" defaultValue={selectedTeacherSchedule?.end_time} />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="day">Día</Label>
-                                <Input id="day" name="day" placeholder="Día" defaultValue={selectedTeacherSchedule?.day}/>
+                            <Label htmlFor="day">Dia</Label>
+                                <select
+                                    id="day"
+                                    name="day"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    defaultValue={selectedTeacherSchedule?.day}
+                                >
+                                    <option value="">Día...</option>
+                                    <option value="lunes">Lunes</option>
+                                    <option value="martes">Martes</option>
+                                    <option value="miercoles">Miércoles</option>
+                                    <option value="jueves">Jueves</option>
+                                    <option value="viernes">Viernes</option>
+                                    <option value="sabado">Sábado</option>
+                                    <option value="domingo">Domingo</option>
+                                </select>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="teacher_id">Profesor</Label>

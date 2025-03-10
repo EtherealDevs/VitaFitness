@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('teacher_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->constrained('teachers');
+            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
             $table->time('start_time');
             $table->time('end_time');
-            $table->string('day');
+            $table->enum('day', ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'])->default('lunes');
             $table->timestamps();
         });
     }

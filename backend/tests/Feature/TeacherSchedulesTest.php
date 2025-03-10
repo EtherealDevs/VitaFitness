@@ -25,7 +25,7 @@ class TeacherSchedulesTest extends TestCase
             'teacher_id' => $teacher->id,
             'start_time' => now(),
             'end_time' => now(),
-            'day' => 'tuesday',
+            'day' => 'lunes',
         ]);
         $response = $this->actingAs($user)->get('/api/teacherSchedules/');
         $response->assertStatus(200);
@@ -46,7 +46,7 @@ class TeacherSchedulesTest extends TestCase
             'teacher_id' => $teacher->id,
             'start_time' => now()->format('H:i'),
             'end_time' => now()->format('H:i'),
-            'day' => 'tuesday',
+            'day' => 'lunes',
         ]);
         $response->assertStatus(201);
     }
@@ -59,7 +59,7 @@ class TeacherSchedulesTest extends TestCase
             'teacher_id' => $teacher->id,
             'start_time' => now()->format('H:i'),
             'end_time' => now()->format('H:i'),
-            'day' => 'tuesday',
+            'day' => 'lunes',
         ]);
         $response->assertStatus(204);
     }
@@ -71,7 +71,7 @@ class TeacherSchedulesTest extends TestCase
             'teacher_id' => $teacher->id,
             'start_time' => now()->format('H:i:s'),
             'end_time' => now()->format('H:i:s'),
-            'day' => 'tuesday',
+            'day' => 'lunes',
         ]);
         $response = $this->actingAs($user)->delete('/api/teacherSchedules/'.$schedule->id);
         $response->assertStatus(204);
