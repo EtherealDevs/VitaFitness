@@ -273,7 +273,7 @@ export default function Services() {
         <div className="grid md:grid-cols-2 gap-12">
           {/* Planes Section */}
           <div>
-            <GradientTitle className="text-3xl mb-6">PLANES</GradientTitle>
+            <GradientTitle className="text-3xl font-impact mb-6">PLANES</GradientTitle>
             <p className="text-gray-400 mb-8">
               Descubre los diferentes planes que ofrecemos para adaptarnos a tus necesidades y objetivos de fitness.
               ¡Elige el que mejor se ajuste a ti y comienza tu transformación hoy mismo!
@@ -384,7 +384,7 @@ export default function Services() {
 
           {/* Tienda Section */}
           <div id="productos">
-            <GradientTitle className="text-3xl mb-6">TIENDA</GradientTitle>
+            <GradientTitle className="text-3x font-impact mb-6">TIENDA</GradientTitle>
             <p className="text-gray-400 mb-8">
               Encuentra tus productos favoritos para el gym aquí. Desde ropa deportiva diseñada para maximizar tu
               comodidad y rendimiento, hasta accesorios esenciales para tus entrenamientos.

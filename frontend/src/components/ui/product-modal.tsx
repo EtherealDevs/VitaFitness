@@ -1,9 +1,9 @@
 "use client"
 
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import Button from "@/components/ui/Button"
 import Image from "next/image"
-import { X, Tag, Star, Check, MessageCircle } from "lucide-react"
+import { Tag, Star, Check, MessageCircle } from "lucide-react"
 import { useState } from "react"
 
 interface ProductModalProps {
@@ -71,9 +71,9 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-black text-white border-gray-800 max-w-4xl p-0 overflow-hidden">
-        <DialogClose className="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+        {/* <DialogClose className="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
           <X className="h-6 w-6" />
-        </DialogClose>
+        </DialogClose> */}
 
         <div className="grid md:grid-cols-2 gap-0">
           {/* Imagen del producto */}

@@ -2,10 +2,10 @@
 
 import type React from "react"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog"
 import Button from "@/components/ui/Button"
 import Image from "next/image"
-import { X, MessageCircle, Tag, Star, Filter, Search } from "lucide-react"
+import { MessageCircle, Tag, Star, Filter, Search } from "lucide-react"
 import { useState } from "react"
 
 interface Product {
@@ -63,9 +63,9 @@ export function CatalogModal({ isOpen, onClose, products, onSelectProduct }: Cat
       <DialogContent className="bg-black text-white border-gray-800 max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between sticky top-0 bg-black z-10 py-4">
           <DialogTitle className="gradient-text text-2xl">Catálogo de Productos</DialogTitle>
-          <DialogClose className="text-gray-400 hover:text-white">
+         {/*  <DialogClose className="text-gray-400 hover:text-white">
             <X className="h-6 w-6" />
-          </DialogClose>
+          </DialogClose> */}
         </DialogHeader>
 
         {/* Barra de búsqueda y filtros */}
