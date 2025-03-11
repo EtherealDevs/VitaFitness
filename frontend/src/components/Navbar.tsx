@@ -42,7 +42,7 @@ const Navbar = ({ isLoggedIn = false, userRole = "user", userAvatar = "/avatar.p
   }
 
   return (
-    <nav className="fixed w-full z-50 bg-black/95 backdrop-blur-md py-4 px-4 sm:px-8 border-b border-white/10">
+    <nav className="sticky w-full z-50 bg-black/95 backdrop-blur-md py-4 px-4 sm:px-8 border-b border-white/10">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="relative z-50">
