@@ -16,13 +16,16 @@ const Login = () => {
 
     const { login } = useAuth({
         middleware: 'guest',
-        redirectIfAuthenticated: '/dashboard',
+        redirectIfAuthenticated: '/',
     })
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [shouldRemember, setShouldRemember] = useState(false)
-    const [errors, setErrors] = useState<{ email?: string[]; password?: string[] }>({})
+    const [errors, setErrors] = useState<{
+        email?: string[]
+        password?: string[]
+    }>({})
     const [status, setStatus] = useState<string | null>(null)
 
     useEffect(() => {
@@ -82,10 +85,7 @@ const Login = () => {
                         autoComplete="current-password"
                     />
 
-                    <InputError
-                        messages={errors.password}
-                        className="mt-2"
-                    />
+                    <InputError messages={errors.password} className="mt-2" />
                 </div>
 
                 {/* Remember Me */}

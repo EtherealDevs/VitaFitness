@@ -19,6 +19,7 @@ import Input from '@/components/ui/Input'
 import Label from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/textarea'
 import { useProducts } from '@/hooks/products'
+import { toast } from '@/hooks/use-toast'
 
 interface ProductOption {
     key: string
@@ -126,19 +127,19 @@ export default function AddProductPage() {
         try {
             await createProduct(formDataToSend)
 
-            // toast({
-            //     title: 'Producto creado',
-            //     description: 'El producto ha sido creado exitosamente',
-            // })
+            toast({
+                title: 'Producto creado',
+                description: 'El producto ha sido creado exitosamente',
+            })
 
             router.push('/admin/products')
         } catch (error) {
             console.error('Error creating product:', error)
-            // toast({
-            //     title: 'Error',
-            //     description: 'Hubo un error al crear el producto',
-            //     variant: 'destructive',
-            // })
+            toast({
+                title: 'Error',
+                description: 'Hubo un error al crear el producto',
+                variant: 'destructive',
+            })
         } finally {
             setIsLoading(false)
         }
@@ -157,6 +158,7 @@ export default function AddProductPage() {
                             <Input
                                 id="name"
                                 name="name"
+                                type="text"
                                 placeholder="Nombre del producto"
                                 required
                             />
@@ -253,8 +255,6 @@ export default function AddProductPage() {
                                             </div>
                                             <Button
                                                 type="button"
-                                                variant="destructive"
-                                                size="icon"
                                                 className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                                                 onClick={() =>
                                                     removeImage(image.id)
@@ -269,12 +269,8 @@ export default function AddProductPage() {
 
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <Label>Opciones</Label>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={addOption}>
+                                <Label htmlFor="options">Opciones</Label>
+                                <Button type="button" onClick={addOption}>
                                     <Plus className="h-4 w-4 mr-2" />
                                     Agregar opción
                                 </Button>
@@ -293,6 +289,8 @@ export default function AddProductPage() {
                                             </Label>
                                             <Input
                                                 id={`option-key-${index}`}
+                                                name="optionsKey"
+                                                type="text"
                                                 value={option.key}
                                                 onChange={e =>
                                                     updateOption(
@@ -312,6 +310,8 @@ export default function AddProductPage() {
                                             </Label>
                                             <Input
                                                 id={`option-value-${index}`}
+                                                name="optionsValue"
+                                                type="text"
                                                 value={option.value}
                                                 onChange={e =>
                                                     updateOption(
@@ -325,8 +325,6 @@ export default function AddProductPage() {
                                         </div>
                                         <Button
                                             type="button"
-                                            variant="ghost"
-                                            size="icon"
                                             onClick={() => removeOption(index)}
                                             disabled={options.length === 1}>
                                             <Trash2 className="h-4 w-4 text-destructive" />
@@ -338,10 +336,7 @@ export default function AddProductPage() {
                     </CardContent>
 
                     <CardFooter className="flex justify-between">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => router.back()}>
+                        <Button type="button" onClick={() => router.back()}>
                             Cancelar
                         </Button>
                         <Button type="submit" disabled={isLoading}>
