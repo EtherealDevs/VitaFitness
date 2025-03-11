@@ -154,8 +154,11 @@ export default function EditProductPage() {
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Nombre</Label>
+                            <Label htmlFor="name" className="block">
+                                Nombre
+                            </Label>
                             <Input
+                                className="w-full p-2 border rounded-lg"
                                 id="name"
                                 name="name"
                                 type="text"
@@ -177,8 +180,11 @@ export default function EditProductPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="price">Precio</Label>
+                                <Label htmlFor="price" className="block">
+                                    Precio
+                                </Label>
                                 <Input
+                                    className="w-full p-2 border rounded-lg"
                                     id="price"
                                     name="price"
                                     type="number"
@@ -190,8 +196,11 @@ export default function EditProductPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="stock">Stock</Label>
+                                <Label htmlFor="stock" className="block">
+                                    Stock
+                                </Label>
                                 <Input
+                                    className="w-full p-2 border rounded-lg"
                                     id="stock"
                                     name="stock"
                                     type="number"
@@ -270,7 +279,10 @@ export default function EditProductPage() {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="options">Opciones</Label>
-                                <Button type="button" onClick={addOption}>
+                                <Button
+                                    type="button"
+                                    className="flex content-center items-center text-zinc-800 bg-transparent border border-zinc-800 hover:bg-zinc-800 hover:text-white hover:border-white rounded-lg"
+                                    onClick={addOption}>
                                     <Plus className="h-4 w-4 mr-2" />
                                     Agregar opción
                                 </Button>
@@ -284,14 +296,15 @@ export default function EditProductPage() {
                                         <div className="flex-1">
                                             <Label
                                                 htmlFor={`option-key-${index}`}
-                                                className="text-sm">
+                                                className="text-sm block">
                                                 Clave (ej: color, talla)
                                             </Label>
                                             <Input
+                                                className="w-full p-2 border rounded-lg"
                                                 id={`option-key-${index}`}
-                                                value={option.key}
                                                 name="optionsKey"
                                                 type="text"
+                                                value={option.key}
                                                 onChange={e =>
                                                     updateOption(
                                                         index,
@@ -305,10 +318,11 @@ export default function EditProductPage() {
                                         <div className="flex-1">
                                             <Label
                                                 htmlFor={`option-value-${index}`}
-                                                className="text-sm">
+                                                className="text-sm block">
                                                 Valor
                                             </Label>
                                             <Input
+                                                className="w-full p-2 border rounded-lg"
                                                 id={`option-value-${index}`}
                                                 name="optionsValue"
                                                 type="text"
@@ -324,6 +338,7 @@ export default function EditProductPage() {
                                             />
                                         </div>
                                         <Button
+                                            className=" hover:text-red-700 text-red-500 font-bold bg-transparent"
                                             type="button"
                                             onClick={() => removeOption(index)}
                                             disabled={options.length === 1}>
@@ -336,10 +351,16 @@ export default function EditProductPage() {
                     </CardContent>
 
                     <CardFooter className="flex justify-between">
-                        <Button type="button" onClick={() => router.back()}>
+                        <Button
+                            className=" hover:bg-red-400 hover:text-white hover:border-white hover:border border border-red-400 text-red-400 bg-transparent"
+                            type="button"
+                            onClick={() => router.back()}>
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button
+                            className="bg-transparent text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white"
+                            type="submit"
+                            disabled={isLoading}>
                             {isLoading ? 'Guardando...' : 'Guardar Producto'}
                         </Button>
                     </CardFooter>
