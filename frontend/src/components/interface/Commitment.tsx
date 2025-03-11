@@ -61,7 +61,8 @@ export default function CommitmentSection() {
                 {/* Título y descripción principal */}
                 <div className="mb-12 relative">
                     <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-green-400/20 to-purple-500/20 rounded-full blur-3xl"></div>
-                    <GradientTitle className="text-4xl mb-4 relative z-10">NUESTRO COMPROMISO</GradientTitle>
+                    <GradientTitle className="text-4xl mb-4 font-impact relative z-10">NUESTRO COMPROMISO</GradientTitle>
+                    
                     <p className="text-gray-400 max-w-xl relative z-10">
                         Descubre los diferentes planes que ofrecemos para adaptarnos a tus necesidades y objetivos de fitness.
                         ¡Elige el que mejor se ajuste a ti y comienza tu transformación hoy mismo!
@@ -85,7 +86,7 @@ export default function CommitmentSection() {
 
                         {/* Nuestras sedes */}
                         <div>
-                            <GradientTitle className="text-2xl mb-6">NUESTRAS SEDES</GradientTitle>
+                            <GradientTitle className="text-2xl font-impact mt-12 mb-6">NUESTRAS SEDES</GradientTitle>
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Sede 1 */}
                                 <Card className="relative h-[200px] overflow-hidden group">
@@ -185,7 +186,7 @@ export default function CommitmentSection() {
             {/* Sección de transformaciones - Ancho completo */}
             <div className="w-full bg-gray-950 py-16" ref={transformationsRef}>
                 <div className="container mx-auto px-4">
-                    <GradientTitle className="text-3xl mb-8 text-center">TRANSFORMACIONES REALES</GradientTitle>
+                    <GradientTitle className="text-3xl mb-8 font-impact text-center">TRANSFORMACIONES REALES</GradientTitle>
 
                     <div className="relative">
                         {/* Controles de navegación */}

@@ -127,7 +127,7 @@ const Reviews = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Reviews Section */}
           <div className="order-2 lg:order-1">
-            <h2 className="text-4xl font-bold mb-8 relative w-fit text-white">
+            <h2 className="text-4xl font-bold font-impact mb-8 relative w-fit text-white">
               RESEÑAS
               <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#40E0D0] to-[#4834d4]" />
             </h2>
@@ -170,7 +170,7 @@ const Reviews = () => {
 
           {/* Gallery Section */}
           <div className="order-1 lg:order-2">
-            <h2 className="text-4xl font-bold mb-8 relative w-fit text-white">
+            <h2 className="text-4xl font-bold mb-8 font-impact relative w-fit text-white">
               GALERIA
               <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#40E0D0] to-[#4834d4]" />
             </h2>

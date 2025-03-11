@@ -50,7 +50,7 @@ export default function Hero() {
                     <div className="flex flex-col items-center md:items-start text-center md:text-left max-w-4xl mx-auto md:mx-0 space-y-8">
                         {/* Heading */}
                         <motion.h1
-                            className="text-4xl sm:text-6xl mt-24 md:mt-0 md:text-7xl font-bold text-white"
+                            className="text-4xl font-impact sm:text-6xl mt-24 md:mt-0 md:text-7xl font-bold text-white"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}

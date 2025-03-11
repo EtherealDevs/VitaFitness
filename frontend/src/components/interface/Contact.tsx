@@ -12,7 +12,7 @@ export default function Contact() {
             <div className="container mx-auto px-4 max-w-4xl grid md:grid-cols-2 gap-8">
                 {/* Left Column */}
                 <div className="bg-black p-8 rounded-lg text-white">
-                    <GradientTitle className="mb-4">CONTACT</GradientTitle>
+                    <GradientTitle className="mb-4 font-impact">CONTACT</GradientTitle>
                     <p className="text-gray-300 text-sm mb-6">
                         Listo para empezar la transformación. Nuestro equipo encontrará el plan perfecto para ti y responder todas las preguntas que tengas. Contáctanos y te respondemos todas las dudas.
                     </p>

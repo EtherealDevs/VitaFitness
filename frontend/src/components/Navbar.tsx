@@ -25,8 +25,6 @@ interface NavbarProps {
 
 const Navbar = ({ isLoggedIn = false, userRole = "user", userAvatar = "/avatar.png" }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
   const toggleMenu = () => {
@@ -146,18 +144,18 @@ const Navbar = ({ isLoggedIn = false, userRole = "user", userAvatar = "/avatar.p
             </div>
           ) : (
             <div className="hidden md:flex items-center gap-4">
-              <button
-                onClick={() => setIsLoginOpen(true)}
+              <Link
+                href="/login"
                 className="px-4 py-2 text-white border border-white/20 rounded hover:bg-white/10 transition-colors"
               >
                 Iniciar Sesión
-              </button>
-              <button
-                onClick={() => setIsRegisterOpen(true)}
+              </Link>
+              <Link
+                href="/register"
                 className="px-4 py-2 text-white bg-gradient-to-r from-green-400 to-purple-500 rounded hover:opacity-90 transition-opacity"
               >
                 Registrarse
-              </button>
+              </Link>
             </div>
           )}
 
@@ -203,24 +201,20 @@ const Navbar = ({ isLoggedIn = false, userRole = "user", userAvatar = "/avatar.p
             <div className="relative h-full flex flex-col pt-24 px-8">
               {!isLoggedIn && (
                 <div className="flex flex-col gap-4 mb-8">
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false)
-                      setIsLoginOpen(true)
-                    }}
-                    className="w-full py-3 text-lg text-white border border-white/20 rounded hover:bg-white/10 transition-colors"
+                  <Link
+                    href="/login"
+                    className="w-full py-3 text-lg text-white border border-white/20 rounded hover:bg-white/10 transition-colors text-center"
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     Iniciar Sesión
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false)
-                      setIsRegisterOpen(true)
-                    }}
-                    className="w-full py-3 text-lg text-white bg-gradient-to-r from-green-400 to-purple-500 rounded hover:opacity-90 transition-opacity"
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="w-full py-3 text-lg text-white bg-gradient-to-r from-green-400 to-purple-500 rounded hover:opacity-90 transition-opacity text-center"
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     Registrarse
-                  </button>
+                  </Link>
                 </div>
               )}
 
@@ -277,101 +271,6 @@ const Navbar = ({ isLoggedIn = false, userRole = "user", userAvatar = "/avatar.p
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Login Modal */}
-      {isLoginOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-8 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold text-white mb-4">Iniciar Sesión</h2>
-            <form className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-              >
-                Iniciar Sesión
-              </button>
-            </form>
-            <button onClick={() => setIsLoginOpen(false)} className="mt-4 text-sm text-gray-400 hover:text-white">
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Register Modal */}
-      {isRegisterOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-8 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold text-white mb-4">Registrarse</h2>
-            <form className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300">
-                  Nombre
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white"
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-              >
-                Registrarse
-              </button>
-            </form>
-            <button onClick={() => setIsRegisterOpen(false)} className="mt-4 text-sm text-gray-400 hover:text-white">
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   )
 }
