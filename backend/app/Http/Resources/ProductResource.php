@@ -21,7 +21,7 @@ class ProductResource extends JsonResource
             'price' => $this->price,
             'stock' => $this->stock,
             'status' => $this->status,
-            'options' => $this->options,
+            'options' => json_decode($this->options),
             'images' => $this->images->map(fn($image) => asset('storage/' . $image->url)),
         ];
     }

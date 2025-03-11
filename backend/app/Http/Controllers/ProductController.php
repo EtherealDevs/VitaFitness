@@ -107,11 +107,17 @@ class ProductController extends Controller
         try {
             $product = Product::find($id);
             $product->update($request->all());
-            foreach ($request->file('images') as $image) {
-                $name = Str::random(10) . '.' . $image->getClientOriginalName() . 'webp';
-                $path = Storage::putFileAs('products', $image, $name);
-                Image::read($image)->scale(width: 1200)->save(public_path('storage/' . $path));
-                $product->images()->create(['url' => $path]);
+            if ($request->has('options')) {
+                $product->options = json_encode($request->options);
+            }
+            $product->save();
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $name = Str::random(10) . '.' . $image->getClientOriginalName() . 'webp';
+                    $path = Storage::putFileAs('products', $image, $name);
+                    Image::read($image)->scale(width: 1200)->save(public_path('storage/' . $path));
+                    $product->images()->create(['url' => $path]);
+                }
             }
         } catch (\Throwable $th) {
             throw $th;

@@ -14,6 +14,7 @@ import {
     CreditCard,
     ArrowLeft,
     UserRoundPen,
+    ShoppingBag,
 } from 'lucide-react'
 
 const navigation = [
@@ -24,7 +25,7 @@ const navigation = [
     { name: 'Clases', href: '/admin/classes', icon: BookOpen },
     { name: 'Calendario', href: '/admin/calendar', icon: Calendar },
     { name: 'Pagos', href: '/admin/payments', icon: CreditCard },
-    { name: 'Productos', href: '/admin/products', icon: UserRoundPen },
+    { name: 'Productos', href: '/admin/products', icon: ShoppingBag },
     { name: 'Permisos', href: '/admin/permissions', icon: FileText },
     { name: 'Estadísticas', href: '/admin/statistics', icon: BarChart2 },
     { name: 'Configuración', href: '/admin/configuration', icon: Settings },

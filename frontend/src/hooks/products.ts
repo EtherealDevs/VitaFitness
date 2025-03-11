@@ -45,7 +45,10 @@ export const useProducts = () => {
     const updateProduct = async (id: string, formData: FormData) => {
         await csrf()
         try {
-            const response = await axios.put(`/api/products/${id}`, formData)
+            const response = await axios.post(
+                `/api/products/${id}?_method=PUT`,
+                formData,
+            )
             return response.data
         } catch (error) {
             console.error(error)

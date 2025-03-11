@@ -146,10 +146,12 @@ export default function AddProductPage() {
     }
 
     return (
-        <div className="container mx-auto py-10">
-            <Card>
+        <div className="container mx-auto py-10 ">
+            <Card className="dark:text-white dark:bg-zinc-950">
                 <CardHeader>
-                    <CardTitle>Agregar Nuevo Producto</CardTitle>
+                    <CardTitle className="dark:text-white">
+                        Agregar Nuevo Producto
+                    </CardTitle>
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-6">
@@ -158,7 +160,7 @@ export default function AddProductPage() {
                                 Nombre
                             </Label>
                             <Input
-                                className="w-full p-2 border rounded-lg"
+                                className="w-full p-2 border rounded-lg dark:bg-transparent"
                                 id="name"
                                 name="name"
                                 type="text"
@@ -173,7 +175,7 @@ export default function AddProductPage() {
                                 id="description"
                                 name="description"
                                 placeholder="Descripción del producto"
-                                className="min-h-[100px]"
+                                className="min-h-[100px] dark:bg-transparent"
                                 required
                             />
                         </div>
@@ -184,7 +186,7 @@ export default function AddProductPage() {
                                     Precio
                                 </Label>
                                 <Input
-                                    className="w-full p-2 border rounded-lg"
+                                    className="w-full p-2 border rounded-lg dark:bg-transparent"
                                     id="price"
                                     name="price"
                                     type="number"
@@ -200,7 +202,7 @@ export default function AddProductPage() {
                                     Stock
                                 </Label>
                                 <Input
-                                    className="w-full p-2 border rounded-lg"
+                                    className="w-full p-2 border rounded-lg dark:bg-transparent"
                                     id="stock"
                                     name="stock"
                                     type="number"
@@ -281,7 +283,7 @@ export default function AddProductPage() {
                                 <Label htmlFor="options">Opciones</Label>
                                 <Button
                                     type="button"
-                                    className="flex content-center items-center text-zinc-800 bg-transparent border border-zinc-800 hover:bg-zinc-800 hover:text-white hover:border-white rounded-lg"
+                                    className="flex content-center items-center text-zinc-800 bg-transparent border border-zinc-800 hover:bg-zinc-800 hover:text-white hover:border-white rounded-lg dark:border-zinc-200 dark:text-zinc-200"
                                     onClick={addOption}>
                                     <Plus className="h-4 w-4 mr-2" />
                                     Agregar opción
@@ -300,7 +302,7 @@ export default function AddProductPage() {
                                                 Clave (ej: color, talla)
                                             </Label>
                                             <Input
-                                                className="w-full p-2 border rounded-lg"
+                                                className="w-full p-2 border rounded-lg dark:bg-transparent"
                                                 id={`option-key-${index}`}
                                                 name="optionsKey"
                                                 type="text"
@@ -322,7 +324,7 @@ export default function AddProductPage() {
                                                 Valor
                                             </Label>
                                             <Input
-                                                className="w-full p-2 border rounded-lg"
+                                                className="w-full p-2 border rounded-lg dark:bg-transparent"
                                                 id={`option-value-${index}`}
                                                 name="optionsValue"
                                                 type="text"

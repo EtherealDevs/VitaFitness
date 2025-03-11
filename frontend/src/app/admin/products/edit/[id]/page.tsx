@@ -2,8 +2,8 @@
 
 import type React from 'react'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Plus, Trash2, Upload, X } from 'lucide-react'
 
@@ -18,7 +18,7 @@ import {
 import Input from '@/components/ui/Input'
 import Label from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/textarea'
-import { useProducts } from '@/hooks/products'
+import { Product, useProducts } from '@/hooks/products'
 import { toast } from '@/hooks/use-toast'
 
 interface ProductOption {
@@ -34,14 +34,50 @@ interface ProductImage {
 
 export default function EditProductPage() {
     const router = useRouter()
-    const { createProduct } = useProducts()
+    const { getProduct, updateProduct } = useProducts()
+    const [product, setProduct] = useState<Product>()
+    const { id } = useParams() as { id: string }
     const [isLoading, setIsLoading] = useState(false)
     const [images, setImages] = useState<ProductImage[]>([])
     const [files, setFiles] = useState<File[]>([])
-    const [options, setOptions] = useState<ProductOption[]>([
-        { key: '', value: '' },
-    ])
+    const [options, setOptions] = useState<ProductOption[]>([])
 
+    const fetchData = async () => {
+        try {
+            const productData = await getProduct(id)
+            setProduct(productData.product)
+
+            // Convert image URLs to ProductImage objects
+            const existingImages = productData.product.images.map(
+                (url: string, index: number) => ({
+                    id: `existing-${index}`,
+                    url,
+                }),
+            )
+            setImages(existingImages)
+
+            // Set options
+            if (
+                productData.product.options &&
+                productData.product.options.length > 0
+            ) {
+                setOptions(productData.product.options)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+    useEffect(() => {
+        fetchData()
+        setImages(
+            product?.images.map(image => ({
+                id: `img-${Date.now()}-${Math.random()
+                    .toString(36)
+                    .substring(2, 9)}`,
+                url: image,
+            })) || [],
+        )
+    }, [])
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files || files.length === 0) return
@@ -93,6 +129,17 @@ export default function EditProductPage() {
         setOptions(newOptions)
     }
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setProduct(prev => (prev ? { ...prev, [name]: value } : undefined))
+    }
+    const handleTextareaChange = (
+        e: React.ChangeEvent<HTMLTextAreaElement>,
+    ) => {
+        const { name, value } = e.target
+        setProduct(prev => (prev ? { ...prev, [name]: value } : undefined))
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
@@ -125,7 +172,7 @@ export default function EditProductPage() {
             formDataToSend.append(`options[${index}][value]`, option.value)
         })
         try {
-            await createProduct(formDataToSend)
+            await updateProduct(id, formDataToSend)
 
             toast({
                 title: 'Producto creado',
@@ -147,9 +194,11 @@ export default function EditProductPage() {
 
     return (
         <div className="container mx-auto py-10">
-            <Card>
+            <Card className="dark:bg-zinc-950 dark:text-white">
                 <CardHeader>
-                    <CardTitle>Agregar Nuevo Producto</CardTitle>
+                    <CardTitle className="dark:text-white">
+                        Editar Nuevo Producto
+                    </CardTitle>
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-6">
@@ -158,10 +207,12 @@ export default function EditProductPage() {
                                 Nombre
                             </Label>
                             <Input
-                                className="w-full p-2 border rounded-lg"
+                                className="w-full p-2 border rounded-lg dark:bg-transparent"
                                 id="name"
                                 name="name"
                                 type="text"
+                                value={product?.name}
+                                onChange={handleInputChange}
                                 placeholder="Nombre del producto"
                                 required
                             />
@@ -172,8 +223,10 @@ export default function EditProductPage() {
                             <Textarea
                                 id="description"
                                 name="description"
+                                value={product?.description}
+                                onChange={handleTextareaChange}
                                 placeholder="Descripción del producto"
-                                className="min-h-[100px]"
+                                className="min-h-[100px] bg-transparent"
                                 required
                             />
                         </div>
@@ -184,10 +237,12 @@ export default function EditProductPage() {
                                     Precio
                                 </Label>
                                 <Input
-                                    className="w-full p-2 border rounded-lg"
+                                    className="w-full p-2 border rounded-lg bg-transparent"
                                     id="price"
                                     name="price"
                                     type="number"
+                                    value={String(product?.price)}
+                                    onChange={handleInputChange}
                                     placeholder="0.00"
                                     step="0.01"
                                     min="0"
@@ -200,10 +255,12 @@ export default function EditProductPage() {
                                     Stock
                                 </Label>
                                 <Input
-                                    className="w-full p-2 border rounded-lg"
+                                    className="w-full p-2 border rounded-lg bg-transparent"
                                     id="stock"
                                     name="stock"
                                     type="number"
+                                    value={String(product?.stock)}
+                                    onChange={handleInputChange}
                                     placeholder="0"
                                     min="0"
                                     required
@@ -281,7 +338,7 @@ export default function EditProductPage() {
                                 <Label htmlFor="options">Opciones</Label>
                                 <Button
                                     type="button"
-                                    className="flex content-center items-center text-zinc-800 bg-transparent border border-zinc-800 hover:bg-zinc-800 hover:text-white hover:border-white rounded-lg"
+                                    className="flex content-center items-center text-zinc-800 bg-transparent border border-zinc-800 hover:bg-zinc-800 hover:text-white hover:border-white rounded-lg dark:border-zinc-200 dark:text-zinc-200"
                                     onClick={addOption}>
                                     <Plus className="h-4 w-4 mr-2" />
                                     Agregar opción
@@ -300,7 +357,7 @@ export default function EditProductPage() {
                                                 Clave (ej: color, talla)
                                             </Label>
                                             <Input
-                                                className="w-full p-2 border rounded-lg"
+                                                className="w-full p-2 border rounded-lg bg-transparent"
                                                 id={`option-key-${index}`}
                                                 name="optionsKey"
                                                 type="text"
@@ -322,7 +379,7 @@ export default function EditProductPage() {
                                                 Valor
                                             </Label>
                                             <Input
-                                                className="w-full p-2 border rounded-lg"
+                                                className="w-full p-2 border rounded-lg bg-transparent"
                                                 id={`option-value-${index}`}
                                                 name="optionsValue"
                                                 type="text"
