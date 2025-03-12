@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
@@ -17,5 +18,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('teachers', TeacherController::class);
     Route::apiResource('teacherSchedules', TeacherSchedulesController::class);
     Route::apiResource('products', ProductController::class)->except(['index', 'show']);
+    Route::apiResource('plans', PlanController::class)->except(['index', 'show']);
 });
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+Route::apiResource('plans', PlanController::class)->only(['index', 'show']);

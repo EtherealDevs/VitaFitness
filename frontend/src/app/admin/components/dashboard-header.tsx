@@ -27,7 +27,7 @@ export function DashboardHeader() {
                             <Image
                                 width={'8'}
                                 height={'8'}
-                                src="/placeholder.svg?height=32&width=32"
+                                src="/favicon.ico"
                                 alt="Logo"
                                 className="h-8 w-8"
                             />
@@ -41,16 +41,14 @@ export function DashboardHeader() {
 
                 {/* Logo y nombre de la aplicación */}
                 <div className="hidden md:flex md:items-center">
-                    <Image
+                    {/* <Image
                         width={'8'}
                         height={'8'}
                         src="/placeholder.svg?height=32&width=32"
                         alt="Logo"
                         className="h-8 w-8"
-                    />
-                    <span className="ml-2 text-lg font-semibold">
-                        Training App
-                    </span>
+                    /> */}
+                    <span className="ml-2 text-lg font-semibold">Vitta</span>
                 </div>
             </div>
 
