@@ -11,7 +11,6 @@ export default function ProductsPage() {
         setLoading(true)
         try {
             const response = await getProducts()
-            console.log(response)
             setProducts(response.products)
         } catch (error) {
             console.error(error)

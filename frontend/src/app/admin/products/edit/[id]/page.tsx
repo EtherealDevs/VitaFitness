@@ -152,11 +152,6 @@ export default function EditProductPage() {
             stock: Number.parseInt(formData.get('stock') as string),
             options: options.filter(option => option.key && option.value),
         }
-
-        // Here you would typically send the data to your API
-        console.log('Product data:', productData)
-        console.log('Images:', images)
-
         const formDataToSend = new FormData()
         formDataToSend.append('name', productData.name)
         formDataToSend.append('description', productData.description)

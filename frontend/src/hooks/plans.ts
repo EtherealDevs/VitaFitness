@@ -7,8 +7,8 @@ export interface Plan {
     description: string
     price: number
     status: string
-    createdAt: string
-    updatedAt: string
+    createdAt?: string
+    updatedAt?: string
 }
 export const usePlans = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')

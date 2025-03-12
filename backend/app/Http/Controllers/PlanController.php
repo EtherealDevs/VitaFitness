@@ -35,7 +35,6 @@ class PlanController extends Controller
             'name' => 'required|string',
             'description' => 'required|string',
             'price' => 'required|numeric',
-            'status' => 'required|string',
         ]);
         try {
             $plan = Plan::create($request->all());
