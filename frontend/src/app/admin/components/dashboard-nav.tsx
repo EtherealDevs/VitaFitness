@@ -16,6 +16,7 @@ import {
     UserRoundPen,
     ShoppingBag,
     NotepadText,
+    CalendarCheck2,
 } from 'lucide-react'
 
 const navigation = [
@@ -24,6 +25,7 @@ const navigation = [
     { name: 'Alumnos', href: '/admin/students', icon: Users },
     { name: 'Profesores', href: '/admin/teachers', icon: UserRoundPen },
     { name: 'Clases', href: '/admin/classes', icon: BookOpen },
+    { name: 'Horarios', href: '/admin/schedules', icon: CalendarCheck2 },
     { name: 'Calendario', href: '/admin/calendar', icon: Calendar },
     { name: 'Pagos', href: '/admin/payments', icon: CreditCard },
     { name: 'Productos', href: '/admin/products', icon: ShoppingBag },
