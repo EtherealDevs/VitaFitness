@@ -202,10 +202,6 @@ export default function TeacherIndex() {
         <div className="space-y-6 p-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold">Profesores</h1>
-                <Button onClick={openCreateTeacherModal}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nuevo Profesor
-                </Button>
             </div>
 
             <div className="flex items-center gap-4">
@@ -219,8 +215,12 @@ export default function TeacherIndex() {
 
             {/* Tabla de Profesores */}
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Lista de Profesores</CardTitle>
+                    <Button onClick={openCreateTeacherModal}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Profesor
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border">
