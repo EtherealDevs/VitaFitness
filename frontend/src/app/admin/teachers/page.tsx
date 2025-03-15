@@ -113,7 +113,7 @@ export default function TeacherIndex() {
         e: React.FormEvent<HTMLFormElement>,
     ) {
         e.preventDefault()
-        let formData = new FormData(e.currentTarget)
+        const formData = new FormData(e.currentTarget)
         await createTeacher(formData)
         closeCreateTeacherModal()
         fetchData()
@@ -122,7 +122,7 @@ export default function TeacherIndex() {
         e: React.FormEvent<HTMLFormElement>,
     ) {
         e.preventDefault()
-        let formData = new FormData(e.currentTarget)
+        const formData = new FormData(e.currentTarget)
         await updateTeacher(e.currentTarget.id.value, formData)
         close()
         fetchData()
@@ -151,7 +151,7 @@ export default function TeacherIndex() {
         e: React.FormEvent<HTMLFormElement>,
     ) {
         e.preventDefault()
-        let formData = new FormData(e.currentTarget)
+        const formData = new FormData(e.currentTarget)
         await createTeacherSchedule(formData)
         closeCreateScheduleModal()
         fetchData()
@@ -160,7 +160,7 @@ export default function TeacherIndex() {
         e: React.FormEvent<HTMLFormElement>,
     ) {
         e.preventDefault()
-        let formData = new FormData(e.currentTarget)
+        const formData = new FormData(e.currentTarget)
         await updateTeacherSchedule(e.currentTarget.id.value, formData)
         closeScheduleModal()
         fetchData()
@@ -291,7 +291,7 @@ export default function TeacherIndex() {
 
             {/* Tabla de Horarios */}
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Horarios de Profesores</CardTitle>
                     <Button onClick={openCreateScheduleModal}>
                         <Plus className="mr-2 h-4 w-4" />
@@ -542,7 +542,7 @@ export default function TeacherIndex() {
             <Dialog
                 open={createScheduleModalIsOpen}
                 onOpenChange={setCreateScheduleModalIsOpen}>
-                <DialogContent className="sm:max-w-[425px] bg-gray-800 ">
+                <DialogContent className="sm:max-w-[425px] bg-gr ">
                     <DialogHeader>
                         <DialogTitle>Editar Horario</DialogTitle>
                     </DialogHeader>
