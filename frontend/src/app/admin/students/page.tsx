@@ -1,44 +1,364 @@
-'use client';
-import { DataTable } from "../components/ui/data-table"
-import { columns, type Student } from "./columns"
-import { Button } from "../components/ui/button"
-import { Plus } from "lucide-react"
-import { useStudents } from "@/hooks/students"
-import { useEffect, useState } from "react"
+'use client'
+import { useState, useEffect } from 'react'
+import type React from 'react'
 
-// Asegúrate de que los datos coincidan con el tipo Student
+import { useStudents } from '@/hooks/students'
+import { Plus, Edit2, Trash2 } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '../components/ui/table'
+import { Input } from '../components/ui/input'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '../components/ui/dialog'
+import { Label } from '../components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import Link from 'next/link'
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState<any>([])
-  const { getStudents } = useStudents() // Recuperar los alumnos desde el hook
+    const [students, setStudents] = useState<any>([])
+    const [isOpen, setIsOpen] = useState(false)
+    const [createStudentModalIsOpen, setCreateStudentModalIsOpen] =
+        useState(false)
+    const [selectedStudent, setSelectedStudent] = useState<any>()
+    const [search, setSearch] = useState('')
 
-  const fetchData = async () => {
-    try {
-        const response = await getStudents()
-        setStudents(response.students)
-    } catch (error) {
-        console.error(error)
-        throw error
+    const { getStudents, createStudent, updateStudent, deleteStudent } =
+        useStudents()
+
+    function open(id: number) {
+        setIsOpen(true)
+        setSelectedStudent(students.find(student => student.id === id))
     }
-}
 
-  useEffect(() => {
-    fetchData() // Llamar al hook para obtener los alumnos
-  }, [])
-  const data: Student[] = students;
-  return (
-    <div className="py-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Alumnos</h1>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Alumno
-        </Button>
-      </div>
-      <div className="mt-6">
-        <DataTable columns={columns} data={data} filterColumn="name" filterPlaceholder="Filtrar alumnos..." />
-      </div>
-    </div>
-  )
-}
+    function close() {
+        setIsOpen(false)
+    }
 
+    function openCreateStudentModal() {
+        setCreateStudentModalIsOpen(true)
+    }
+
+    function closeCreateStudentModal() {
+        setCreateStudentModalIsOpen(false)
+    }
+
+    const fetchData = async () => {
+        try {
+            const response = await getStudents()
+            setStudents(response.students)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+
+    async function handleCreateStudentForm(
+        e: React.FormEvent<HTMLFormElement>,
+    ) {
+        e.preventDefault()
+        const formData = new FormData(e.currentTarget)
+        await createStudent(formData)
+        closeCreateStudentModal()
+        fetchData()
+    }
+
+    async function handleUpdateStudentForm(
+        e: React.FormEvent<HTMLFormElement>,
+    ) {
+        e.preventDefault()
+        const formData = new FormData(e.currentTarget)
+        await updateStudent(e.currentTarget.id.value, formData)
+        close()
+        fetchData()
+    }
+
+    async function handleDeleteStudent(id: number) {
+        const confirmDelete = confirm(
+            '¿Estás seguro de que deseas eliminar este alumno?',
+        )
+        if (!confirmDelete) return
+
+        try {
+            await deleteStudent(String(id))
+            alert('Alumno eliminado correctamente')
+            fetchData()
+            setStudents((prevStudents: any[]) =>
+                prevStudents.filter(student => student.id !== id),
+            )
+        } catch (error) {
+            console.error('Error al eliminar el alumno:', error)
+            alert('No se pudo eliminar el alumno')
+        }
+    }
+
+    useEffect(() => {
+        fetchData()
+    }, [])
+
+    // Filtrar estudiantes según la búsqueda
+    const filteredStudents = students?.filter(
+        (student: any) =>
+            student.name?.toLowerCase().includes(search.toLowerCase()) ||
+            student.last_name?.toLowerCase().includes(search.toLowerCase()) ||
+            student.email?.toLowerCase().includes(search.toLowerCase()),
+    )
+
+    return (
+        <div className="space-y-6 p-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold">Alumnos</h1>
+                <Button onClick={openCreateStudentModal}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Nuevo Alumno
+                </Button>
+            </div>
+
+            <div className="flex items-center gap-4">
+                <Input
+                    placeholder="Buscar alumno..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="max-w-sm"
+                />
+            </div>
+
+            {/* Tabla de Alumnos */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Lista de Alumnos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>ID</TableHead>
+                                    <TableHead>Nombre</TableHead>
+                                    <TableHead>Apellido</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Teléfono</TableHead>
+                                    <TableHead>DNI</TableHead>
+                                    <TableHead>Dirección</TableHead>
+                                    <TableHead className="text-right">
+                                        Acciones
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredStudents?.map((student: any) => (
+                                    <TableRow key={student.id}>
+                                        <TableCell>{student.id}</TableCell>
+                                        <TableCell>
+                                            <Link
+                                                href={`/admin/students/${student.id}`}
+                                                className="font-medium hover:underline">
+                                                {student.name}
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell>
+                                            {student.last_name}
+                                        </TableCell>
+                                        <TableCell>{student.email}</TableCell>
+                                        <TableCell>{student.phone}</TableCell>
+                                        <TableCell>{student.dni}</TableCell>
+                                        <TableCell>{student.address}</TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        open(student.id)
+                                                    }>
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        handleDeleteStudent(
+                                                            student.id,
+                                                        )
+                                                    }>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Modal para agregar alumno */}
+            <Dialog
+                open={createStudentModalIsOpen}
+                onOpenChange={setCreateStudentModalIsOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Agregar Alumno</DialogTitle>
+                    </DialogHeader>
+                    <form
+                        id="createStudentForm"
+                        onSubmit={handleCreateStudentForm}
+                        className="space-y-4">
+                        <div className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Nombre</Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    placeholder="Nombre"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="last_name">Apellido</Label>
+                                <Input
+                                    id="last_name"
+                                    name="last_name"
+                                    placeholder="Apellido"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder="Email"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">Teléfono</Label>
+                                <Input
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="Teléfono"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="dni">DNI</Label>
+                                <Input id="dni" name="dni" placeholder="DNI" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="address">Dirección</Label>
+                                <Input
+                                    id="address"
+                                    name="address"
+                                    placeholder="Dirección"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={closeCreateStudentModal}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit">Guardar</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal para editar alumno */}
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Editar Alumno</DialogTitle>
+                    </DialogHeader>
+                    <form
+                        id="updateStudentForm"
+                        onSubmit={handleUpdateStudentForm}
+                        className="space-y-4">
+                        <input
+                            type="hidden"
+                            name="id"
+                            value={selectedStudent?.id}
+                        />
+                        <div className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Nombre</Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    placeholder="Nombre"
+                                    defaultValue={selectedStudent?.name}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="last_name">Apellido</Label>
+                                <Input
+                                    id="last_name"
+                                    name="last_name"
+                                    placeholder="Apellido"
+                                    defaultValue={selectedStudent?.last_name}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder="Email"
+                                    defaultValue={selectedStudent?.email}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">Teléfono</Label>
+                                <Input
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="Teléfono"
+                                    defaultValue={selectedStudent?.phone}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="dni">DNI</Label>
+                                <Input
+                                    id="dni"
+                                    name="dni"
+                                    placeholder="DNI"
+                                    defaultValue={selectedStudent?.dni}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="address">Dirección</Label>
+                                <Input
+                                    id="address"
+                                    name="address"
+                                    placeholder="Dirección"
+                                    defaultValue={selectedStudent?.address}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={close}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit">Guardar Cambios</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        </div>
+    )
+}
