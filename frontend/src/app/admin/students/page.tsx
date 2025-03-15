@@ -118,10 +118,6 @@ export default function StudentsPage() {
         <div className="space-y-6 p-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold">Alumnos</h1>
-                <Button onClick={openCreateStudentModal}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nuevo Alumno
-                </Button>
             </div>
 
             <div className="flex items-center gap-4">
@@ -135,8 +131,12 @@ export default function StudentsPage() {
 
             {/* Tabla de Alumnos */}
             <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Lista de Alumnos</CardTitle>
+                    <Button onClick={openCreateStudentModal}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Alumno
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border">
