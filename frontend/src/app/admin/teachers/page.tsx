@@ -542,7 +542,7 @@ export default function TeacherIndex() {
             <Dialog
                 open={createScheduleModalIsOpen}
                 onOpenChange={setCreateScheduleModalIsOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] bg-gray-800 ">
                     <DialogHeader>
                         <DialogTitle>Editar Horario</DialogTitle>
                     </DialogHeader>
