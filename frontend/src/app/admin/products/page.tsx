@@ -53,7 +53,7 @@ export default function ProductsPage() {
 
     // Filtrar productos según la búsqueda
     const filteredProducts = products?.filter(
-        (product: any) =>
+        (product: Product) =>
             product.name?.toLowerCase().includes(search.toLowerCase()) ||
             product.description?.toLowerCase().includes(search.toLowerCase()),
     )
@@ -110,7 +110,7 @@ export default function ProductsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredProducts?.map((product: any) => (
+                                {filteredProducts?.map((product: Product) => (
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             <Link

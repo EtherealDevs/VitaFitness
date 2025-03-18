@@ -85,7 +85,7 @@ export default function Schedules() {
                                 </td>
                                 <td className="px-6 py-4">
                                     <Link
-                                        href={`/admin/schedules/${schedule.id}/edit`}>
+                                        href={`/admin/schedules/edit/${schedule.id}`}>
                                         Edit
                                     </Link>
                                 </td>
