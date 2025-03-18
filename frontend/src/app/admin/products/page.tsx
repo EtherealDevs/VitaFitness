@@ -1,11 +1,25 @@
 'use client'
-import { Product, useProducts } from '@/hooks/products'
+import { type Product, useProducts } from '@/hooks/products'
+import { useState, useEffect } from 'react'
+import { Plus, Edit2, Trash2 } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '../components/ui/table'
+import { Input } from '../components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+
 export default function ProductsPage() {
     const { getProducts, deleteProduct } = useProducts()
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(false)
+    const [search, setSearch] = useState('')
 
     async function fetchProducts() {
         setLoading(true)
@@ -18,11 +32,17 @@ export default function ProductsPage() {
             setLoading(false)
         }
     }
+
     useEffect(() => {
         fetchProducts()
     }, [])
 
     const handleDelete = async (id: string) => {
+        const confirmDelete = confirm(
+            '¿Estás seguro de que deseas eliminar este producto?',
+        )
+        if (!confirmDelete) return
+
         try {
             await deleteProduct(id)
             setProducts(products.filter(product => product.id !== id))
@@ -31,119 +51,106 @@ export default function ProductsPage() {
         }
     }
 
-    return loading ? (
-        <div>loading...</div>
-    ) : (
-        <div className="space-y-4 overflow-x-auto">
-            <div className=" flex justify-between align-bottom">
-                <div className="flex space-x-4">
-                    <h1 className="text-2xl md:text-4xl font-extrabold">
-                        Productos
-                    </h1>
-                    <button className="py-1 px-2 sm:py-2 sm:px-4 bg-blue-600  rounded-xl">
-                        filtros
-                    </button>
-                </div>
-                <Link href="/admin/products/create">
-                    <button className="py-2 px-4 bg-blue-600  rounded-xl">
-                        nuevo producto
-                    </button>
-                </Link>
-            </div>
+    // Filtrar productos según la búsqueda
+    const filteredProducts = products?.filter(
+        (product: any) =>
+            product.name?.toLowerCase().includes(search.toLowerCase()) ||
+            product.description?.toLowerCase().includes(search.toLowerCase()),
+    )
 
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg bg-white p-4 rounded-lg">
-                {/* desktop view */}
-                <div className="hidden md:block w-full">
-                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 rounded-lg ">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                            <tr className="rounded-lg">
-                                <th scope="col" className="px-6 py-3">
-                                    Product name
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Descripcion
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Price
-                                </th>
-                                <th
-                                    scope="col"
-                                    colSpan={2}
-                                    className="px-6 py-3 text-center">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {products.map((product, index) => (
-                                <tr
-                                    key={index}
-                                    className="odd:bg-white  even:bg-gray-100  border-gray-200">
-                                    <th
-                                        scope="row"
-                                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
-                                        {product.name}
-                                    </th>
-                                    <td className="px-6 py-4">
-                                        {product.description}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        ${product.price}
-                                    </td>
-                                    <td className=" p-4">
-                                        <button
-                                            onClick={() =>
-                                                handleDelete(product.id)
-                                            }
-                                            className="py-2 px-4 bg-red-600 rounded-xl">
-                                            Eliminar
-                                        </button>
-                                    </td>
-                                    <td className="p-4">
-                                        <Link
-                                            href={`/admin/products/edit/${product.id}`}
-                                            className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                            Edit
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* mobile view */}
-                <div className="block sm:hidden space-y-4">
-                    {products.map(product => (
-                        <div
-                            key={product.id}
-                            className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                {product.name}
-                            </h2>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {product.description}
-                            </p>
-                            <p className="text-md font-bold text-gray-900 dark:text-gray-200 mt-2">
-                                ${product.price}
-                            </p>
-                            <div className="flex gap-2 mt-4">
-                                <button
-                                    onClick={() => handleDelete(product.id)}
-                                    className="py-2 px-4 bg-red-600 text-white rounded-lg w-full hover:bg-red-700"
-                                    aria-label={`Eliminar ${product.name}`}>
-                                    Eliminar
-                                </button>
-                                <Link
-                                    href={`/admin/products/edit/${product.id}`}
-                                    className="py-2 px-4 bg-blue-600 text-white rounded-lg w-full text-center hover:bg-blue-700">
-                                    Editar
-                                </Link>
-                            </div>
-                        </div>
-                    ))}
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4">Cargando productos...</p>
                 </div>
             </div>
+        )
+    }
+
+    return (
+        <div className="space-y-6 p-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold">Productos</h1>
+            </div>
+
+            <div className="flex items-center gap-4">
+                <Input
+                    placeholder="Buscar producto..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="max-w-sm"
+                />
+            </div>
+
+            {/* Tabla de Productos */}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Lista de Productos</CardTitle>
+                    <Link href="/admin/products/create">
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Nuevo Producto
+                        </Button>
+                    </Link>
+                </CardHeader>
+                <CardContent>
+                    <div className="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nombre</TableHead>
+                                    <TableHead>Descripción</TableHead>
+                                    <TableHead>Precio</TableHead>
+                                    <TableHead>Stock</TableHead>
+                                    <TableHead className="text-right">
+                                        Acciones
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredProducts?.map((product: any) => (
+                                    <TableRow key={product.id}>
+                                        <TableCell>
+                                            <Link
+                                                href={`/admin/products/edit/${product.id}`}
+                                                className="font-medium hover:underline">
+                                                {product.name}
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell>
+                                            {product.description}
+                                        </TableCell>
+                                        <TableCell>${product.price}</TableCell>
+                                        <TableCell>{product.stock}</TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Link
+                                                    href={`/admin/products/edit/${product.id}`}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm">
+                                                        <Edit2 className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        handleDelete(product.id)
+                                                    }>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     )
 }
