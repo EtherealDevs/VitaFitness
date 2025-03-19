@@ -24,9 +24,11 @@ import {
 import { Label } from '../components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import Link from 'next/link'
+import { useBranches } from '@/hooks/branches'
 
 export default function StudentsPage() {
     const [students, setStudents] = useState<any>([])
+    const [branches, setBranches] = useState<any>([])
     const [isOpen, setIsOpen] = useState(false)
     const [createStudentModalIsOpen, setCreateStudentModalIsOpen] =
         useState(false)
@@ -35,6 +37,7 @@ export default function StudentsPage() {
 
     const { getStudents, createStudent, updateStudent, deleteStudent } =
         useStudents()
+    const { getBranches } = useBranches();
 
     function open(id: number) {
         setIsOpen(true)
@@ -57,6 +60,13 @@ export default function StudentsPage() {
         try {
             const response = await getStudents()
             setStudents(response.students)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+        try {
+            const response = await getBranches()
+            setBranches(response.branches)
         } catch (error) {
             console.error(error)
             throw error
@@ -149,7 +159,8 @@ export default function StudentsPage() {
                                     <TableHead>Email</TableHead>
                                     <TableHead>Teléfono</TableHead>
                                     <TableHead>DNI</TableHead>
-                                    <TableHead>Dirección</TableHead>
+                                    <TableHead>Sucursal</TableHead>
+                                    <TableHead>Estado</TableHead>
                                     <TableHead className="text-right">
                                         Acciones
                                     </TableHead>
@@ -172,7 +183,8 @@ export default function StudentsPage() {
                                         <TableCell>{student.email}</TableCell>
                                         <TableCell>{student.phone}</TableCell>
                                         <TableCell>{student.dni}</TableCell>
-                                        <TableCell>{student.address}</TableCell>
+                                        <TableCell>{student.branch.name}</TableCell>
+                                        <TableCell>{student.status}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Button
@@ -254,12 +266,26 @@ export default function StudentsPage() {
                                 <Input id="dni" name="dni" placeholder="DNI" />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="address">Dirección</Label>
-                                <Input
-                                    id="address"
-                                    name="address"
-                                    placeholder="Dirección"
-                                />
+                                <Label htmlFor="branch_id">Sucursal</Label>
+                                <select name="branch_id" id="branch_id">
+                                    <option value="">Seleccionar...</option>
+                                    {branches?.map((branch: any) => (
+                                        <option
+                                            key={branch.id}
+                                            value={branch.id}>
+                                            {branch.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="status">Estado</Label>
+                                <select name="status" id="status">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
+                                    <option value="pendiente">Pendiente</option>
+                                </select>
                             </div>
                         </div>
                         <DialogFooter>
@@ -338,13 +364,26 @@ export default function StudentsPage() {
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="address">Dirección</Label>
-                                <Input
-                                    id="address"
-                                    name="address"
-                                    placeholder="Dirección"
-                                    defaultValue={selectedStudent?.address}
-                                />
+                                <Label htmlFor="branch_id">Sucursal</Label>
+                                <select name="branch_id" id="branch_id" defaultValue={selectedStudent?.branch.id}>
+                                    <option value="">Seleccionar...</option>
+                                    {branches?.map((branch: any) => (
+                                        <option
+                                            key={branch.id}
+                                            value={branch.id}>
+                                            {branch.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="status">Estado</Label>
+                                <select name="status" id="status" defaultValue={selectedStudent?.status}>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
+                                    <option value="pendiente">Pendiente</option>
+                                </select>
                             </div>
                         </div>
                         <DialogFooter>

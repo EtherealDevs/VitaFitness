@@ -89,7 +89,7 @@ export const columns: ColumnDef<Student>[] = [
                         <DropdownMenuItem onClick={() => navigator.clipboard.writeText(student.id)}>Copiar ID</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
-                            <Link href={`/dashboard/alumnos/${student.id}`} className="flex items-center">
+                            <Link href={`/admin/students/${student.id}`} className="flex items-center">
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Editar
                             </Link>

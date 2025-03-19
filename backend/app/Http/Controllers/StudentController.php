@@ -34,10 +34,10 @@ class StudentController extends Controller
         // Return the retrieved student as a JSON response
         try {
             $student = Student::find($id);
-            $student->load('branch');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+        $student->load('branch');
         
         $student = new StudentResource($student);
         $data = [
@@ -58,6 +58,7 @@ class StudentController extends Controller
             'email' => 'email|unique:students,email|nullable',
             'phone' => 'required|string|max:12',
             'dni' => 'required|string|unique:students,dni',
+            'status' => 'required|string|in:activo,inactivo,pendiente',
             'branch_id' => [Rule::in($branches_ids), 'required'],
         ]);
         try {
@@ -68,6 +69,7 @@ class StudentController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'dni' => $request->dni,
+                'status' => $request->status,
                 'branch_id' => $request->branch_id,
             ]);
         } catch (\Exception $e) {
@@ -92,6 +94,7 @@ class StudentController extends Controller
             'email' => 'email|nullable|unique:students,email,' . $id,
             'phone' => 'required|string|max:12',
             'dni' => 'required|string|unique:students,dni,' . $id,
+            'status' => 'required|string|in:activo,inactivo,pendiente',
             'branch_id' => [Rule::in($branches_ids), 'required'],
         ]);
         $student = Student::find($id);
