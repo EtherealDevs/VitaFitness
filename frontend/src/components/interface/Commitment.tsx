@@ -5,8 +5,7 @@ import { Card } from "@/components/ui/card"
 import { GradientTitle } from "@/components/ui/gradient-title"
 import Image from "next/image"
 import { ArrowRight, Star, ChevronLeft, ChevronRight } from "lucide-react"
-import Button from '@/components/ui/Button'
-
+import Button from '@/components/ui/button'
 // Datos para la sección de transformaciones
 const transformations = [
     {

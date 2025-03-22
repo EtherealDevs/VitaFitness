@@ -2,7 +2,7 @@
 
 import { GradientTitle } from '@/components/ui/gradient-title'
 import { Title } from '@/components/ui/title'
-import Button from '@/components/ui/Button'
+import Button from '@/components/ui/button'
 import { Facebook, Instagram, Linkedin, MessageCircle } from 'lucide-react'
 import Link from "next/link"
 
