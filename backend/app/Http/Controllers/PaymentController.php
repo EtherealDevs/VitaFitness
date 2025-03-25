@@ -75,6 +75,21 @@ class PaymentController extends Controller
         return response()->json($data, 200);
     }
 
+    public function student(string $id)
+    {
+        try {
+            $payment = Payment::with(['student', 'plan'])->where('student_id', $id)->get();
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+        $payment = new PaymentResource($payment);
+        $data = [
+            'payment' => $payment,
+            'message' => 'Payment retrieved successfully',
+            'status' => 'success (200)'
+        ];
+        return response()->json($data, 200);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -92,6 +107,31 @@ class PaymentController extends Controller
         ]);
         try {
             $payment = Payment::find($id);
+            $payment->update($request->all());
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+        $payment = new PaymentResource($payment);
+        $data = [
+            'payment' => $payment,
+            'message' => 'Payment updated successfully',
+            'status' => 'success (200)'
+        ];
+        return response()->json($data, 200);
+    }
+    public function updateStudent(Request $request, string $id)
+    {
+        $request->validate([
+            'student_id' => 'integer',
+            'plan_id' => 'integer',
+            'date_start' => 'date',
+            'amount' => 'numeric',
+            'status' => 'string',
+            'payment_date' => 'date',
+            'expiration_date' => 'date',
+        ]);
+        try {
+            $payment = Payment::where('student_id', $id)->first();
             $payment->update($request->all());
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
