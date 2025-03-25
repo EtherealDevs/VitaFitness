@@ -12,6 +12,7 @@ class Student extends Model
         'phone',
         'dni',
         'last_name',
+        'status',
         'branch_id',
         'registration_date',
     ];

@@ -8,7 +8,7 @@ import { ProductModal } from "@/components/ui/product-modal"
 import { CatalogModal } from "@/components/ui/catalog-modal"
 import Image from "next/image"
 import { Clock, Dumbbell, Battery, User, ArrowRight, ShoppingCart, Tag, Star } from "lucide-react"
-import Button from "@/components/ui/Button"
+import Button from "@/components/ui/button"
 
 // Lista ampliada de planes
 const plans = [

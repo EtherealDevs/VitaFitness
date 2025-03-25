@@ -38,6 +38,7 @@ export const useStudents = () => {
 
   const updateStudent = async (id: string, formData: FormData) => {
       await csrf()
+      console.log(formData)
       try {
           const response = await axios.post(`/api/students/${id}?_method=PUT`, formData)
           return response.data
