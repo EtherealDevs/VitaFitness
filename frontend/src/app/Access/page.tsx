@@ -1,14 +1,33 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import { Card } from "@/components/ui/card"
+import Image from 'next/image'
+import { Card } from '@/components/ui/card'
+import { useState } from 'react'
+
+// Definir los estados posibles
+type AccessStatus = 'authorized' | 'unauthorized' | 'pending' | 'loading'
 
 interface AccessCardProps {
     name: string
     paymentDate: string
+    status: AccessStatus
+    documentNumber: string
+    onDocumentChange: (value: string) => void
 }
 
-function AccessCard({ name = "SOFIA ALARCON", paymentDate = "22 DE ABRIL" }: AccessCardProps) {
+function AccessCard({
+    name,
+    paymentDate,
+    status,
+    documentNumber,
+    onDocumentChange,
+}: AccessCardProps) {
+    // Lógica para determinar el estado de autorización
+    const isAuthorized = status === 'authorized'
+    const isUnauthorized = status === 'unauthorized'
+    const isPending = status === 'pending'
+    const isLoading = status === 'loading'
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-black p-4">
             {/* Gradient background effect */}
@@ -16,19 +35,73 @@ function AccessCard({ name = "SOFIA ALARCON", paymentDate = "22 DE ABRIL" }: Acc
 
             {/* Main content */}
             <div className="relative">
-                <h1 className="text-4xl font-bold text-white text-center mb-6">ACCESO PERMITIDO</h1>
+                <h1 className="text-4xl font-bold text-white text-center mb-6">
+                    {isLoading
+                        ? 'Cargando...'
+                        : isAuthorized
+                        ? 'ACCESO PERMITIDO'
+                        : isUnauthorized
+                        ? 'ACCESO DENEGADO'
+                        : 'ESTADO PENDIENTE'}
+                </h1>
 
-                <Card className="w-[400px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6">
+                <Card
+                    className={`w-[400px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6 ${
+                        isAuthorized
+                            ? 'bg-emerald-400'
+                            : isUnauthorized
+                            ? 'bg-red-500'
+                            : isPending
+                            ? 'bg-yellow-500'
+                            : 'bg-gray-300'
+                    }`}>
                     {/* Logo */}
                     <div className="w-32 h-16 relative">
-                        <Image src="/placeholder.svg" alt="VITA fitness" fill className="object-contain" priority />
+                        <Image
+                            src="/placeholder.svg"
+                            alt="VITA fitness"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
+
+                    {/* Input for document number */}
+                    <div className="w-full space-y-4">
+                        <label className="block text-white text-lg">
+                            Número de Documento
+                        </label>
+                        <input
+                            type="text"
+                            value={documentNumber}
+                            onChange={e => onDocumentChange(e.target.value)}
+                            className="w-full p-2 rounded-md text-black"
+                            placeholder="Ingresa tu número de documento"
+                        />
                     </div>
 
                     {/* Access status */}
-                    <p className="text-emerald-400 text-xl font-medium">ACCESO PERMITIDO</p>
+                    <p
+                        className={`text-xl font-medium ${
+                            isAuthorized
+                                ? 'text-white'
+                                : isUnauthorized
+                                ? 'text-white'
+                                : 'text-black'
+                        }`}>
+                        {isLoading
+                            ? 'Verificando...'
+                            : isAuthorized
+                            ? 'ACCESO PERMITIDO'
+                            : isUnauthorized
+                            ? 'ACCESO DENEGADO'
+                            : 'ESTADO PENDIENTE'}
+                    </p>
 
                     {/* Member name */}
-                    <h2 className="text-4xl font-black tracking-wide text-center">{name}</h2>
+                    <h2 className="text-4xl font-black tracking-wide text-center">
+                        {name}
+                    </h2>
 
                     {/* Payment date */}
                     <div className="text-center space-y-1">
@@ -41,7 +114,49 @@ function AccessCard({ name = "SOFIA ALARCON", paymentDate = "22 DE ABRIL" }: Acc
     )
 }
 
+// Componente principal para determinar el estado de la autorización
 export default function AccessPage() {
-    return <AccessCard name="SOFIA ALARCON" paymentDate="22 DE ABRIL" />
-}
+    const [documentNumber, setDocumentNumber] = useState('')
+    const [status, setStatus] = useState<AccessStatus>('loading')
 
+    const today = new Date()
+
+    // Simulamos la lógica de autorización basada en la fecha de pago
+    const lastPaymentDate = new Date('2025-03-20') // Esta debería ser la fecha de pago real
+
+    // Lógica de verificación del documento (solo un ejemplo de validación)
+    const validateDocument = (docNumber: string): boolean => {
+        // Validación simple, por ejemplo, longitud del documento
+        return docNumber.length === 8
+    }
+
+    const handleDocumentChange = (value: string) => {
+        setDocumentNumber(value)
+        // Cambiar estado a "loading" mientras validamos el documento
+        setStatus('loading')
+
+        if (validateDocument(value)) {
+            // Si el documento es válido, calculamos el estado
+            setTimeout(() => {
+                if (lastPaymentDate <= today) {
+                    setStatus('authorized')
+                } else {
+                    setStatus('unauthorized')
+                }
+            }, 1500)
+        } else {
+            // Si el documento no es válido
+            setStatus('unauthorized')
+        }
+    }
+
+    return (
+        <AccessCard
+            name="SOFIA ALARCON"
+            paymentDate="22 DE ABRIL"
+            status={status}
+            documentNumber={documentNumber}
+            onDocumentChange={handleDocumentChange}
+        />
+    )
+}
