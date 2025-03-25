@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '../lib/utils'
 import {
     Home,
+    UserCheck,
     Settings,
     Users,
     FileText,
@@ -21,6 +22,7 @@ import {
 
 const navigation = [
     { name: 'Volver a la Pagina', href: '/', icon: ArrowLeft },
+    { name: 'Registro de Asistencia', href: '/Access', icon: UserCheck },
     { name: 'Inicio', href: '/admin/dashboard', icon: Home },
     { name: 'Alumnos', href: '/admin/students', icon: Users },
     { name: 'Profesores', href: '/admin/teachers', icon: UserRoundPen },
