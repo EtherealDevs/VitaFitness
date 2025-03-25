@@ -1,24 +1,54 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { useState, useEffect } from "react"
-import { useTeachers } from "@/hooks/teachers"
-import { useTeacherSchedules } from "@/hooks/teacherSchedules"
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
-import { Button } from "../../components/ui/button"
-import { Badge } from "../../components/ui/badge"
-import { Calendar } from "../../components/ui/calendar"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
-import { Input } from "../../components/ui/input"
-import { Label } from "../../components/ui/label"
-import { Mail, Phone, Edit2 } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog"
+import { useState, useEffect } from 'react'
+import { useTeachers } from '@/hooks/teachers'
+import { useTeacherSchedules } from '@/hooks/teacherSchedules'
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { Calendar } from '../../components/ui/calendar'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '../../components/ui/table'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
+import { Mail, Phone, Edit2 } from 'lucide-react'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '../../components/ui/dialog'
 
 export default function TeacherProfile({ params }: { params: { id: string } }) {
-    const [teacher, setTeacher] = useState<any>(null)
-    const [teacherSchedules, setTeacherSchedules] = useState<any>([])
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+    interface Teacher {
+        id: number
+        name: string
+        last_name: string
+        email: string
+        phone: string
+    }
+
+    const [teacher, setTeacher] = useState<Teacher | null>(null)
+    const [teacherSchedules, setTeacherSchedules] = useState<
+        { id: number; day: string; start_time: string; end_time: string }[]
+    >([])
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+        new Date(),
+    )
     const [isEditingEmail, setIsEditingEmail] = useState(false)
     const [isEditingPhone, setIsEditingPhone] = useState(false)
     const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
@@ -32,18 +62,19 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                 const response = await getTeacher(params.id)
                 setTeacher(response.teacher)
             } catch (error) {
-                console.error("Error fetching teacher:", error)
+                console.error('Error fetching teacher:', error)
             }
 
             try {
                 const response = await getTeacherSchedules()
                 // Filtrar horarios para este profesor
                 const teacherSchedules = response.teacher_schedules.filter(
-                    (schedule: any) => schedule.teacher.id === Number.parseInt(params.id),
+                    (schedule: { teacher: { id: number } }) =>
+                        schedule.teacher.id === Number.parseInt(params.id),
                 )
                 setTeacherSchedules(teacherSchedules)
             } catch (error) {
-                console.error("Error fetching schedules:", error)
+                console.error('Error fetching schedules:', error)
             }
         }
 
@@ -58,21 +89,25 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
             await updateTeacher(params.id, formData)
             // Actualizar el estado local
             setTeacher({
-                ...teacher,
-                email: formData.get("email") || teacher.email,
-                phone: formData.get("phone") || teacher.phone,
+                ...teacher!,
+                email:
+                    (formData.get('email') as string) || teacher?.email || '',
+                phone:
+                    (formData.get('phone') as string | null) ??
+                    teacher?.phone ??
+                    '',
             })
             setIsEditingEmail(false)
             setIsEditingPhone(false)
         } catch (error) {
-            console.error("Error updating teacher:", error)
+            console.error('Error updating teacher:', error)
         }
     }
 
     const handleAddSchedule = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        formData.append("teacher_id", params.id)
+        formData.append('teacher_id', params.id)
 
         try {
             await createTeacherSchedule(formData)
@@ -80,11 +115,12 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
             // Recargar horarios
             const response = await getTeacherSchedules()
             const teacherSchedules = response.teacher_schedules.filter(
-                (schedule: any) => schedule.teacher.id === Number.parseInt(params.id),
+                (schedule: { teacher: { id: number } }) =>
+                    schedule.teacher.id === Number.parseInt(params.id),
             )
             setTeacherSchedules(teacherSchedules)
         } catch (error) {
-            console.error("Error creating schedule:", error)
+            console.error('Error creating schedule:', error)
         }
     }
 
@@ -93,7 +129,7 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
     }
 
     // Crear un array de fechas con clases para el calendario
-    const scheduleDates = teacherSchedules.map((schedule: any) => {
+    const scheduleDates = teacherSchedules.map((schedule: { day: string }) => {
         // Convertir el día de la semana a un número de fecha para visualización
         // Esto es simplificado, en una app real necesitarías mapear los días correctamente
         const dayMap: { [key: string]: number } = {
@@ -122,7 +158,9 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                 </div>
                 <div className="flex gap-2">
                     <Button>Generar Pago</Button>
-                    <Button variant="outline" onClick={() => setIsScheduleModalOpen(true)}>
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsScheduleModalOpen(true)}>
                         Horarios Nuevos
                     </Button>
                 </div>
@@ -142,16 +180,29 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                                     <Label>Correo elect.</Label>
                                     <div className="flex items-center gap-2">
                                         {isEditingEmail ? (
-                                            <Input name="email" defaultValue={teacher.email} autoFocus />
+                                            <Input
+                                                name="email"
+                                                defaultValue={teacher.email}
+                                                autoFocus
+                                            />
                                         ) : (
-                                            <Input value={teacher.email} readOnly />
+                                            <Input
+                                                value={teacher.email}
+                                                readOnly
+                                            />
                                         )}
                                         {isEditingEmail ? (
                                             <Button type="submit" size="sm">
                                                 Guardar
                                             </Button>
                                         ) : (
-                                            <Button type="button" size="icon" variant="ghost" onClick={() => setIsEditingEmail(true)}>
+                                            <Button
+                                                type="button"
+                                                size="icon"
+                                                variant="ghost"
+                                                onClick={() =>
+                                                    setIsEditingEmail(true)
+                                                }>
                                                 <Edit2 className="h-4 w-4" />
                                             </Button>
                                         )}
@@ -167,16 +218,29 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                                     <Label>Teléfono</Label>
                                     <div className="flex items-center gap-2">
                                         {isEditingPhone ? (
-                                            <Input name="phone" defaultValue={teacher.phone} autoFocus />
+                                            <Input
+                                                name="phone"
+                                                defaultValue={teacher.phone}
+                                                autoFocus
+                                            />
                                         ) : (
-                                            <Input value={teacher.phone} readOnly />
+                                            <Input
+                                                value={teacher.phone}
+                                                readOnly
+                                            />
                                         )}
                                         {isEditingPhone ? (
                                             <Button type="submit" size="sm">
                                                 Guardar
                                             </Button>
                                         ) : (
-                                            <Button type="button" size="icon" variant="ghost" onClick={() => setIsEditingPhone(true)}>
+                                            <Button
+                                                type="button"
+                                                size="icon"
+                                                variant="ghost"
+                                                onClick={() =>
+                                                    setIsEditingPhone(true)
+                                                }>
                                                 <Edit2 className="h-4 w-4" />
                                             </Button>
                                         )}
@@ -198,12 +262,13 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                             onSelect={setSelectedDate}
                             className="rounded-md border"
                             modifiers={{
-                                booked: (date) => scheduleDates.includes(date.getDate()),
+                                booked: date =>
+                                    scheduleDates.includes(date.getDate()),
                             }}
                             modifiersStyles={{
                                 booked: {
-                                    backgroundColor: "hsl(var(--primary))",
-                                    color: "white",
+                                    backgroundColor: 'hsl(var(--primary))',
+                                    color: 'white',
                                 },
                             }}
                         />
@@ -226,16 +291,29 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {teacherSchedules.map((schedule: any) => (
-                                <TableRow key={schedule.id}>
-                                    <TableCell>{schedule.day}</TableCell>
-                                    <TableCell>{schedule.start_time}</TableCell>
-                                    <TableCell>{schedule.end_time}</TableCell>
-                                </TableRow>
-                            ))}
+                            {teacherSchedules.map(
+                                (schedule: {
+                                    id: number
+                                    day: string
+                                    start_time: string
+                                    end_time: string
+                                }) => (
+                                    <TableRow key={schedule.id}>
+                                        <TableCell>{schedule.day}</TableCell>
+                                        <TableCell>
+                                            {schedule.start_time}
+                                        </TableCell>
+                                        <TableCell>
+                                            {schedule.end_time}
+                                        </TableCell>
+                                    </TableRow>
+                                ),
+                            )}
                             {teacherSchedules.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="text-center py-4">
+                                    <TableCell
+                                        colSpan={3}
+                                        className="text-center py-4">
                                         No hay horarios programados
                                     </TableCell>
                                 </TableRow>
@@ -246,7 +324,9 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
             </Card>
 
             {/* Modal para agregar horario */}
-            <Dialog open={isScheduleModalOpen} onOpenChange={setIsScheduleModalOpen}>
+            <Dialog
+                open={isScheduleModalOpen}
+                onOpenChange={setIsScheduleModalOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Agregar Nuevo Horario</DialogTitle>
@@ -259,8 +339,7 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                                     id="day"
                                     name="day"
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    required
-                                >
+                                    required>
                                     <option value="">Seleccione un día</option>
                                     <option value="LUN">Lunes</option>
                                     <option value="MAR">Martes</option>
@@ -272,16 +351,33 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                                 </select>
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="start_time">Horario de Inicio</Label>
-                                <Input id="start_time" name="start_time" type="time" required />
+                                <Label htmlFor="start_time">
+                                    Horario de Inicio
+                                </Label>
+                                <Input
+                                    id="start_time"
+                                    name="start_time"
+                                    type="time"
+                                    required
+                                />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="end_time">Horario de Finalización</Label>
-                                <Input id="end_time" name="end_time" type="time" required />
+                                <Label htmlFor="end_time">
+                                    Horario de Finalización
+                                </Label>
+                                <Input
+                                    id="end_time"
+                                    name="end_time"
+                                    type="time"
+                                    required
+                                />
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsScheduleModalOpen(false)}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsScheduleModalOpen(false)}>
                                 Cancelar
                             </Button>
                             <Button type="submit">Guardar Horario</Button>
@@ -292,4 +388,3 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
         </div>
     )
 }
-

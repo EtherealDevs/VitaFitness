@@ -1,24 +1,24 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import Button from "@/components/ui/Button"
+import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import InputError from "@/components/ui/InputError"
-import Label from "@/components/ui/Label"
-import { useAuth } from "@/hooks/auth"
-import { useEffect, useState, useCallback } from "react"
-import { useSearchParams } from "next/navigation"
-import AuthSessionStatus from "@/app/(auth)/AuthSessionStatus"
+import InputError from '@/components/ui/InputError'
+import Label from '@/components/ui/Label'
+import { useAuth } from '@/hooks/auth'
+import { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
+import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
 
 const PasswordReset = () => {
     const searchParams = useSearchParams()
 
-    const { resetPassword } = useAuth({ middleware: "guest" })
+    const { resetPassword } = useAuth({ middleware: 'guest' })
 
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [passwordConfirmation, setPasswordConfirmation] = useState("")
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [passwordConfirmation, setPasswordConfirmation] = useState('')
     const [errors, setErrors] = useState<{
         email?: string[]
         password?: string[]
@@ -39,7 +39,7 @@ const PasswordReset = () => {
     }
 
     const updateEmailFromSearchParams = useCallback(() => {
-        const emailParam = searchParams.get("email")
+        const emailParam = searchParams.get('email')
         if (emailParam) {
             setEmail(emailParam)
         }
@@ -65,7 +65,7 @@ const PasswordReset = () => {
                         type="email"
                         value={email}
                         className="block mt-1 w-full"
-                        onChange={(event) => setEmail(event.target.value)}
+                        onChange={event => setEmail(event.target.value)}
                         required
                         autoFocus
                     />
@@ -82,7 +82,7 @@ const PasswordReset = () => {
                         type="password"
                         value={password}
                         className="block mt-1 w-full"
-                        onChange={(event) => setPassword(event.target.value)}
+                        onChange={event => setPassword(event.target.value)}
                         required
                     />
 
@@ -91,7 +91,9 @@ const PasswordReset = () => {
 
                 {/* Confirm Password */}
                 <div className="mt-4">
-                    <Label htmlFor="passwordConfirmation">Confirm Password</Label>
+                    <Label htmlFor="passwordConfirmation">
+                        Confirm Password
+                    </Label>
 
                     <Input
                         id="passwordConfirmation"
@@ -99,11 +101,16 @@ const PasswordReset = () => {
                         type="password"
                         value={passwordConfirmation}
                         className="block mt-1 w-full"
-                        onChange={(event) => setPasswordConfirmation(event.target.value)}
+                        onChange={event =>
+                            setPasswordConfirmation(event.target.value)
+                        }
                         required
                     />
 
-                    <InputError messages={errors.password_confirmation} className="mt-2" />
+                    <InputError
+                        messages={errors.password_confirmation}
+                        className="mt-2"
+                    />
                 </div>
 
                 <div className="flex items-center justify-end mt-4">
@@ -115,4 +122,3 @@ const PasswordReset = () => {
 }
 
 export default PasswordReset
-

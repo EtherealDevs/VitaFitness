@@ -1,6 +1,6 @@
 'use client'
 
-import type React from 'react'
+import React from 'react'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -42,7 +42,7 @@ export default function EditProductPage() {
     const [files, setFiles] = useState<File[]>([])
     const [options, setOptions] = useState<ProductOption[]>([])
 
-    const fetchData = async () => {
+    const fetchData = React.useCallback(async () => {
         try {
             const productData = await getProduct(id)
             setProduct(productData.product)
@@ -66,7 +66,7 @@ export default function EditProductPage() {
         } catch (error) {
             console.error(error)
         }
-    }
+    }, [getProduct, id])
     useEffect(() => {
         fetchData()
         setImages(
@@ -77,7 +77,7 @@ export default function EditProductPage() {
                 url: image,
             })) || [],
         )
-    }, [])
+    }, [fetchData, product?.images])
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files || files.length === 0) return

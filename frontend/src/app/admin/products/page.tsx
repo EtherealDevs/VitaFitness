@@ -21,21 +21,21 @@ export default function ProductsPage() {
     const [loading, setLoading] = useState(false)
     const [search, setSearch] = useState('')
 
-    async function fetchProducts() {
-        setLoading(true)
-        try {
-            const response = await getProducts()
-            setProducts(response.products)
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     useEffect(() => {
+        async function fetchProducts() {
+            setLoading(true)
+            try {
+                const response = await getProducts()
+                setProducts(response.products)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
         fetchProducts()
-    }, [])
+    }, [getProducts])
 
     const handleDelete = async (id: string) => {
         const confirmDelete = confirm(

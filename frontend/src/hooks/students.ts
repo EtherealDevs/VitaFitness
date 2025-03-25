@@ -1,20 +1,19 @@
-import useSWR from 'swr'
+// import useSWR from 'swr'
 import axios from '@/lib/axios'
 /* import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation' */
 
-
 export const useStudents = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')
     const getStudents = async () => {
-        await csrf();
+        await csrf()
         try {
-            const response = await axios.get("/api/students");
-            return response.data;
-          } catch (error) {
-            console.error(error);
-            throw error;
-          }
+            const response = await axios.get('/api/students')
+            return response.data
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
     }
     const getStudent = async (id: string) => {
         try {
@@ -26,38 +25,41 @@ export const useStudents = () => {
         }
     }
     const createStudent = async (formData: FormData) => {
-      await csrf()
-      try {
-          const response = await axios.post('/api/students', formData)
-          return response.data
-      } catch (error) {
-          console.error(error)
-          throw error
-      }
-  }
+        await csrf()
+        try {
+            const response = await axios.post('/api/students', formData)
+            return response.data
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
 
-  const updateStudent = async (id: string, formData: FormData) => {
-      await csrf()
-      console.log(formData)
-      try {
-          const response = await axios.post(`/api/students/${id}?_method=PUT`, formData)
-          return response.data
-      } catch (error) {
-          console.error(error)
-          throw error
-      }
-  }
+    const updateStudent = async (id: string, formData: FormData) => {
+        await csrf()
+        console.log(formData)
+        try {
+            const response = await axios.post(
+                `/api/students/${id}?_method=PUT`,
+                formData,
+            )
+            return response.data
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
 
-  const deleteStudent = async (id: string) => {
-      await csrf()
-      try {
-          const response = await axios.delete(`/api/students/${id}`)
-          return response.data
-      } catch (error) {
-          console.error(error)
-          throw error
-      }
-  }
+    const deleteStudent = async (id: string) => {
+        await csrf()
+        try {
+            const response = await axios.delete(`/api/students/${id}`)
+            return response.data
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
     return {
         getStudents,
         getStudent,
@@ -65,7 +67,7 @@ export const useStudents = () => {
         updateStudent,
         deleteStudent,
     }
-    
+
     // const { data } = useSWR('/api/students', () =>
     //     axios
     //         .get('/api/students')
@@ -76,5 +78,4 @@ export const useStudents = () => {
     //             router.push('/verify-email')
     //         }),
     // )
-
 }
