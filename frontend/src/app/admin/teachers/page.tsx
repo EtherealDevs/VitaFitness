@@ -151,7 +151,6 @@ export default function TeacherIndex() {
         }
     }
 
-    //--------- Teacher ----------//
     async function handleCreateTeacherForm(
         e: React.FormEvent<HTMLFormElement>,
     ) {
@@ -190,7 +189,6 @@ export default function TeacherIndex() {
         }
     }
 
-    //--------- Schedule ----------//
     async function handleCreateTeacherSchedulesForm(
         e: React.FormEvent<HTMLFormElement>,
     ) {
