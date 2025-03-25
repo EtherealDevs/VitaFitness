@@ -5,7 +5,12 @@ import { Card } from '@/components/ui/card'
 import { useState } from 'react'
 
 // Definir los estados posibles
-type AccessStatus = 'authorized' | 'unauthorized' | 'pending' | 'loading'
+type AccessStatus =
+    | 'authorized'
+    | 'unauthorized'
+    | 'pending'
+    | 'loading'
+    | 'error'
 
 interface AccessCardProps {
     name: string
@@ -13,6 +18,7 @@ interface AccessCardProps {
     status: AccessStatus
     documentNumber: string
     onDocumentChange: (value: string) => void
+    errorMessage?: string
 }
 
 function AccessCard({
@@ -21,12 +27,14 @@ function AccessCard({
     status,
     documentNumber,
     onDocumentChange,
+    errorMessage,
 }: AccessCardProps) {
     // Lógica para determinar el estado de autorización
     const isAuthorized = status === 'authorized'
     const isUnauthorized = status === 'unauthorized'
     const isPending = status === 'pending'
     const isLoading = status === 'loading'
+    const isError = status === 'error'
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-black p-4">
@@ -42,6 +50,8 @@ function AccessCard({
                         ? 'ACCESO PERMITIDO'
                         : isUnauthorized
                         ? 'ACCESO DENEGADO'
+                        : isError
+                        ? 'ERROR'
                         : 'ESTADO PENDIENTE'}
                 </h1>
 
@@ -53,6 +63,8 @@ function AccessCard({
                             ? 'bg-red-500'
                             : isPending
                             ? 'bg-yellow-500'
+                            : isError
+                            ? 'bg-red-700'
                             : 'bg-gray-300'
                     }`}>
                     {/* Logo */}
@@ -80,6 +92,13 @@ function AccessCard({
                         />
                     </div>
 
+                    {/* Error message */}
+                    {isError && errorMessage && (
+                        <p className="text-red-500 text-sm mt-2">
+                            {errorMessage}
+                        </p>
+                    )}
+
                     {/* Access status */}
                     <p
                         className={`text-xl font-medium ${
@@ -95,6 +114,8 @@ function AccessCard({
                             ? 'ACCESO PERMITIDO'
                             : isUnauthorized
                             ? 'ACCESO DENEGADO'
+                            : isError
+                            ? 'ERROR EN EL DOCUMENTO'
                             : 'ESTADO PENDIENTE'}
                     </p>
 
@@ -118,6 +139,7 @@ function AccessCard({
 export default function AccessPage() {
     const [documentNumber, setDocumentNumber] = useState('')
     const [status, setStatus] = useState<AccessStatus>('loading')
+    const [errorMessage, setErrorMessage] = useState<string>('')
 
     const today = new Date()
 
@@ -134,6 +156,7 @@ export default function AccessPage() {
         setDocumentNumber(value)
         // Cambiar estado a "loading" mientras validamos el documento
         setStatus('loading')
+        setErrorMessage('') // Reseteamos el mensaje de error
 
         if (validateDocument(value)) {
             // Si el documento es válido, calculamos el estado
@@ -146,7 +169,8 @@ export default function AccessPage() {
             }, 1500)
         } else {
             // Si el documento no es válido
-            setStatus('unauthorized')
+            setStatus('error')
+            setErrorMessage('El número de documento no es válido.')
         }
     }
 
@@ -157,6 +181,7 @@ export default function AccessPage() {
             status={status}
             documentNumber={documentNumber}
             onDocumentChange={handleDocumentChange}
+            errorMessage={errorMessage}
         />
     )
 }
