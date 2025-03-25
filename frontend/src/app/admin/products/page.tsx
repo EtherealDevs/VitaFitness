@@ -21,21 +21,21 @@ export default function ProductsPage() {
     const [loading, setLoading] = useState(false)
     const [search, setSearch] = useState('')
 
-    async function fetchProducts() {
-        setLoading(true)
-        try {
-            const response = await getProducts()
-            setProducts(response.products)
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     useEffect(() => {
+        async function fetchProducts() {
+            setLoading(true)
+            try {
+                const response = await getProducts()
+                setProducts(response.products)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
         fetchProducts()
-    }, [])
+    }, [getProducts])
 
     const handleDelete = async (id: string) => {
         const confirmDelete = confirm(
@@ -53,7 +53,7 @@ export default function ProductsPage() {
 
     // Filtrar productos según la búsqueda
     const filteredProducts = products?.filter(
-        (product: any) =>
+        (product: Product) =>
             product.name?.toLowerCase().includes(search.toLowerCase()) ||
             product.description?.toLowerCase().includes(search.toLowerCase()),
     )
@@ -110,7 +110,7 @@ export default function ProductsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredProducts?.map((product: any) => (
+                                {filteredProducts?.map((product: Product) => (
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             <Link

@@ -27,21 +27,42 @@ import Link from 'next/link'
 import { useBranches } from '@/hooks/branches'
 
 export default function StudentsPage() {
-    const [students, setStudents] = useState<any>([])
-    const [branches, setBranches] = useState<any>([])
+    const [students, setStudents] = useState<Student[]>([])
+    const [branches, setBranches] = useState<Branch[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [createStudentModalIsOpen, setCreateStudentModalIsOpen] =
         useState(false)
-    const [selectedStudent, setSelectedStudent] = useState<any>()
+    const [selectedStudent, setSelectedStudent] = useState<
+        Student | undefined
+    >()
     const [search, setSearch] = useState('')
 
     const { getStudents, createStudent, updateStudent, deleteStudent } =
         useStudents()
-    const { getBranches } = useBranches();
+    const { getBranches } = useBranches()
 
     function open(id: number) {
         setIsOpen(true)
         setSelectedStudent(students.find(student => student.id === id))
+    }
+
+    interface Branch {
+        id: number
+        name: string
+    }
+
+    interface Student {
+        id: number
+        name: string
+        last_name: string
+        email: string
+        phone: string
+        dni: string
+        branch: {
+            id: number
+            name: string
+        }
+        status: string
     }
 
     function close() {
@@ -88,7 +109,7 @@ export default function StudentsPage() {
     ) {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        await updateStudent(e.currentTarget.id.value, formData)
+        await updateStudent(formData.get('id') as string, formData)
         close()
         fetchData()
     }
@@ -103,7 +124,7 @@ export default function StudentsPage() {
             await deleteStudent(String(id))
             alert('Alumno eliminado correctamente')
             fetchData()
-            setStudents((prevStudents: any[]) =>
+            setStudents((prevStudents: Student[]) =>
                 prevStudents.filter(student => student.id !== id),
             )
         } catch (error) {
@@ -118,7 +139,7 @@ export default function StudentsPage() {
 
     // Filtrar estudiantes según la búsqueda
     const filteredStudents = students?.filter(
-        (student: any) =>
+        (student: Student) =>
             student.name?.toLowerCase().includes(search.toLowerCase()) ||
             student.last_name?.toLowerCase().includes(search.toLowerCase()) ||
             student.email?.toLowerCase().includes(search.toLowerCase()),
@@ -167,7 +188,7 @@ export default function StudentsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredStudents?.map((student: any) => (
+                                {filteredStudents?.map((student: Student) => (
                                     <TableRow key={student.id}>
                                         <TableCell>{student.id}</TableCell>
                                         <TableCell>
@@ -183,7 +204,9 @@ export default function StudentsPage() {
                                         <TableCell>{student.email}</TableCell>
                                         <TableCell>{student.phone}</TableCell>
                                         <TableCell>{student.dni}</TableCell>
-                                        <TableCell>{student.branch.name}</TableCell>
+                                        <TableCell>
+                                            {student.branch.name}
+                                        </TableCell>
                                         <TableCell>{student.status}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
@@ -269,7 +292,7 @@ export default function StudentsPage() {
                                 <Label htmlFor="branch_id">Sucursal</Label>
                                 <select name="branch_id" id="branch_id">
                                     <option value="">Seleccionar...</option>
-                                    {branches?.map((branch: any) => (
+                                    {branches?.map((branch: Branch) => (
                                         <option
                                             key={branch.id}
                                             value={branch.id}>
@@ -365,9 +388,12 @@ export default function StudentsPage() {
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="branch_id">Sucursal</Label>
-                                <select name="branch_id" id="branch_id" defaultValue={selectedStudent?.branch.id}>
+                                <select
+                                    name="branch_id"
+                                    id="branch_id"
+                                    defaultValue={selectedStudent?.branch.id}>
                                     <option value="">Seleccionar...</option>
-                                    {branches?.map((branch: any) => (
+                                    {branches?.map((branch: Branch) => (
                                         <option
                                             key={branch.id}
                                             value={branch.id}>
@@ -378,7 +404,10 @@ export default function StudentsPage() {
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="status">Estado</Label>
-                                <select name="status" id="status" defaultValue={selectedStudent?.status}>
+                                <select
+                                    name="status"
+                                    id="status"
+                                    defaultValue={selectedStudent?.status}>
                                     <option value="">Seleccionar...</option>
                                     <option value="activo">Activo</option>
                                     <option value="inactivo">Inactivo</option>

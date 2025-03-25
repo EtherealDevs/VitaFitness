@@ -27,11 +27,36 @@ import { Label } from '../components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import Link from 'next/link'
 
+export interface Teacher {
+    id: number
+    name: string
+    last_name: string
+    email: string
+    phone: string
+    dni: string
+    branch?: { id: number; name: string }
+}
+
+interface Branch {
+    id: number
+    name: string
+}
+
+interface TeacherSchedule {
+    id: number
+    start_time: string
+    end_time: string
+    day: string
+    teacher: { id: number; name: string; last_name: string }
+}
+
 export default function TeacherIndex() {
     // Fetch data from Teacher API
-    const [teachers, setTeachers] = useState<any>([])
-    const [teacherSchedules, setTeacherSchedules] = useState<any>([])
-    const [branches, setBranches] = useState<any>([])
+    const [teachers, setTeachers] = useState<Teacher[]>([])
+    const [teacherSchedules, setTeacherSchedules] = useState<TeacherSchedule[]>(
+        [],
+    )
+    const [branches, setBranches] = useState<Branch[]>([])
 
     const [isOpen, setIsOpen] = useState(false)
     const [createTeacherModalIsOpen, setCreateTeacherModalIsOpen] =
@@ -42,8 +67,22 @@ export default function TeacherIndex() {
         useState(false)
 
     const [search, setSearch] = useState('')
-    const [selectedTeacher, setSelectedTeacher] = useState()
-    const [selectedTeacherSchedule, setSelectedTeacherSchedule] = useState()
+    const [selectedTeacher, setSelectedTeacher] = useState<{
+        id: number
+        name: string
+        last_name: string
+        email: string
+        phone: string
+        dni: string
+        branch?: { id: number; name: string }
+    } | null>(null)
+    const [selectedTeacherSchedule, setSelectedTeacherSchedule] = useState<{
+        id: number
+        start_time: string
+        end_time: string
+        day: string
+        teacher: { id: number; name: string; last_name: string }
+    } | null>(null)
     const { getTeachers, createTeacher, updateTeacher, deleteTeacher } =
         useTeachers()
     const {
@@ -56,7 +95,9 @@ export default function TeacherIndex() {
 
     function open(id: number) {
         setIsOpen(true)
-        setSelectedTeacher(teachers.find(teacher => teacher.id === id))
+        setSelectedTeacher(
+            teachers.find((teacher: Teacher) => teacher.id === id) || null,
+        )
     }
     function close() {
         setIsOpen(false)
@@ -71,7 +112,9 @@ export default function TeacherIndex() {
     function openScheduleModal(id: number) {
         setScheduleModalIsOpen(true)
         setSelectedTeacherSchedule(
-            teacherSchedules.find(schedule => schedule.id === id),
+            teacherSchedules.find(
+                (schedule: TeacherSchedule) => schedule.id === id,
+            ) || null,
         )
     }
     function closeScheduleModal() {
@@ -123,7 +166,8 @@ export default function TeacherIndex() {
     ) {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        await updateTeacher(e.currentTarget.id.value, formData)
+        const teacherId = formData.get('id') as string
+        await updateTeacher(teacherId, formData)
         close()
         fetchData()
     }
@@ -137,7 +181,7 @@ export default function TeacherIndex() {
             await deleteTeacher(String(id))
             alert('Profesor eliminado correctamente')
             fetchData()
-            setTeachers((prevTeachers: any[]) =>
+            setTeachers((prevTeachers: Teacher[]) =>
                 prevTeachers.filter(teacher => teacher.id !== id),
             )
         } catch (error) {
@@ -161,7 +205,8 @@ export default function TeacherIndex() {
     ) {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        await updateTeacherSchedule(e.currentTarget.id.value, formData)
+        const scheduleId = formData.get('id') as string
+        await updateTeacherSchedule(scheduleId, formData)
         closeScheduleModal()
         fetchData()
     }
@@ -175,7 +220,7 @@ export default function TeacherIndex() {
             await deleteTeacherSchedule(String(id))
             alert('Horario eliminado correctamente')
             fetchData()
-            setTeacherSchedules((prevTeacherSchedules: any[]) =>
+            setTeacherSchedules((prevTeacherSchedules: TeacherSchedule[]) =>
                 prevTeacherSchedules.filter(
                     teacherSchedule => teacherSchedule.id !== id,
                 ),
@@ -192,7 +237,7 @@ export default function TeacherIndex() {
 
     // Filtrar profesores según la búsqueda
     const filteredTeachers = teachers?.filter(
-        (teacher: any) =>
+        (teacher: Teacher) =>
             teacher.name.toLowerCase().includes(search.toLowerCase()) ||
             teacher.last_name.toLowerCase().includes(search.toLowerCase()) ||
             teacher.email.toLowerCase().includes(search.toLowerCase()),
@@ -240,7 +285,7 @@ export default function TeacherIndex() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredTeachers?.map((teacher: any) => (
+                                {filteredTeachers?.map((teacher: Teacher) => (
                                     <TableRow key={teacher.id}>
                                         <TableCell>{teacher.id}</TableCell>
                                         <TableCell>
@@ -316,46 +361,50 @@ export default function TeacherIndex() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {teacherSchedules?.map((schedule: any) => (
-                                    <TableRow key={schedule.id}>
-                                        <TableCell>{schedule.id}</TableCell>
-                                        <TableCell>
-                                            {schedule.teacher.name}{' '}
-                                            {schedule.teacher.last_name}
-                                        </TableCell>
-                                        <TableCell>{schedule.day}</TableCell>
-                                        <TableCell>
-                                            {schedule.start_time}
-                                        </TableCell>
-                                        <TableCell>
-                                            {schedule.end_time}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        openScheduleModal(
-                                                            schedule.id,
-                                                        )
-                                                    }>
-                                                    <Edit2 className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        handleDeleteTeacherSchedule(
-                                                            schedule.id,
-                                                        )
-                                                    }>
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {teacherSchedules?.map(
+                                    (schedule: TeacherSchedule) => (
+                                        <TableRow key={schedule.id}>
+                                            <TableCell>{schedule.id}</TableCell>
+                                            <TableCell>
+                                                {schedule.teacher.name}{' '}
+                                                {schedule.teacher.last_name}
+                                            </TableCell>
+                                            <TableCell>
+                                                {schedule.day}
+                                            </TableCell>
+                                            <TableCell>
+                                                {schedule.start_time}
+                                            </TableCell>
+                                            <TableCell>
+                                                {schedule.end_time}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            openScheduleModal(
+                                                                schedule.id,
+                                                            )
+                                                        }>
+                                                        <Edit2 className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            handleDeleteTeacherSchedule(
+                                                                schedule.id,
+                                                            )
+                                                        }>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ),
+                                )}
                             </TableBody>
                         </Table>
                     </div>
@@ -421,7 +470,7 @@ export default function TeacherIndex() {
                                     <option value="">
                                         Seleccione una sucursal
                                     </option>
-                                    {branches?.map((branch: any) => (
+                                    {branches?.map((branch: Branch) => (
                                         <option
                                             key={branch.id}
                                             value={branch.id}>
@@ -511,11 +560,13 @@ export default function TeacherIndex() {
                                     id="branch_id"
                                     name="branch_id"
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    defaultValue={selectedTeacher?.branch.id}>
+                                    defaultValue={
+                                        selectedTeacher?.branch?.id || ''
+                                    }>
                                     <option value="">
                                         Seleccione una sucursal
                                     </option>
-                                    {branches?.map((branch: any) => (
+                                    {branches?.map((branch: Branch) => (
                                         <option
                                             key={branch.id}
                                             value={branch.id}>
@@ -596,13 +647,20 @@ export default function TeacherIndex() {
                                     <option value="">
                                         Seleccione un profesor
                                     </option>
-                                    {teachers?.map((teacher: any) => (
-                                        <option
-                                            key={teacher.id}
-                                            value={teacher.id}>
-                                            {teacher.name} {teacher.last_name}
-                                        </option>
-                                    ))}
+                                    {teachers?.map(
+                                        (teacher: {
+                                            id: number
+                                            name: string
+                                            last_name: string
+                                        }) => (
+                                            <option
+                                                key={teacher.id}
+                                                value={teacher.id}>
+                                                {teacher.name}{' '}
+                                                {teacher.last_name}
+                                            </option>
+                                        ),
+                                    )}
                                 </select>
                             </div>
                         </div>
@@ -690,13 +748,20 @@ export default function TeacherIndex() {
                                     <option value="">
                                         Seleccione un profesor
                                     </option>
-                                    {teachers?.map((teacher: any) => (
-                                        <option
-                                            key={teacher.id}
-                                            value={teacher.id}>
-                                            {teacher.name} {teacher.last_name}
-                                        </option>
-                                    ))}
+                                    {teachers?.map(
+                                        (teacher: {
+                                            id: number
+                                            name: string
+                                            last_name: string
+                                        }) => (
+                                            <option
+                                                key={teacher.id}
+                                                value={teacher.id}>
+                                                {teacher.name}{' '}
+                                                {teacher.last_name}
+                                            </option>
+                                        ),
+                                    )}
                                 </select>
                             </div>
                         </div>

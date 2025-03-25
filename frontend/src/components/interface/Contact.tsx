@@ -2,9 +2,9 @@
 
 import { GradientTitle } from '@/components/ui/gradient-title'
 import { Title } from '@/components/ui/title'
-import Button from '@/components/ui/button'
+import Button from '@/components/ui/Button'
 import { Facebook, Instagram, Linkedin, MessageCircle } from 'lucide-react'
-import Link from "next/link"
+import Link from 'next/link'
 
 export default function Contact() {
     return (
@@ -12,22 +12,35 @@ export default function Contact() {
             <div className="container mx-auto px-4 max-w-4xl grid md:grid-cols-2 gap-8">
                 {/* Left Column */}
                 <div className="bg-black p-8 rounded-lg text-white">
-                    <GradientTitle className="mb-4 font-impact">CONTACT</GradientTitle>
+                    <GradientTitle className="mb-4 font-impact">
+                        CONTACT
+                    </GradientTitle>
                     <p className="text-gray-300 text-sm mb-6">
-                        Listo para empezar la transformación. Nuestro equipo encontrará el plan perfecto para ti y responder todas las preguntas que tengas. Contáctanos y te respondemos todas las dudas.
+                        Listo para empezar la transformación. Nuestro equipo
+                        encontrará el plan perfecto para ti y responder todas
+                        las preguntas que tengas. Contáctanos y te respondemos
+                        todas las dudas.
                     </p>
                     <Title className="text-lg mb-4">REDES SOCIALES</Title>
                     <div className="flex gap-4">
-                        <Link href="#" className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:opacity-80 transition-all">
+                        <Link
+                            href="#"
+                            className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:opacity-80 transition-all">
                             <Linkedin className="w-4 h-4 text-black" />
                         </Link>
-                        <Link href="#" className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:opacity-80 transition-all">
+                        <Link
+                            href="#"
+                            className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:opacity-80 transition-all">
                             <Facebook className="w-4 h-4 text-black" />
                         </Link>
-                        <Link href="#" className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:opacity-80 transition-all">
+                        <Link
+                            href="#"
+                            className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:opacity-80 transition-all">
                             <Instagram className="w-4 h-4 text-black" />
                         </Link>
-                        <Link href="#" className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:opacity-80 transition-all">
+                        <Link
+                            href="#"
+                            className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:opacity-80 transition-all">
                             <MessageCircle className="w-4 h-4 text-black" />
                         </Link>
                     </div>
