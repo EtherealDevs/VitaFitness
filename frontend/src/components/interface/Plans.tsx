@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { GradientTitle } from '@/components/ui/gradient-title'
 import { PlanModal } from '@/components/ui/plan-modal'
@@ -18,6 +18,7 @@ import {
     Star,
 } from 'lucide-react'
 import Button from '@/components/ui/button'
+import { Product, useProducts } from '@/hooks/products'
 
 // Lista ampliada de planes
 const plans = [
@@ -286,9 +287,12 @@ const fullCatalog = [
 ]
 
 export default function Services() {
+    const { getProducts } = useProducts()
+    // const [allProducts, setProducts] = useState<Product[]>([])
     const [selectedPlan, setSelectedPlan] = useState<(typeof plans)[0] | null>(
         null,
     )
+    const [allProducts, setProducts] = useState<Product[]>([])
     const [selectedProduct, setSelectedProduct] = useState<
         (typeof allProducts)[0] | null
     >(null)
@@ -297,7 +301,19 @@ export default function Services() {
     const [visibleProducts, setVisibleProducts] = useState<number>(4)
     const plansContainerRef = useRef<HTMLDivElement>(null)
     const productsContainerRef = useRef<HTMLDivElement>(null)
+    const fetchData = async () => {
+        try {
+            const response = await getProducts()
+            setProducts(response.products)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
 
+    useEffect(() => {
+        fetchData()
+    }, [])
     // Función para manejar el scroll dentro del contenedor de planes
     const handlePlansScroll = () => {
         if (!plansContainerRef.current) return
@@ -534,45 +550,21 @@ export default function Services() {
                                             <div className="aspect-square relative overflow-hidden">
                                                 <Image
                                                     src={
-                                                        product.image ||
+                                                        product.images[0] ||
                                                         '/placeholder.svg'
                                                     }
-                                                    alt={product.title}
+                                                    alt={product.name}
                                                     fill
                                                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
 
                                                 {/* Etiquetas y badges */}
-                                                <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-start">
-                                                    {product.discount && (
-                                                        <div className="bg-green-500 px-2 py-1 rounded text-xs font-bold text-white">
-                                                            {product.discount}{' '}
-                                                            OFF
-                                                        </div>
-                                                    )}
-                                                    <div className="flex items-center gap-1 bg-black/50 px-2 py-1 rounded-full">
-                                                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                                                        <span className="text-xs text-white">
-                                                            {product.rating}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Categoría */}
-                                                <div className="absolute bottom-3 left-3">
-                                                    <div className="flex items-center gap-1 bg-black/50 px-2 py-1 rounded-full">
-                                                        <Tag className="w-3 h-3 text-gray-300" />
-                                                        <span className="text-xs text-white">
-                                                            {product.category}
-                                                        </span>
-                                                    </div>
-                                                </div>
                                             </div>
 
                                             <CardContent className="p-4">
                                                 <h3 className="font-bold text-white mb-1 uppercase">
-                                                    {product.title}
+                                                    {product.name}
                                                 </h3>
                                                 <p className="text-gray-400 text-xs line-clamp-2 mb-2">
                                                     {product.description}
