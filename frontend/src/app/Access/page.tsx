@@ -75,7 +75,7 @@ function AccessCard({
                     {status === 'pending' && (
                         <div className="w-full space-y-4">
                             <label className="block text-black text-lg">
-                                Número de Documento
+                                Escriba su Número de Documento Aqui
                             </label>
                             <input
                                 type="text"
