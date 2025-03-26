@@ -48,8 +48,9 @@ function AccessCard({
                         : ''}
                 </h1>
 
+                {/* Modal más grande */}
                 <Card
-                    className={`w-[400px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6 
+                    className={`w-[700px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6
                     ${
                         status === 'authorized'
                             ? 'bg-emerald-400'
