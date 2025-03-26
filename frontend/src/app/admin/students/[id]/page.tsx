@@ -1,9 +1,10 @@
 import { Button } from "../../components/ui/button"
-import { PageProps } from "next"
 
-type Props = PageProps<{
-  id: string
-}>
+type Props = {
+  params: {
+    id: string
+  }
+}
 
 export default function StudentProfile({ params }: Props) {
   const student = {

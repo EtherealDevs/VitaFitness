@@ -32,16 +32,18 @@ import {
     DialogTitle,
     DialogFooter,
 } from '../../components/ui/dialog'
+import { useParams } from 'next/navigation'
 
-export default function TeacherProfile({ params }: { params: { id: string } }) {
+export default function TeacherProfile() {
     interface Teacher {
         id: number
         name: string
         last_name: string
         email: string
         phone: string
+        
     }
-
+    const { id } = useParams() as { id: string }
     const [teacher, setTeacher] = useState<Teacher | null>(null)
     const [teacherSchedules, setTeacherSchedules] = useState<
         { id: number; day: string; start_time: string; end_time: string }[]
@@ -59,7 +61,7 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getTeacher(params.id)
+                const response = await getTeacher(id)
                 setTeacher(response.teacher)
             } catch (error) {
                 console.error('Error fetching teacher:', error)
@@ -70,7 +72,7 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
                 // Filtrar horarios para este profesor
                 const teacherSchedules = response.teacher_schedules.filter(
                     (schedule: { teacher: { id: number } }) =>
-                        schedule.teacher.id === Number.parseInt(params.id),
+                        schedule.teacher.id === Number.parseInt(id),
                 )
                 setTeacherSchedules(teacherSchedules)
             } catch (error) {
@@ -79,14 +81,14 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
         }
 
         fetchData()
-    }, [params.id, getTeacher, getTeacherSchedules])
+    }, [id, getTeacher, getTeacherSchedules])
 
     const handleUpdateTeacher = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
 
         try {
-            await updateTeacher(params.id, formData)
+            await updateTeacher(id, formData)
             // Actualizar el estado local
             setTeacher({
                 ...teacher!,
@@ -107,7 +109,7 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
     const handleAddSchedule = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        formData.append('teacher_id', params.id)
+        formData.append('teacher_id', id)
 
         try {
             await createTeacherSchedule(formData)
@@ -116,7 +118,7 @@ export default function TeacherProfile({ params }: { params: { id: string } }) {
             const response = await getTeacherSchedules()
             const teacherSchedules = response.teacher_schedules.filter(
                 (schedule: { teacher: { id: number } }) =>
-                    schedule.teacher.id === Number.parseInt(params.id),
+                    schedule.teacher.id === Number.parseInt(id),
             )
             setTeacherSchedules(teacherSchedules)
         } catch (error) {

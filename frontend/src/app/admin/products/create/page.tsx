@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Plus, Trash2, Upload, X } from 'lucide-react'
 
-import Button from '@/components/ui/Button'
+import Button from '@/components/ui/button'
 import {
     Card,
     CardContent,
@@ -15,7 +15,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import Input from '@/components/ui/Input'
+import Input from '@/components/ui/input'
 import Label from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/textarea'
 import { useProducts } from '@/hooks/products'
