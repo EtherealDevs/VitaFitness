@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Schedules extends Model
+class Schedule extends Model
 {
     protected $table = 'schedules';
-    protected $fillable = ['day', 'start_time', 'end_time'];
+    protected $casts = [
+        'days' => 'array',
+    ];
+    protected $fillable = ['days'];
     public $timestamps = true;
     protected $hidden = ['created_at', 'updated_at'];
 }
