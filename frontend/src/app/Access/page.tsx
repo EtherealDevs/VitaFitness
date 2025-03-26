@@ -63,7 +63,7 @@ function AccessCard({
                     {/* Logo */}
                     <div className="w-32 h-16 relative">
                         <Image
-                            src="/placeholder.svg"
+                            src="/img/LogoVita.png"
                             alt="VITA fitness"
                             fill
                             className="object-contain"
