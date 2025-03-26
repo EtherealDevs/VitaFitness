@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('students');
-            $table->foreignId('plan_id')->constrained('plans');
-            $table->date('payment_date');
+            $table->foreignId('class_id')->constrained('classes');
+            $table->date('payment_date')->nullable();
             $table->decimal('amount', 8, 2);
-            $table->string('status');
-            $table->date('expiration_date');
+            $table->enum('status', ['pagado', 'pendiente', 'rechazado'])->default('pendiente');
             $table->date('date_start');
+            $table->date('expiration_date');
             $table->timestamps();
         });
     }

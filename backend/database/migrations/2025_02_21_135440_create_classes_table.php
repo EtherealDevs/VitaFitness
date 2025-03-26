@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_availability_id')->constrained('teacher_availabilities')->onDelete('cascade');
-            $table->time('time');
-            $table->date('day');
+            $table->foreignId('branch_id')->constrained();
+            $table->foreignId('plan_id')->constrained();
+            $table->foreignId('schedule_id')->constrained();
+            $table->foreignId('timeslot_id')->constrained();
+            $table->foreignId('student_id')->constrained();
+            $table->foreignId('teacher_id')->constrained();
             $table->integer('max_students');
             $table->timestamps();
         });
