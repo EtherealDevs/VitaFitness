@@ -50,7 +50,7 @@ function AccessCard({
 
                 {/* Modal más grande */}
                 <Card
-                    className={`w-[700px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6
+                    className={`w-[600px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6 
                     ${
                         status === 'authorized'
                             ? 'bg-emerald-400'
@@ -63,7 +63,7 @@ function AccessCard({
                     {/* Logo */}
                     <div className="w-32 h-16 relative">
                         <Image
-                            src="/img/LogoVita.png"
+                            src="/placeholder.svg"
                             alt="VITA fitness"
                             fill
                             className="object-contain"
@@ -75,16 +75,22 @@ function AccessCard({
                     {status === 'pending' && (
                         <div className="w-full space-y-4">
                             <label className="block text-black text-lg">
-                                Escriba su Número de Documento Aqui
+                                Número de Documento
                             </label>
                             <input
                                 type="text"
                                 className="w-full p-2 rounded-md text-black border border-gray-300"
                                 placeholder="Ej: 12345678"
                                 value={documentNumber || ''} // Asegura que siempre tenga un valor
-                                onChange={e =>
-                                    setDocumentNumber(e.target.value)
-                                }
+                                onChange={e => {
+                                    // Solo permitir números
+                                    const value = e.target.value
+                                    if (/^\d*$/.test(value)) {
+                                        setDocumentNumber(value)
+                                    }
+                                }}
+                                inputMode="numeric" // Para dispositivos móviles
+                                maxLength={8} // Limitar a 8 caracteres (ajustar según el formato)
                             />
                         </div>
                     )}
