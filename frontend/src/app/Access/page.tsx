@@ -3,6 +3,9 @@
 import Image from 'next/image'
 import { Card } from '@/components/ui/card'
 import { useState, useEffect } from 'react'
+// import { Payment } from '@/hooks/payments'
+// import { Student } from '../admin/students/columns'
+// import axios from '@/lib/axios'
 
 // Estados posibles
 type AccessStatus = 'authorized' | 'unauthorized' | 'pending' | 'error'
@@ -84,7 +87,7 @@ function AccessCard({
                     {/* Logo */}
                     <div className="w-32 h-16 relative">
                         <Image
-                            src="/img/LogoVita.png"
+                            src="/favicon.ico"
                             alt="VITA fitness"
                             fill
                             className="object-contain"
@@ -159,6 +162,47 @@ export default function AccessPage() {
     const [documentNumber, setDocumentNumber] = useState<string>('')
     const [status, setStatus] = useState<AccessStatus>('pending')
     const [errorMessage, setErrorMessage] = useState<string>('')
+    // const [payment, setPayment] = useState<Payment | null>(null)
+    // const [student, setStudent] = useState<Student>()
+    //funtion search student for dni
+
+    // const fetchStudent = async (dni: string) => {
+    //     try {
+    //         const res = await axios.get('/api/student/search', {
+    //             params: {
+    //                 key: 'dni',
+    //                 value: dni,
+    //             },
+    //         })
+    //         console.log(res)
+    //         setStudent(res.data.student)
+    //     } catch (error) {
+    //         console.error(error)
+    //         throw error
+    //     }
+    // }
+
+    // const fetchPayment = async (id: string) => {
+    //     try {
+    //         const res = await axios.get(`payments/student/${id}`)
+    //         setPayment(res.data.payment)
+    //     } catch (error) {
+    //         console.error(error)
+    //         throw error
+    //     }
+    // }
+
+    // const isValidPayment = (payment: Payment): boolean => {
+    //     const today = new Date()
+    //     const paymentDate = new Date(payment.payment_date)
+    //     const expirationDate = new Date(payment.expiration_date)
+
+    //     return (
+    //         paymentDate > today &&
+    //         payment.status === 'pagado' &&
+    //         expirationDate > today
+    //     )
+    // }
 
     const today = new Date()
     const lastPaymentDate = new Date('2025-03-20') // Ejemplo de fecha de pago
@@ -215,5 +259,13 @@ export default function AccessPage() {
             documentNumber={documentNumber}
             setDocumentNumber={setDocumentNumber}
         />
+        // <AccessCard
+        //     name={`${student.name} ${student.lastname}`}
+        //     paymentDate={payment.payment_date}
+        //     status={status}
+        //     errorMessage={errorMessage}
+        //     documentNumber={documentNumber}
+        //     setDocumentNumber={setDocumentNumber}
+        // />
     )
 }
