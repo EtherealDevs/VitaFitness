@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('timeslot_id')->constrained();
             $table->foreignId('student_id')->constrained();
             $table->foreignId('teacher_id')->constrained();
+            $table->integer('precio');
             $table->integer('max_students');
             $table->timestamps();
         });

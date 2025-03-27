@@ -16,6 +16,10 @@ class Student extends Model
         'branch_id',
         'registration_date',
     ];
+    public function classes()
+    {
+        return $this->hasMany(Classe::class);
+    }
 
     public function branch()
     {

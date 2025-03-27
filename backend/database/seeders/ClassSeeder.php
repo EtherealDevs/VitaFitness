@@ -42,7 +42,8 @@ class ClassSeeder extends Seeder
             'timeslot_id' => $timeslot1->id,
             'student_id' => $student1->id,
             'teacher_id' => $teacher1->id,
-            'max_students' => 3
+            'max_students' => 3,
+            'precio' => 20000
         ]);
         Classe::create([
             'branch_id' => $branch1->id,
@@ -51,7 +52,8 @@ class ClassSeeder extends Seeder
             'timeslot_id' => $timeslot1->id,
             'student_id' => $student2->id,
             'teacher_id' => $teacher1->id,
-            'max_students' => 3
+            'max_students' => 3,
+            'precio' => 20000
         ]);
     }
 }

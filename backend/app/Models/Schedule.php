@@ -13,4 +13,9 @@ class Schedule extends Model
     protected $fillable = ['days'];
     public $timestamps = true;
     protected $hidden = ['created_at', 'updated_at'];
+
+    public function classes()
+    {
+        return $this->hasMany(Classe::class);
+    }
 }
