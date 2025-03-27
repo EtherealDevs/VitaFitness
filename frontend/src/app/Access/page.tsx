@@ -24,8 +24,29 @@ function AccessCard({
     documentNumber,
     setDocumentNumber,
 }: AccessCardProps) {
+    // Función para alternar pantalla completa
+    const toggleFullScreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(
+                    'Error al intentar entrar en pantalla completa: ',
+                    err,
+                )
+            })
+        } else {
+            document.exitFullscreen()
+        }
+    }
+
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4 relative">
+            {/* Botón de maximizar pantalla */}
+            <button
+                onClick={toggleFullScreen}
+                className="fixed top-4 right-4 z-50 bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 cursor-pointer">
+                ⛶
+            </button>
+
             {/* Fondo con gradiente */}
             <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
 

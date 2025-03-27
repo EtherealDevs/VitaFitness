@@ -22,7 +22,12 @@ import {
 
 const navigation = [
     { name: 'Volver a la Pagina', href: '/', icon: ArrowLeft },
-    { name: 'Registro de Asistencia', href: '/Access', icon: UserCheck },
+    {
+        name: 'Registro de Asistencia',
+        href: '/access',
+        icon: UserCheck,
+        target: '_blank',
+    },
     { name: 'Inicio', href: '/admin/dashboard', icon: Home },
     { name: 'Alumnos', href: '/admin/students', icon: Users },
     { name: 'Profesores', href: '/admin/teachers', icon: UserRoundPen },
@@ -41,7 +46,7 @@ export function DashboardNav() {
     const pathname = usePathname()
 
     return (
-        <nav className="space-y-1 p-4 ">
+        <nav className="space-y-1 p-4">
             {navigation.map(item => {
                 const Icon = item.icon
                 const isActive =
@@ -52,6 +57,12 @@ export function DashboardNav() {
                     <Link
                         key={item.href}
                         href={item.href}
+                        target={item.target || '_self'}
+                        rel={
+                            item.target === '_blank'
+                                ? 'noopener noreferrer'
+                                : undefined
+                        }
                         className={cn(
                             'group flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800',
                             isActive
