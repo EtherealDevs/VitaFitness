@@ -14,8 +14,6 @@ import {
     User,
     ArrowRight,
     ShoppingCart,
-    Tag,
-    Star,
 } from 'lucide-react'
 import Button from '@/components/ui/button'
 import { Product, useProducts } from '@/hooks/products'
