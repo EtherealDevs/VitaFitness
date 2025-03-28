@@ -13,7 +13,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import Input from '@/components/ui/input'
+import Input from '@/components/ui/Input'
 import Label from '@/components/ui/Label'
 import {
     Select,
