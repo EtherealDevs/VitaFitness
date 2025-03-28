@@ -3,7 +3,7 @@
 import type React from 'react'
 
 import Button from '@/components/ui/button'
-import Input from '@/components/ui/Input'
+import Input from '@/components/ui/input'
 import InputError from '@/components/ui/InputError'
 import Label from '@/components/ui/Label'
 import { useAuth } from '@/hooks/auth'
