@@ -15,7 +15,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import Input from '@/components/ui/Input'
+import Input from '@/components/ui/input'
 import Label from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/textarea'
 import { useProducts } from '@/hooks/products'
