@@ -1,18 +1,21 @@
 'use client'
 
 import type React from 'react'
-
 import { useAuth } from '@/hooks/auth'
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+
 import Link from 'next/link'
 import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
-
 import { AtSign, Lock, Eye, EyeOff } from 'lucide-react'
 
 const Login = () => {
-    const searchParams = useSearchParams()
-    const resetParam = searchParams.get('reset')
+    const [resetParam, setResetParam] = useState<string | null>(null)
+
+    useEffect(() => {
+        // Obtenemos los parámetros de la URL sin useSearchParams()
+        const params = new URLSearchParams(window.location.search)
+        setResetParam(params.get('reset'))
+    }, [])
 
     const { login } = useAuth({
         middleware: 'guest',
@@ -39,7 +42,6 @@ const Login = () => {
 
     const submitForm = async (event: React.FormEvent) => {
         event.preventDefault()
-
         login({
             email,
             password,
@@ -64,14 +66,13 @@ const Login = () => {
                     <AuthSessionStatus className="mb-4" status={status} />
 
                     <form onSubmit={submitForm} className="space-y-6">
-                        {/* Email Address */}
+                        {/* Email */}
                         <div>
                             <label
                                 htmlFor="email"
                                 className="title-font text-lg text-white block mb-2">
                                 Email
                             </label>
-
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <AtSign className="h-5 w-5 text-gray-400" />
@@ -90,7 +91,6 @@ const Login = () => {
                                     placeholder="tu@email.com"
                                 />
                             </div>
-
                             {errors.email && (
                                 <p className="mt-2 text-sm text-red-500">
                                     {errors.email.join(', ')}
@@ -105,7 +105,6 @@ const Login = () => {
                                 className="title-font text-lg text-white block mb-2">
                                 Contraseña
                             </label>
-
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-gray-400" />
@@ -138,7 +137,6 @@ const Login = () => {
                                     </button>
                                 </div>
                             </div>
-
                             {errors.password && (
                                 <p className="mt-2 text-sm text-red-500">
                                     {errors.password.join(', ')}
@@ -164,7 +162,6 @@ const Login = () => {
                                     Recordarme
                                 </span>
                             </label>
-
                             <Link
                                 href="/forgot-password"
                                 className="text-sm text-teal-400 hover:text-teal-300 transition-colors">

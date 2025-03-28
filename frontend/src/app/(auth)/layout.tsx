@@ -5,7 +5,7 @@ import ApplicationLogo from '@/components/ui/ApplicationLogo' */
 import React from 'react'
 
 export const metadata = {
-    title: 'Laravel',
+    title: 'Vitta',
 }
 
 interface LayoutProps {
@@ -16,7 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <div>
             <div className="text-gray-900 antialiased">
-                <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12"> 
+                <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12">
                     {children}
                 </div>
             </div>

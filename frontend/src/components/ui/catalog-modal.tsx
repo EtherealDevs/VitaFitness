@@ -10,20 +10,9 @@ import {
 } from '@/components/ui/dialog'
 import Button from '@/components/ui/button'
 import Image from 'next/image'
-import { MessageCircle, Tag, Star, Filter, Search } from 'lucide-react'
+import { MessageCircle, Search } from 'lucide-react'
 import { useState } from 'react'
-
-interface Product {
-    title: string
-    description: string
-    price: string
-    image: string
-    sizes?: string[]
-    colors?: string[]
-    rating?: number
-    category?: string
-    discount?: string
-}
+import { Product } from '@/hooks/products'
 
 interface CatalogModalProps {
     isOpen: boolean
@@ -39,28 +28,20 @@ export function CatalogModal({
     onSelectProduct,
 }: CatalogModalProps) {
     const [searchTerm, setSearchTerm] = useState('')
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(
-        null,
-    )
 
-    // Extraer categorías únicas de los productos
-    const categories = Array.from(
-        new Set(products.map(product => product.category).filter(Boolean)),
-    ) as string[]
+    // Extraer categorías únicas de los producto
 
     // Filtrar productos según búsqueda y categoría
     const filteredProducts = products.filter(product => {
         const matchesSearch =
-            product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             product.description.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesCategory =
-            !selectedCategory || product.category === selectedCategory
-        return matchesSearch && matchesCategory
+        return matchesSearch
     })
 
     // Función para generar el mensaje de WhatsApp
     const generateWhatsAppMessage = (product: Product) => {
-        let message = `Hola, estoy interesado en el producto: ${product.title} (${product.price})`
+        let message = `Hola, estoy interesado en el producto: ${product.name} (${product.price})`
         message +=
             '\n¿Podrían brindarme más información sobre disponibilidad y envíos?'
         return encodeURIComponent(message)
@@ -99,33 +80,6 @@ export function CatalogModal({
                                 onChange={e => setSearchTerm(e.target.value)}
                             />
                         </div>
-
-                        <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-                            <Filter className="text-gray-400 h-4 w-4 flex-shrink-0" />
-                            <button
-                                className={`px-3 py-1 rounded-full text-xs whitespace-nowrap ${
-                                    selectedCategory === null
-                                        ? 'bg-gradient-to-r from-green-400 to-purple-500 text-white'
-                                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                                }`}
-                                onClick={() => setSelectedCategory(null)}>
-                                Todos
-                            </button>
-                            {categories.map(category => (
-                                <button
-                                    key={category}
-                                    className={`px-3 py-1 rounded-full text-xs whitespace-nowrap ${
-                                        selectedCategory === category
-                                            ? 'bg-gradient-to-r from-green-400 to-purple-500 text-white'
-                                            : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                                    }`}
-                                    onClick={() =>
-                                        setSelectedCategory(category)
-                                    }>
-                                    {category}
-                                </button>
-                            ))}
-                        </div>
                     </div>
                 </div>
 
@@ -138,7 +92,6 @@ export function CatalogModal({
                             className="text-green-400 hover:underline"
                             onClick={() => {
                                 setSearchTerm('')
-                                setSelectedCategory(null)
                             }}>
                             Limpiar filtros
                         </button>
@@ -154,41 +107,17 @@ export function CatalogModal({
                                     onClick={() => onSelectProduct(product)}>
                                     <Image
                                         src={
-                                            product.image || '/placeholder.svg'
+                                            product.images[0] ||
+                                            '/placeholder.svg'
                                         }
-                                        alt={product.title}
+                                        alt={product.name}
                                         fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
 
-                                    {/* Badges y etiquetas */}
-                                    <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-start">
-                                        {product.discount && (
-                                            <div className="bg-green-500 px-2 py-1 rounded text-xs font-bold text-white">
-                                                {product.discount} OFF
-                                            </div>
-                                        )}
-                                        {product.rating && (
-                                            <div className="flex items-center gap-1 bg-black/50 px-2 py-1 rounded-full">
-                                                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                                                <span className="text-xs text-white">
-                                                    {product.rating}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-
                                     {/* Categoría y precio */}
                                     <div className="absolute bottom-3 left-0 w-full px-3 flex justify-between items-center">
-                                        {product.category && (
-                                            <div className="flex items-center gap-1 bg-black/50 px-2 py-1 rounded-full">
-                                                <Tag className="w-3 h-3 text-gray-300" />
-                                                <span className="text-xs text-white">
-                                                    {product.category}
-                                                </span>
-                                            </div>
-                                        )}
                                         <div className="bg-black/70 px-2 py-1 rounded-full">
                                             <span className="text-white font-bold text-sm">
                                                 {product.price}
@@ -199,7 +128,7 @@ export function CatalogModal({
 
                                 <div className="p-4">
                                     <h3 className="font-bold text-white mb-2 text-lg">
-                                        {product.title}
+                                        {product.name}
                                     </h3>
                                     <p className="text-gray-400 text-sm line-clamp-2 mb-4">
                                         {product.description}

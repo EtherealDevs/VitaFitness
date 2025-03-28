@@ -19,7 +19,7 @@ interface PlanModalProps {
             assistance: string
         }
         image: string
-        price: string
+        price?: string
     }
 }
 

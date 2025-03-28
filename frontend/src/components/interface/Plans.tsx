@@ -130,160 +130,6 @@ const plans = [
     },
 ]
 
-// Lista ampliada de productos
-const allProducts = [
-    {
-        title: 'Conjunto Deportivo',
-        description:
-            'Conjunto deportivo de alta calidad para máximo rendimiento',
-        price: '$59.99',
-        image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000',
-        sizes: ['S', 'M', 'L', 'XL'],
-        colors: ['#000000', '#ffffff', '#ff0000'],
-        rating: 4.8,
-        category: 'Ropa',
-        discount: '20%',
-    },
-    {
-        title: 'Suplementos Premium',
-        description:
-            'Suplementos de alta calidad para optimizar tus resultados',
-        price: '$29.99',
-        image: 'https://images.unsplash.com/photo-1579722821273-0f6c1b5d28b0?q=80&w=1000',
-        rating: 4.5,
-        category: 'Nutrición',
-        discount: '15%',
-    },
-    {
-        title: 'Zapatillas Deportivas',
-        description:
-            'Zapatillas con soporte y amortiguación para entrenamientos intensos',
-        price: '$89.99',
-        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000',
-        sizes: ['39', '40', '41', '42', '43', '44'],
-        colors: ['#000000', '#ffffff', '#ff0000'],
-        rating: 4.9,
-        category: 'Calzado',
-        discount: '10%',
-    },
-    {
-        title: 'Remera Técnica',
-        description:
-            'Remera de secado rápido para máxima comodidad durante el entrenamiento',
-        price: '$34.99',
-        image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=1000',
-        sizes: ['S', 'M', 'L', 'XL'],
-        colors: ['#000000', '#ffffff', '#0000ff'],
-        rating: 4.6,
-        category: 'Ropa',
-    },
-    {
-        title: 'Proteína Whey',
-        description:
-            'Proteína de suero de leche de alta calidad para recuperación muscular',
-        price: '$49.99',
-        image: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?q=80&w=1000',
-        rating: 4.7,
-        category: 'Nutrición',
-        discount: '25%',
-    },
-    {
-        title: 'Botella Deportiva',
-        description:
-            'Botella de 750ml con medidor de consumo y boquilla antigoteo',
-        price: '$19.99',
-        image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?q=80&w=1000',
-        colors: ['#000000', '#ff0000', '#0000ff'],
-        rating: 4.4,
-        category: 'Accesorios',
-    },
-    {
-        title: 'Guantes de Entrenamiento',
-        description: 'Guantes con soporte para muñeca y agarre antideslizante',
-        price: '$24.99',
-        image: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=1000',
-        sizes: ['S', 'M', 'L'],
-        rating: 4.3,
-        category: 'Accesorios',
-    },
-    {
-        title: 'Banda de Resistencia',
-        description:
-            'Set de bandas elásticas con diferentes niveles de resistencia',
-        price: '$19.99',
-        image: 'https://images.unsplash.com/photo-1598289431512-b97b0917affc?q=80&w=1000',
-        rating: 4.5,
-        category: 'Accesorios',
-        discount: '15%',
-    },
-    {
-        title: 'Mancuernas Ajustables',
-        description:
-            'Set de mancuernas con pesos intercambiables para entrenamientos versátiles',
-        price: '$129.99',
-        image: 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?q=80&w=1000',
-        rating: 4.9,
-        category: 'Equipamiento',
-        discount: '5%',
-    },
-    {
-        title: 'Esterilla de Yoga',
-        description:
-            'Esterilla antideslizante de alta densidad para yoga y pilates',
-        price: '$39.99',
-        image: 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?q=80&w=1000',
-        colors: ['#6a0dad', '#008000', '#000000'],
-        rating: 4.7,
-        category: 'Accesorios',
-    },
-    {
-        title: 'Cuerda de Saltar',
-        description:
-            'Cuerda de saltar ajustable con contador digital y empuñaduras ergonómicas',
-        price: '$15.99',
-        image: 'https://images.unsplash.com/photo-1598289431969-9b3a4a8a3908?q=80&w=1000',
-        rating: 4.2,
-        category: 'Accesorios',
-        discount: '30%',
-    },
-    {
-        title: 'Cinturón de Levantamiento',
-        description:
-            'Cinturón de cuero para soporte lumbar durante levantamientos pesados',
-        price: '$45.99',
-        image: 'https://images.unsplash.com/photo-1620188467120-5042ed1eb5da?q=80&w=1000',
-        sizes: ['S', 'M', 'L', 'XL'],
-        rating: 4.8,
-        category: 'Equipamiento',
-    },
-]
-
-// Catálogo completo para el modal
-const fullCatalog = [
-    ...allProducts,
-    {
-        title: 'Bolsa Deportiva',
-        description:
-            'Bolsa espaciosa con compartimentos para equipo y ropa de entrenamiento',
-        price: '$49.99',
-        image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1000',
-        colors: ['#000000', '#0000ff', '#ff0000'],
-        rating: 4.4,
-        category: 'Accesorios',
-    },
-    {
-        title: 'Auriculares Deportivos',
-        description:
-            'Auriculares inalámbricos resistentes al agua y sudor para entrenamientos intensos',
-        price: '$79.99',
-        image: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=1000',
-        colors: ['#000000', '#ffffff'],
-        rating: 4.6,
-        category: 'Tecnología',
-        discount: '10%',
-    },
-]
-
 export default function Services() {
     const { getProducts } = useProducts()
     // const [allProducts, setProducts] = useState<Product[]>([])
@@ -291,6 +137,7 @@ export default function Services() {
         null,
     )
     const [allProducts, setProducts] = useState<Product[]>([])
+    const [fullCatalog, setFullCatalog] = useState<Product[]>([])
     const [selectedProduct, setSelectedProduct] = useState<
         (typeof allProducts)[0] | null
     >(null)
@@ -303,6 +150,7 @@ export default function Services() {
         try {
             const response = await getProducts()
             setProducts(response.products)
+            setFullCatalog(response.products)
         } catch (error) {
             console.error(error)
             throw error
@@ -637,7 +485,7 @@ export default function Services() {
                 isOpen={isCatalogOpen}
                 onClose={() => setIsCatalogOpen(false)}
                 products={fullCatalog}
-                onSelectProduct={setSelectedProduct}
+                onSelectProduct={product => setSelectedProduct(product)}
             />
 
             {/* Estilos para la animación */}

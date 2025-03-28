@@ -7,6 +7,12 @@ import { Check, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Product } from '@/hooks/products'
 
+interface ProductOption {
+    key: string
+    value: string
+    product: Product & { options?: ProductOption[] }
+}
+
 interface ProductModalProps {
     isOpen: boolean
     onClose: () => void
@@ -78,50 +84,55 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
                             {product.description}
                         </p>
 
-                        {product.options?.map(option => (
-                            <div key={option.key} className="mb-6">
-                                <h3 className="text-sm font-medium mb-2">
-                                    {option.key}
-                                </h3>
-                                <div className="flex flex-wrap gap-2">
-                                    <button
-                                        key={option.value}
-                                        className={`px-3 py-1 rounded-full text-sm border ${
-                                            selectedOptions[option.key] ===
-                                            option.value
-                                                ? 'border-green-400 text-green-400'
-                                                : 'border-gray-600 text-gray-300 hover:border-gray-400'
-                                        }`}
-                                        style={
-                                            option.key.toLowerCase() === 'color'
-                                                ? {
-                                                      backgroundColor:
-                                                          option.value,
-                                                      width: '2rem',
-                                                      height: '2rem',
-                                                      display: 'flex',
-                                                      alignItems: 'center',
-                                                      justifyContent: 'center',
-                                                      borderRadius: '50%',
-                                                  }
-                                                : {}
-                                        }
-                                        onClick={() =>
-                                            handleOptionSelect(
-                                                option.key,
-                                                option.value,
-                                            )
-                                        }>
-                                        {option.key.toLowerCase() === 'color'
-                                            ? selectedOptions[option.key] ===
-                                                  option.value && (
-                                                  <Check className="w-4 h-4 text-white" />
-                                              )
-                                            : option.value}
-                                    </button>
+                        {Array.isArray(product.options) &&
+                            (product.options as ProductOption[]).map(option => (
+                                <div key={option.key} className="mb-6">
+                                    <h3 className="text-sm font-medium mb-2">
+                                        {option.key}
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            key={option.value}
+                                            className={`px-3 py-1 rounded-full text-sm border ${
+                                                selectedOptions[option.key] ===
+                                                option.value
+                                                    ? 'border-green-400 text-green-400'
+                                                    : 'border-gray-600 text-gray-300 hover:border-gray-400'
+                                            }`}
+                                            style={
+                                                option.key.toLowerCase() ===
+                                                'color'
+                                                    ? {
+                                                          backgroundColor:
+                                                              option.value,
+                                                          width: '2rem',
+                                                          height: '2rem',
+                                                          display: 'flex',
+                                                          alignItems: 'center',
+                                                          justifyContent:
+                                                              'center',
+                                                          borderRadius: '50%',
+                                                      }
+                                                    : {}
+                                            }
+                                            onClick={() =>
+                                                handleOptionSelect(
+                                                    option.key,
+                                                    option.value,
+                                                )
+                                            }>
+                                            {option.key.toLowerCase() ===
+                                            'color'
+                                                ? selectedOptions[
+                                                      option.key
+                                                  ] === option.value && (
+                                                      <Check className="w-4 h-4 text-white" />
+                                                  )
+                                                : option.value}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
                         {/* Cantidad */}
                         <div className="mb-6">
                             <h3 className="text-sm font-medium mb-2">
