@@ -8,7 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import Button from '@/components/ui/button'
+import Button from '@/components/ui/Button'
 import Image from 'next/image'
 import { MessageCircle, Search } from 'lucide-react'
 import { useState } from 'react'

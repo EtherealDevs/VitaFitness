@@ -5,7 +5,7 @@ import type React from 'react'
 import { useState } from 'react'
 import { Calendar, ChevronRight } from 'lucide-react'
 
-import Button from '@/components/ui/button'
+import Button from '@/components/ui/Button'
 import {
     Card,
     CardContent,

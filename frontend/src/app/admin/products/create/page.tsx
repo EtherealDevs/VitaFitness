@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Plus, Trash2, Upload, X } from 'lucide-react'
 
-import Button from '@/components/ui/button'
+import Button from '@/components/ui/Button'
 import {
     Card,
     CardContent,

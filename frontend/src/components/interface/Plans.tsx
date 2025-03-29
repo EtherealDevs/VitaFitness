@@ -15,7 +15,7 @@ import {
     ArrowRight,
     ShoppingCart,
 } from 'lucide-react'
-import Button from '@/components/ui/button'
+import Button from '@/components/ui/Button'
 import { Product, useProducts } from '@/hooks/products'
 
 // Lista ampliada de planes
