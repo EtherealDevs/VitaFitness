@@ -2,8 +2,7 @@ import axios from '@/lib/axios'
 
 export interface Payment {
     id: string
-    student_id: string
-    plan_id: string
+    class_id: string
     date_start: string
     amount: number
     status: string

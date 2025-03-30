@@ -53,7 +53,6 @@ export default function PlansPage() {
                         <tr className="rounded-lg">
                             <th className="p-2">Nombre</th>
                             <th className="p-2">Descripcion</th>
-                            <th className="p-2">Precio</th>
                             <th className="p-2">Status</th>
                             <th className="p-2" colSpan={2}>
                                 Acciones
@@ -64,7 +63,6 @@ export default function PlansPage() {
                         {plans.map(plan => (
                             <tr key={plan.id} className="hover:bg-gray-100">
                                 <td className="p-2">{plan.name}</td>
-                                <td className="p-2">{plan.price}</td>
                                 <td className="p-2">{plan.description}</td>
                                 <td className="p-2">{plan.status}</td>
                                 <td className="p-2">

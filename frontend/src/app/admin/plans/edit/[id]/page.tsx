@@ -17,7 +17,6 @@ export default function EditPlan() {
         id: '',
         name: '',
         description: '',
-        price: 0,
         status: '',
     })
 
@@ -42,7 +41,6 @@ export default function EditPlan() {
         const fromData = new FormData()
         fromData.append('name', plan.name)
         fromData.append('description', plan.description)
-        fromData.append('price', plan.price.toString())
         fromData.append('status', plan.status)
         try {
             await updatePlan(id as string, fromData)
@@ -98,17 +96,6 @@ export default function EditPlan() {
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-4">
-                            <Label htmlFor="price">Precio del plan</Label>
-                            <Input
-                                id="price"
-                                className="w-full p-2 border rounded-lg dark:bg-transparent"
-                                value={plan.price.toString()}
-                                onChange={handleChange}
-                                type="number"
-                                name="price"
-                            />
-                        </div>
                         <div className="space-y-4">
                             <Label htmlFor="status">Estado del plan</Label>
                             <Select

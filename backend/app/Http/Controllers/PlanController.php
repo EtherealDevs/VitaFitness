@@ -34,7 +34,7 @@ class PlanController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'price' => 'required|numeric',
+            'status' => 'require|string'
         ]);
         try {
             $plan = Plan::create($request->all());
@@ -78,7 +78,6 @@ class PlanController extends Controller
         $request->validate([
             'name' => 'string',
             'description' => 'string',
-            'price' => 'numeric',
             'status' => 'string',
         ]);
         try {

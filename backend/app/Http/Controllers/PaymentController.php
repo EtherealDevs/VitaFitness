@@ -34,8 +34,7 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'student_id' => 'required|integer',
-            'plan_id' => 'required|integer',
+            'class_id' => 'required|exists:classes,id',
             'date_start' => 'required|date',
             'amount' => 'required|numeric',
             'status' => 'required|string',
@@ -97,8 +96,7 @@ class PaymentController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'student_id' => 'integer',
-            'plan_id' => 'integer',
+            'class_id' => 'exists:classes,id',
             'date_start' => 'date',
             'amount' => 'numeric',
             'status' => 'string',

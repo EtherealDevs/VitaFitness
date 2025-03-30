@@ -16,6 +16,11 @@ class Payment extends Model
         'expiration_date',
     ];
 
+    public function class()
+    {
+        return $this->belongsTo(Classe::class);
+    }
+
     public function student()
     {
         return $this->belongsTo(Student::class);

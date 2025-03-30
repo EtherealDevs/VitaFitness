@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ScheduleResource;
 use App\Http\Resources\SchedulesResource;
 use App\Models\Schedule;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ class SchedulesController extends Controller
         ]);
         try {
             $schedule = Schedule::create($request->all());
-            $schedule = new SchedulesResource($schedule);
+            $schedule = new ScheduleResource($schedule);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al crear el horario',
@@ -56,7 +57,7 @@ class SchedulesController extends Controller
     {
         try {
             $schedule = Schedule::find($id);
-            $schedule = new SchedulesResource($schedule);
+            $schedule = new ScheduleResource($schedule);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al obtener el horario',

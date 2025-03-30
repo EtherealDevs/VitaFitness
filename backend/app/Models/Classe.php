@@ -22,6 +22,10 @@ class Classe extends Model
     {
         return $this->belongsToMany(Schedule::class, 'class_schedules', 'class_id', 'schedule_id');
     }
+    public function payment()
+    {
+        return $this->hasMany(Payment::class);
+    }
     // public function timeslot()
     // {
     //     return $this->belongsTo(TimeSlot::class);
