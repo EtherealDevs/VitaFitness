@@ -16,11 +16,14 @@ class ClasseResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'day' => $this->day,
-            'time' => $this->time,
             'max_students' => $this->max_students,
-            'teacher_schedules_id' => $this->teacher_schedules_id,
-            'branch_id' => $this->branch_id,
+            'precio' => $this->precio,
+            'branch' => new BranchResource($this->whenLoaded('branch')),
+            'plan' => new PlanResource($this->whenLoaded('plan')),
+            'schedules' => ScheduleResource::collection($this->whenLoaded('schedules')),
+            // 'timeslot' => new TimeslotResource($this->whenLoaded('timeslot')),
+            // 'teacher' => new TeacherResource($this->whenLoaded('teacher')),
+            // 'student' => new StudentResource($this->whenLoaded('student')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
 

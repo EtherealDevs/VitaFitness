@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SchedulesResource;
-use App\Models\Schedules;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 
 class SchedulesController extends Controller
@@ -13,7 +13,7 @@ class SchedulesController extends Controller
     {
         try {
 
-            $schedules = Schedules::all();
+            $schedules = Schedule::all();
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al obtener los horarios',
@@ -36,7 +36,7 @@ class SchedulesController extends Controller
             'end_time' => 'required|date_format:H:i'
         ]);
         try {
-            $schedule = Schedules::create($request->all());
+            $schedule = Schedule::create($request->all());
             $schedule = new SchedulesResource($schedule);
         } catch (\Exception $e) {
             return response()->json([
@@ -55,7 +55,7 @@ class SchedulesController extends Controller
     public function show(string $id)
     {
         try {
-            $schedule = Schedules::find($id);
+            $schedule = Schedule::find($id);
             $schedule = new SchedulesResource($schedule);
         } catch (\Exception $e) {
             return response()->json([
@@ -79,7 +79,7 @@ class SchedulesController extends Controller
             'end_time' => 'date_format:H:i'
         ]);
         try {
-            $schedule = Schedules::find($id);
+            $schedule = Schedule::find($id);
             $schedule->update($request->all());
         } catch (\Exception $e) {
             return response()->json([
@@ -98,7 +98,7 @@ class SchedulesController extends Controller
     public function destroy(string $id)
     {
         try {
-            $schedule = Schedules::find($id);
+            $schedule = Schedule::find($id);
             $schedule->delete();
         } catch (\Exception $e) {
             return response()->json([

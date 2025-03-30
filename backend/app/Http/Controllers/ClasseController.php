@@ -11,7 +11,7 @@ class ClasseController extends Controller
     public function index()
     {
         try {
-            $classes = Classe::with(['teacherSchedule', 'branches'])->all();
+            $classes = Classe::all();
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

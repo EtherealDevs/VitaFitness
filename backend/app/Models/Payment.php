@@ -8,12 +8,11 @@ class Payment extends Model
 {
 
     protected $fillable = [
-        'student_id',
-        'plan_id',
-        'date_start',
+        'class_id',
+        'payment_date',
         'amount',
         'status',
-        'payment_date',
+        'date_start',
         'expiration_date',
     ];
 

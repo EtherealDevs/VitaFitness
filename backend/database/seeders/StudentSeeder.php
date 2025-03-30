@@ -15,13 +15,28 @@ class StudentSeeder extends Seeder
     public function run(): void
     {
         Student::create([
-            'name' => 'Student Name',
-            'last_name' => 'Student Last Name',
+            'name' => 'First Student Name',
+            'last_name' => 'First Student Last Name',
             'registration_date' => now(),
-            'email' => 'student@example.com',
-            'phone' => '+573123456789',
-            'dni' => 'Student DNI (123456789)',
-            'branch_id' => Branch::all()->random(1)->first()->id,
+            'email' => 'firststudent@example.com',
+            'phone' => 'First Student Phone (+573123456789)',
+            'dni' => 'First Student DNI (123456789)',
+        ]);
+        Student::create([
+            'name' => 'Second Student Name',
+            'last_name' => 'Second Student Last Name',
+            'registration_date' => now(),
+            'email' => 'secondstudent@example.com',
+            'phone' => 'Second Student Phone (+573123456789)',
+            'dni' => 'Second Student DNI (987654321)',
+        ]);
+        Student::create([
+            'name' => 'Third Student Name',
+            'last_name' => 'Third Student Last Name',
+            'registration_date' => now(),
+            'email' => 'thirdstudent@example.com',
+            'phone' => 'Third Student Phone (+573123456789)',
+            'dni' => 'Third Student DNI (123987456)',
         ]);
     }
 }

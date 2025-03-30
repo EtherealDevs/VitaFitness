@@ -8,6 +8,10 @@ class Plan extends Model
 {
     protected $fillable = ['name', 'price', 'description'];
 
+    public function classes()
+    {
+        return $this->hasMany(Classe::class);
+    }
     public function teachers()
     {
         return $this->belongsToMany(Teacher::class);

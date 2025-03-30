@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teacher_schedules', function (Blueprint $table) {
+        Schema::create('classes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->enum('day', ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'])->default('lunes');
+            $table->foreignId('branch_id')->constrained();
+            $table->foreignId('plan_id')->constrained();
+            $table->integer('precio');
+            $table->integer('max_students');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teacher_schedules');
+        Schema::dropIfExists('classes');
     }
 };

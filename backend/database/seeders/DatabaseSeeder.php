@@ -26,7 +26,32 @@ class DatabaseSeeder extends Seeder
             'password' => $hashedPassword,
         ]);
         $this->call(RolePermissionSeeder::class);
+
+        //branch
         $this->call(BranchSeeder::class);
+        //plans
+        $this->call(PlanSeeder::class);
+        //student
         $this->call(StudentSeeder::class);
+        //teacher
+        $this->call(TeacherSeeder::class);
+        //schedule
+        $this->call(ScheduleSeeder::class);
+        //timeslot
+        $this->call(TimeSlotSeeder::class);
+        //class
+        $this->call(ClassSeeder::class);
+        //class_schedules
+        $this->call(ClassScheduleSeeder::class);
+        //schedule_timeslots
+        $this->call(ClassScheduleTimeslotSeeder::class);
+        //class_schedule_timeslot_students
+        $this->call(ClassScheduleTimeslotStudentSeeder::class);
+        //class_schedule_timeslot_teachers
+        $this->call(ClassScheduleTimeslotTeacherSeeder::class);
+        //payment
+        // $this->call(PaymentSeeder::class);
+        // //attendance
+        // $this->call(AttendanceSeeder::class);
     }
 }

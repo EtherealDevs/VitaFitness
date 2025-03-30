@@ -17,5 +17,9 @@ class BranchSeeder extends Seeder
             'name' => 'Branch A',
             'address' => 'Av. Independencia 1234'
         ]);
+        Branch::create([
+            'name' => 'Branch B',
+            'address' => 'Salta 9876'
+        ]);
     }
 }

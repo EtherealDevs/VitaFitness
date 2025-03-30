@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('schedules', function (Blueprint $table) {
+        Schema::create('class_schedule_timeslots', function (Blueprint $table) {
             $table->id();
-            $table->enum('day', ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'])->default('lunes');
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->foreignId('class_schedule_id')->constrained('class_schedules', 'id');
+            $table->foreignId('timeslot_id')->constrained();
+            $table->unique(['class_schedule_id', 'timeslot_id']);
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('schedules');
+        Schema::dropIfExists('class_schedule_timeslots');
     }
 };
