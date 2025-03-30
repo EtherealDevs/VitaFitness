@@ -32,11 +32,12 @@ export default function Class() {
                     <h2>{c.plan.name}</h2>
                     <p>{c.plan.description}</p>
                     <p>{c.plan.status}</p>
+                    <h3>{c.schedules[0]?.days}</h3>
+                    <h4>{c.schedules[0]?.timeslots[0]?.hour}</h4>
                     <hr />
-                    <h3>{c.schedule.days}</h3>
-                    <p>{c.student.name}</p>
+                    {/* <p>{c.student.name}</p>
                     <p>{c.student.last_name}</p>
-                    <p>{c.student.dni}</p>
+                    <p>{c.student.dni}</p> */}
                 </div>
 
             ))}

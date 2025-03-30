@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ScheduleResource extends JsonResource
+class ClassScheduleResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,8 +16,8 @@ class ScheduleResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'days' => $this->days,
-            'timeslots' => TimeslotResource::collection($this->whenLoaded('timeslots')),
+            'class' => new ClasseResource($this->whenLoaded('class')),
+            'schedule' => new ScheduleResource($this->whenLoaded('schedule'))
         ];
     }
 }

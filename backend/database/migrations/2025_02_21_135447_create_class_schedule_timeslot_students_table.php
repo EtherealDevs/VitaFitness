@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('classes', function (Blueprint $table) {
+        Schema::create('class_schedule_timeslot_students', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_id')->constrained();
-            $table->foreignId('plan_id')->constrained();
-            $table->integer('precio');
-            $table->integer('max_students');
+            $table->foreignId('c_sch_ts_id')->constrained('class_schedule_timeslots')->onDelete('cascade');
+            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
+            $table->unique(['c_sch_ts_id', 'student_id']);
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('classes');
+        Schema::dropIfExists('class_schedule_timeslot_students');
     }
 };

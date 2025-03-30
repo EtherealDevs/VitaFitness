@@ -20,10 +20,10 @@ class ClasseResource extends JsonResource
             'precio' => $this->precio,
             'branch' => new BranchResource($this->whenLoaded('branch')),
             'plan' => new PlanResource($this->whenLoaded('plan')),
-            'schedule' => new ScheduleResource($this->whenLoaded('schedule')),
-            'timeslot' => new TimeslotResource($this->whenLoaded('timeslot')),
-            'teacher' => new TeacherResource($this->whenLoaded('teacher')),
-            'student' => new StudentResource($this->whenLoaded('student')),
+            'schedules' => ScheduleResource::collection($this->whenLoaded('schedules')),
+            // 'timeslot' => new TimeslotResource($this->whenLoaded('timeslot')),
+            // 'teacher' => new TeacherResource($this->whenLoaded('teacher')),
+            // 'student' => new StudentResource($this->whenLoaded('student')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
 

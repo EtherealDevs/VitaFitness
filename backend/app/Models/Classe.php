@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Classe extends Model
 {
-    protected $with = ['branch', 'plan', 'schedule', 'timeslot', 'teacher', 'student'];
+    protected $with = ['branch', 'plan', 'schedules'];
 
     protected $fillable = ['precio', 'max_students', 'branch_id', 'plan_id', 'schedule_id', 'teacher_id', 'student_id', 'timeslot_id'];
 
@@ -18,20 +18,20 @@ class Classe extends Model
     {
         return $this->belongsTo(Plan::class);
     }
-    public function schedule()
+    public function schedules()
     {
-        return $this->belongsTo(Schedule::class);
+        return $this->belongsToMany(Schedule::class, 'class_schedules', 'class_id', 'schedule_id');
     }
-    public function timeslot()
-    {
-        return $this->belongsTo(TimeSlot::class);
-    }
-    public function teacher()
-    {
-        return $this->belongsTo(Teacher::class);
-    }
-    public function student()
-    {
-        return $this->belongsTo(Student::class);
-    }
+    // public function timeslot()
+    // {
+    //     return $this->belongsTo(TimeSlot::class);
+    // }
+    // public function teacher()
+    // {
+    //     return $this->belongsTo(Teacher::class);
+    // }
+    // public function student()
+    // {
+    //     return $this->belongsTo(Student::class);
+    // }
 }

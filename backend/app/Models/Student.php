@@ -16,10 +16,35 @@ class Student extends Model
         'branch_id',
         'registration_date',
     ];
+    public function timeslots()
+    {
+        return $this->belongsToMany(ClassScheduleTimeslot::class, 'class_schedule_timeslot_students', 'student_id', 'c_sch_ts_id');
+    }
+
+    public function schedules()
+    {
+        return $this->hasManyThrough(
+            Schedule::class,
+            ClassSchedule::class,
+            'id',
+            'id',
+            'id',
+            'schedule_id'
+        );
+    }
+
     public function classes()
     {
-        return $this->hasMany(Classe::class);
+        return $this->hasManyThrough(
+            Classe::class,
+            ClassSchedule::class,
+            'id',
+            'id',
+            'id',
+            'class_id'
+        );
     }
+
 
     public function branch()
     {
