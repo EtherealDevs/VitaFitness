@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ClasseController;
+use App\Http\Controllers\ClassScheduleTimeslotController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProductController;
@@ -27,7 +28,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('classes', ClasseController::class);
     Route::apiResource('products', ProductController::class)->except(['index', 'show']);
     Route::apiResource('plans', PlanController::class)->except(['index', 'show']);
-    Route::apiResource('schedules', SchedulesController::class)->except(['index', 'show']);
+    Route::apiResource('schedules', ClassScheduleTimeslotController::class)->except(['index', 'show']);
 });
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::apiResource('plans', PlanController::class)->only(['index', 'show']);

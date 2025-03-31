@@ -1,5 +1,7 @@
 /* import useSWR from 'swr' */
 import axios from '@/lib/axios'
+import { Plan } from '@/hooks/plans'
+import { Branch } from '@/hooks/branches'
 /* import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation' */
 
@@ -9,6 +11,8 @@ export interface Class {
     precio: number
     branch_id: string
     plan_id: string
+    plan?: Plan
+    branch?: Branch
 }
 
 export const useClasses = () => {
