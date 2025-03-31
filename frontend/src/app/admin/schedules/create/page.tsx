@@ -150,6 +150,11 @@ export default function CreateSchedulePage() {
     // Get day names for preview
     const getDayNames = () => {
         return selectedDays
+            .sort((a, b) => {
+                const indexA = daysOfWeek.findIndex(d => d.id === a)
+                const indexB = daysOfWeek.findIndex(d => d.id === b)
+                return indexA - indexB
+            })
             .map(day => {
                 const dayObj = daysOfWeek.find(d => d.id === day)
                 return dayObj ? dayObj.label : ''
