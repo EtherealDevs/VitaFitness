@@ -236,7 +236,8 @@ export default function CreateClassPage() {
                         <CardFooter className="flex justify-between border-t pt-6">
                             <Button
                                 className="bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white"
-                                type="button">
+                                type="button"
+                                onClick={() => router.back()}>
                                 Cancelar
                             </Button>
                             <Button
