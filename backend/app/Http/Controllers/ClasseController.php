@@ -28,7 +28,7 @@ class ClasseController extends Controller
     public function show(string $id)
     {
         try {
-            $classe = Classe::with(['teacherSchedule', 'branch'])->find($id);
+            $classe = Classe::with(['plan', 'branch'])->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -45,10 +45,9 @@ class ClasseController extends Controller
     {
         $request->validate([
             'max_students' => 'required|integer',
-            'teacher_schedules_id' => 'required|integer',
-            'branch_id' => 'required|integer',
-            'time' => 'required|string',
-            'day' => 'required|string',
+            'plan_id' => 'required|exists:plans,id',
+            'branch_id' => 'required|exists:branches,id',
+            'precio' => 'required|integer',
         ]);
         try {
             $classe = Classe::create($request->all());
@@ -68,10 +67,9 @@ class ClasseController extends Controller
     {
         $request->validate([
             'max_students' => 'integer',
-            'teacher_schedules_id' => 'exists:teacher_schedules,id',
+            'plan_id' => 'exists:plans,id',
             'branch_id' => 'exists:branches,id',
-            'time' => 'string',
-            'day' => 'string',
+            'price' => 'integer',
         ]);
         try {
             $classe = Classe::find($id);

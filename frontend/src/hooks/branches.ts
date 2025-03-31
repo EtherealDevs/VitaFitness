@@ -2,6 +2,11 @@
 import axios from '@/lib/axios'
 /* import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation' */
+export interface Branch {
+    id: string
+    name: string
+    address: string
+}
 
 export const useBranches = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')

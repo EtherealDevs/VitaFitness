@@ -35,7 +35,7 @@ export default function ProductsPage() {
         }
 
         fetchProducts()
-    }, [getProducts])
+    }, [])
 
     const handleDelete = async (id: string) => {
         const confirmDelete = confirm(
@@ -96,7 +96,7 @@ export default function ProductsPage() {
                     </Link>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border">
+                    <div className="rounded-md border hidden md:block">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -148,6 +148,36 @@ export default function ProductsPage() {
                                 ))}
                             </TableBody>
                         </Table>
+                    </div>
+                    <div className="block sm:hidden space-y-4">
+                        {products.map(product => (
+                            <div
+                                key={product.id}
+                                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    {product.name}
+                                </h2>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    {product.description}
+                                </p>
+                                <p className="text-md font-bold text-gray-900 dark:text-gray-200 mt-2">
+                                    ${product.price}
+                                </p>
+                                <div className="flex gap-2 mt-4">
+                                    <button
+                                        onClick={() => handleDelete(product.id)}
+                                        className="py-2 px-4 bg-red-600 text-white rounded-lg w-full hover:bg-red-700"
+                                        aria-label={`Eliminar ${product.name}`}>
+                                        Eliminar
+                                    </button>
+                                    <Link
+                                        href={`/admin/products/edit/${product.id}`}
+                                        className="py-2 px-4 bg-blue-600 text-white rounded-lg w-full text-center hover:bg-blue-700">
+                                        Editar
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </CardContent>
             </Card>

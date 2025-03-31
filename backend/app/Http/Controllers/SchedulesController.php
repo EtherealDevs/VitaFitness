@@ -6,6 +6,7 @@ use App\Http\Resources\ScheduleResource;
 use App\Http\Resources\SchedulesResource;
 use App\Models\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SchedulesController extends Controller
 {
@@ -32,10 +33,13 @@ class SchedulesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'days' => 'required|in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
+            'days' => 'required|array',
+            'days.*' => 'required|string|in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
         ]);
         try {
-            $schedule = Schedule::create($request->all());
+            $schedule = new Schedule();
+            $schedule->days = $request->days;
+            $schedule->save();
             $schedule = new ScheduleResource($schedule);
         } catch (\Exception $e) {
             return response()->json([
@@ -73,13 +77,12 @@ class SchedulesController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'day' => 'in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
-            'start_time' => 'date_format:H:i',
-            'end_time' => 'date_format:H:i'
+            'days' => 'array',
+            'days.*' => 'required|string|in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
         ]);
         try {
             $schedule = Schedule::find($id);
-            $schedule->update($request->all());
+            $schedule->days = $request->days;
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al actualizar el horario',

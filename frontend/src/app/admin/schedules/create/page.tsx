@@ -15,18 +15,12 @@ import {
 } from '@/components/ui/card'
 import Input from '@/components/ui/Input'
 import Label from '@/components/ui/Label'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+
 import { useSchedules } from '@/hooks/schedules'
 import { useRouter } from 'next/navigation'
 
 export default function CreateSchedulePage() {
-    const [day, setDay] = useState<string>('')
+    const [days, setDays] = useState<string[]>([])
     const [startTime, setStartTime] = useState<string>('')
     const [endTime, setEndTime] = useState<string>('')
     const { createSchedule } = useSchedules()
@@ -36,7 +30,9 @@ export default function CreateSchedulePage() {
         e.preventDefault()
         // Handle form submission
         const formData = new FormData()
-        formData.append('day', day)
+        days.forEach((day, index) => {
+            formData.append(`days[${index}]`, day)
+        })
         formData.append('start_time', startTime)
         formData.append('end_time', endTime)
         try {
@@ -46,6 +42,14 @@ export default function CreateSchedulePage() {
             console.error(error)
             throw error
         }
+    }
+
+    const toggleDay = (day: string) => {
+        setDays(prevDays =>
+            prevDays.includes(day)
+                ? prevDays.filter(d => d !== day)
+                : [...prevDays, day],
+        )
     }
 
     return (
@@ -64,43 +68,37 @@ export default function CreateSchedulePage() {
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {/* Day Selection */}
+                                {/* Days Selection */}
                                 <div className="space-y-2">
                                     <Label
-                                        htmlFor="day"
+                                        htmlFor="days"
                                         className="font-medium">
-                                        Día de la semana
+                                        Días de la semana
                                     </Label>
-                                    <Select value={day} onValueChange={setDay}>
-                                        <SelectTrigger
-                                            id="day"
-                                            className="w-full">
-                                            <SelectValue placeholder="Seleccionar día" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="lunes">
-                                                Lunes
-                                            </SelectItem>
-                                            <SelectItem value="martes">
-                                                Martes
-                                            </SelectItem>
-                                            <SelectItem value="miercoles">
-                                                Miércoles
-                                            </SelectItem>
-                                            <SelectItem value="jueves">
-                                                Jueves
-                                            </SelectItem>
-                                            <SelectItem value="viernes">
-                                                Viernes
-                                            </SelectItem>
-                                            <SelectItem value="sabado">
-                                                Sábado
-                                            </SelectItem>
-                                            <SelectItem value="domingo">
-                                                Domingo
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                        {[
+                                            'lunes',
+                                            'martes',
+                                            'miercoles',
+                                            'jueves',
+                                            'viernes',
+                                            'sabado',
+                                            'domingo',
+                                        ].map(day => (
+                                            <Button
+                                                key={day}
+                                                type="button"
+                                                onClick={() => toggleDay(day)}
+                                                className={
+                                                    days.includes(day)
+                                                        ? 'bg-primary text-white'
+                                                        : 'bg-gray-200 text-black'
+                                                }>
+                                                {day.charAt(0).toUpperCase() +
+                                                    day.slice(1)}
+                                            </Button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Start Time */}
@@ -154,10 +152,10 @@ export default function CreateSchedulePage() {
                                     Vista previa
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
-                                    {day ? (
+                                    {days.length > 0 ? (
                                         <>
                                             <span className="font-medium capitalize">
-                                                {day}
+                                                {days.join(', ')}
                                             </span>
                                             {startTime && endTime ? (
                                                 <>
@@ -169,7 +167,7 @@ export default function CreateSchedulePage() {
                                             )}
                                         </>
                                     ) : (
-                                        'Selecciona un día y horario para ver la vista previa'
+                                        'Selecciona al menos un día y un horario para ver la vista previa'
                                     )}
                                 </p>
                             </div>

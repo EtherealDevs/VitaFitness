@@ -1,3 +1,4 @@
+'use client'
 import type React from 'react'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from './providers/theme-provider'
@@ -5,6 +6,9 @@ import './styles/admin.css'
 import { DashboardHeader } from './components/dashboard-header'
 import { DashboardNav } from './components/dashboard-nav'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import axios from '@/lib/axios'
+import { useRouter } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,6 +17,34 @@ export default function AdminLayout({
 }: {
     children: React.ReactNode
 }) {
+    const router = useRouter()
+    const [loading, setLoading] = useState(true)
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                // Asegurar que Sanctum reconozca la sesión
+                await axios.get('/sanctum/csrf-cookie')
+
+                // Obtener el usuario autenticado
+                const res = await axios.get('/api/user')
+
+                const user: { roles: { name: string }[] } = res.data
+
+                // Verificar si es admin
+                if (!user.roles.some(role => role.name === 'admin')) {
+                    router.push('/')
+                } else {
+                    setLoading(false)
+                }
+            } catch (error) {
+                console.error('Acceso denegado:', error)
+                router.push('/login')
+            }
+        }
+
+        checkAuth()
+    }, [router])
+    if (loading) return <div>Loading...</div>
     return (
         <div
             className={`admin ${inter.className} min-h-screen bg-[#f8f9fa] text-black dark:text-white`}>

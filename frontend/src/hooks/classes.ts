@@ -3,6 +3,14 @@ import axios from '@/lib/axios'
 /* import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation' */
 
+export interface Class {
+    id: string
+    max_students: number
+    precio: number
+    branch_id: string
+    plan_id: string
+}
+
 export const useClasses = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')
     const getClasses = async () => {
