@@ -36,5 +36,9 @@ class ClassScheduleTimeslot extends Model
     {
         return $this->belongsToMany(Teacher::class, 'class_schedule_timeslot_teachers', 'c_sch_ts_id', 'teacher_id');
     }
+    public function attendances()
+    {
+        return $this->hasManyThrough(Attendance::class, ClassScheduleTimeslotStudent::class, 'c_sch_ts_id', 'c_sch_ts_student_id', 'id', 'student_id');
+    }
 
 }

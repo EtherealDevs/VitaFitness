@@ -60,6 +60,6 @@ class Student extends Model
     }
     public function attendances()
     {
-        return $this->hasMany(Attendance::class);
+        return $this->hasManyThrough(Attendance::class, ClassScheduleTimeslotStudent::class, 'c_sch_ts_id', 'c_sch_ts_student_id', 'id', 'student_id');
     }
 }
