@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Attendance;
 use App\Models\Classe;
+use App\Models\ClassScheduleTimeslot;
+use App\Models\ClassScheduleTimeslotStudent;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,12 +16,30 @@ class AttendanceSeeder extends Seeder
      */
     public function run(): void
     {
-        $class1 = Classe::all()[0];
-        $class2 = Classe::all()[1];
-        Attendance::create([
-            'class_id' => $class1->id,
-            'date' => now(),
-            'status' => 'presente',
-        ]);
+        $classScheduleTimeslots = ClassScheduleTimeslot::all();
+        $timeslot1 = $classScheduleTimeslots[0];
+        foreach ($timeslot1->students as $student) {
+            $timeslotStudent = ClassScheduleTimeslotStudent::where('c_sch_ts_id', $timeslot1->id)
+            ->where('student_id', $student->id)
+            ->first();
+            $timeslotStudent->attendances()->create([
+                'date' => now(),
+                'status' => 'presente',
+            ]);
+        }
+        // $timeslot1->attendances()->create([
+        //     'date' => now(),
+        //     'status' => 'presente',
+        // ]);
+        // $timeslot2 = $classScheduleTimeslots[1];
+        // $timeslot2->attendances()->create([
+        //     'date' => now(),
+        //     'status' => 'presente',
+        // ]);
+        // $timeslot3 = $classScheduleTimeslots[2];
+        // $timeslot3->attendances()->create([
+        //     'date' => now(),
+        //     'status' => 'presente',
+        // ]);
     }
 }

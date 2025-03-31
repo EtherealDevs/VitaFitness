@@ -32,9 +32,7 @@ class SchedulesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'day' => 'required|in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i'
+            'days' => 'required|in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
         ]);
         try {
             $schedule = Schedule::create($request->all());
