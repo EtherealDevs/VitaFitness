@@ -40,6 +40,7 @@ export default function StudentsPage() {
     const { getStudents, createStudent, updateStudent, deleteStudent } =
         useStudents()
     const { getBranches } = useBranches()
+    const [showDetails, setShowDetails] = useState(false)
 
     function open(id: number) {
         setIsOpen(true)
@@ -146,9 +147,9 @@ export default function StudentsPage() {
     )
 
     return (
-        <div className="space-y-6 p-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Alumnos</h1>
+        <div className="space-y-6 p-6 max-w-full">
+            <div className="flex flex-wrap items-center justify-between">
+                <h1 className="text-2xl md:text-3xl font-bold">Alumnos</h1>
             </div>
 
             <div className="flex items-center gap-4">
@@ -156,13 +157,13 @@ export default function StudentsPage() {
                     placeholder="Buscar alumno..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    className="max-w-sm"
+                    className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg"
                 />
             </div>
 
             {/* Tabla de Alumnos */}
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-wrap items-center justify-between gap-2">
                     <CardTitle>Lista de Alumnos</CardTitle>
                     <Button onClick={openCreateStudentModal}>
                         <Plus className="mr-2 h-4 w-4" />
@@ -170,17 +171,40 @@ export default function StudentsPage() {
                     </Button>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border">
-                        <Table>
+                    <div className="rounded-md border overflow-x-auto max-w-full">
+                        <Table className="min-w-full">
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>ID</TableHead>
+                                    <TableHead className="hidden sm:table-cell">
+                                        ID
+                                    </TableHead>
+                                    <TableHead>DNI</TableHead>
                                     <TableHead>Nombre</TableHead>
                                     <TableHead>Apellido</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Teléfono</TableHead>
-                                    <TableHead>DNI</TableHead>
-                                    <TableHead>Sucursal</TableHead>
+                                    <TableHead
+                                        className={
+                                            showDetails
+                                                ? ''
+                                                : 'hidden sm:table-cell'
+                                        }>
+                                        Email
+                                    </TableHead>
+                                    <TableHead
+                                        className={
+                                            showDetails
+                                                ? ''
+                                                : 'hidden sm:table-cell'
+                                        }>
+                                        Teléfono
+                                    </TableHead>
+                                    <TableHead
+                                        className={
+                                            showDetails
+                                                ? ''
+                                                : 'hidden sm:table-cell'
+                                        }>
+                                        Sucursal
+                                    </TableHead>
                                     <TableHead>Estado</TableHead>
                                     <TableHead className="text-right">
                                         Acciones
@@ -188,23 +212,44 @@ export default function StudentsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredStudents?.map((student: Student) => (
+                                {filteredStudents?.map(student => (
                                     <TableRow key={student.id}>
-                                        <TableCell>{student.id}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">
+                                            {student.id}
+                                        </TableCell>
                                         <TableCell>
                                             <Link
                                                 href={`/admin/students/${student.id}`}
                                                 className="font-medium hover:underline">
-                                                {student.name}
+                                                {student.dni}
                                             </Link>
                                         </TableCell>
+                                        <TableCell>{student.name}</TableCell>
                                         <TableCell>
                                             {student.last_name}
                                         </TableCell>
-                                        <TableCell>{student.email}</TableCell>
-                                        <TableCell>{student.phone}</TableCell>
-                                        <TableCell>{student.dni}</TableCell>
-                                        <TableCell>
+                                        <TableCell
+                                            className={
+                                                showDetails
+                                                    ? ''
+                                                    : 'hidden sm:table-cell'
+                                            }>
+                                            {student.email}
+                                        </TableCell>
+                                        <TableCell
+                                            className={
+                                                showDetails
+                                                    ? ''
+                                                    : 'hidden sm:table-cell'
+                                            }>
+                                            {student.phone}
+                                        </TableCell>
+                                        <TableCell
+                                            className={
+                                                showDetails
+                                                    ? ''
+                                                    : 'hidden sm:table-cell'
+                                            }>
                                             {student.branch.name}
                                         </TableCell>
                                         <TableCell>{student.status}</TableCell>
@@ -235,6 +280,13 @@ export default function StudentsPage() {
                             </TableBody>
                         </Table>
                     </div>
+                    <div className="mt-4 text-center">
+                        <Button onClick={() => setShowDetails(!showDetails)}>
+                            {showDetails
+                                ? 'Ocultar detalles'
+                                : 'Mostrar más detalles'}
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -242,7 +294,7 @@ export default function StudentsPage() {
             <Dialog
                 open={createStudentModalIsOpen}
                 onOpenChange={setCreateStudentModalIsOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="w-full max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Agregar Alumno</DialogTitle>
                     </DialogHeader>
@@ -250,7 +302,7 @@ export default function StudentsPage() {
                         id="createStudentForm"
                         onSubmit={handleCreateStudentForm}
                         className="space-y-4">
-                        <div className="grid gap-4">
+                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Nombre</Label>
                                 <Input
@@ -326,7 +378,7 @@ export default function StudentsPage() {
 
             {/* Modal para editar alumno */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="w-full sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Editar Alumno</DialogTitle>
                     </DialogHeader>
