@@ -23,7 +23,7 @@ import {
 } from '../components/ui/dialog'
 import { Label } from '../components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import Link from 'next/link'
+
 import { useBranches } from '@/hooks/branches'
 
 export default function StudentsPage() {
@@ -45,6 +45,9 @@ export default function StudentsPage() {
     function open(id: number) {
         setIsOpen(true)
         setSelectedStudent(students.find(student => student.id === id))
+    }
+    const toggleDetails = () => {
+        setShowDetails(!showDetails)
     }
 
     interface Branch {
@@ -150,20 +153,35 @@ export default function StudentsPage() {
         <div className="space-y-6 p-6 max-w-full">
             <div className="flex flex-wrap items-center justify-between">
                 <h1 className="text-2xl md:text-3xl font-bold">Alumnos</h1>
+                <div className="flex sm:hidden justify-center mt-2">
+                    <Button
+                        onClick={toggleDetails}
+                        variant="outline"
+                        className="w-full sm:w-auto">
+                        Mostrar más detalles
+                    </Button>
+                </div>
+                <div className="hidden sm:flex justify-end gap-2">
+                    <Button onClick={openCreateStudentModal}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Alumno
+                    </Button>
+                </div>
             </div>
 
-            <div className="flex items-center gap-4">
-                <Input
+            {/* Barra de Busqueda */}
+            <div className="flex  sm:justify-start w-full">
+                <input
+                    type="text"
                     placeholder="Buscar alumno..."
-                    value={search}
+                    className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl px-4 py-2 border rounded-md text-sm md:text-base"
                     onChange={e => setSearch(e.target.value)}
-                    className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg"
                 />
             </div>
 
             {/* Tabla de Alumnos */}
-            <Card>
-                <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+            <Card className="w-full">
+                <CardHeader className="flex flex-wrap flex-row items-center justify-between gap-2">
                     <CardTitle>Lista de Alumnos</CardTitle>
                     <Button onClick={openCreateStudentModal}>
                         <Plus className="mr-2 h-4 w-4" />
@@ -171,38 +189,43 @@ export default function StudentsPage() {
                     </Button>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border overflow-x-auto max-w-full">
-                        <Table className="min-w-full">
+                    <div className="rounded-md border overflow-scroll max-w-full">
+                        <Table className="min-w-full overflow-scroll">
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="hidden sm:table-cell">
+                                    <TableHead
+                                        className={`sm:table-cell ${
+                                            showDetails
+                                                ? 'table-cell'
+                                                : 'hidden'
+                                        }`}>
                                         ID
                                     </TableHead>
                                     <TableHead>DNI</TableHead>
                                     <TableHead>Nombre</TableHead>
                                     <TableHead>Apellido</TableHead>
                                     <TableHead
-                                        className={
+                                        className={`sm:table-cell ${
                                             showDetails
-                                                ? ''
-                                                : 'hidden sm:table-cell'
-                                        }>
-                                        Email
-                                    </TableHead>
-                                    <TableHead
-                                        className={
-                                            showDetails
-                                                ? ''
-                                                : 'hidden sm:table-cell'
-                                        }>
+                                                ? 'table-cell'
+                                                : 'hidden'
+                                        }`}>
                                         Teléfono
                                     </TableHead>
                                     <TableHead
-                                        className={
+                                        className={`sm:table-cell ${
                                             showDetails
-                                                ? ''
-                                                : 'hidden sm:table-cell'
-                                        }>
+                                                ? 'table-cell'
+                                                : 'hidden'
+                                        }`}>
+                                        Email
+                                    </TableHead>
+                                    <TableHead
+                                        className={`sm:table-cell ${
+                                            showDetails
+                                                ? 'table-cell'
+                                                : 'hidden'
+                                        }`}>
                                         Sucursal
                                     </TableHead>
                                     <TableHead>Estado</TableHead>
@@ -212,47 +235,34 @@ export default function StudentsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredStudents?.map(student => (
+                                {filteredStudents?.map((student: Student) => (
                                     <TableRow key={student.id}>
+                                        <TableCell>{student.id}</TableCell>
                                         <TableCell className="hidden sm:table-cell">
-                                            {student.id}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Link
-                                                href={`/admin/students/${student.id}`}
-                                                className="font-medium hover:underline">
-                                                {student.dni}
-                                            </Link>
+                                            {student.dni}
                                         </TableCell>
                                         <TableCell>{student.name}</TableCell>
                                         <TableCell>
                                             {student.last_name}
                                         </TableCell>
+                                        <TableCell>{student.email}</TableCell>
+                                        <TableCell>{student.phone}</TableCell>
                                         <TableCell
-                                            className={
+                                            className={`sm:table-cell ${
                                                 showDetails
-                                                    ? ''
-                                                    : 'hidden sm:table-cell'
-                                            }>
-                                            {student.email}
-                                        </TableCell>
-                                        <TableCell
-                                            className={
-                                                showDetails
-                                                    ? ''
-                                                    : 'hidden sm:table-cell'
-                                            }>
-                                            {student.phone}
-                                        </TableCell>
-                                        <TableCell
-                                            className={
-                                                showDetails
-                                                    ? ''
-                                                    : 'hidden sm:table-cell'
-                                            }>
+                                                    ? 'table-cell'
+                                                    : 'hidden'
+                                            }`}>
                                             {student.branch.name}
                                         </TableCell>
-                                        <TableCell>{student.status}</TableCell>
+                                        <TableCell
+                                            className={`sm:table-cell ${
+                                                showDetails
+                                                    ? 'table-cell'
+                                                    : 'hidden'
+                                            }`}>
+                                            {student.status}
+                                        </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Button
@@ -280,8 +290,9 @@ export default function StudentsPage() {
                             </TableBody>
                         </Table>
                     </div>
-                    <div className="mt-4 text-center">
-                        <Button onClick={() => setShowDetails(!showDetails)}>
+                    {/* Botón visible solo en pantallas pequeñas */}
+                    <div className="sm:hidden flex justify-center mt-2">
+                        <Button variant="outline" onClick={toggleDetails}>
                             {showDetails
                                 ? 'Ocultar detalles'
                                 : 'Mostrar más detalles'}
