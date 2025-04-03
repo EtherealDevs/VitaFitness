@@ -21,11 +21,8 @@ class ClassScheduleTimeslotSeeder extends Seeder
         $classSchedule1 = $classSchedules[0];
         $classSchedule2 = $classSchedules[1];
 
-        foreach ($timeslots as $timeslot) {
-            $timeslot->schedules()->attach($classSchedule1);
-        }
-        foreach ($timeslots as $timeslot) {
-            $classSchedule2->timeslots()->syncWithoutDetaching($timeslot);
+        foreach ($classSchedules as $classSchedule) {
+            $classSchedule->timeslots()->syncWithoutDetaching($timeslots);
         }
 
     }

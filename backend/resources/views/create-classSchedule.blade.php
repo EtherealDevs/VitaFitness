@@ -18,7 +18,7 @@
         <p class="success">{{ session('success') }}</p>
     @endif
 
-    <form action="{{ route('testing.timeslot.store') }}" method="POST">
+    <form action="{{ route('testing.classSchedule.store') }}" method="POST">
         @csrf
 
         <label for="class_id">Class:</label>

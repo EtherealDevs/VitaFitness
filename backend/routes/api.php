@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ClasseController;
+use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\ClassScheduleTimeslotController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
@@ -23,7 +24,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('students', StudentController::class);
     Route::apiResource('branches', BranchController::class);
     Route::apiResource('teachers', TeacherController::class);
-    Route::apiResource('teacherSchedules', TeacherSchedulesController::class);
+    Route::apiResource('class-schedules', ClassScheduleController::class);
     Route::apiResource('payments', PaymentController::class);
     Route::apiResource('classes', ClasseController::class);
     Route::apiResource('products', ProductController::class)->except(['index', 'show']);
