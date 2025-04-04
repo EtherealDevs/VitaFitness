@@ -20,7 +20,7 @@ class StudentSeeder extends Seeder
             'registration_date' => now(),
             'email' => 'firststudent@example.com',
             'phone' => 'First Student Phone (+573123456789)',
-            'dni' => 'First Student DNI (123456789)',
+            'dni' => '12345678',
         ]);
         Student::create([
             'name' => 'Second Student Name',
@@ -28,7 +28,7 @@ class StudentSeeder extends Seeder
             'registration_date' => now(),
             'email' => 'secondstudent@example.com',
             'phone' => 'Second Student Phone (+573123456789)',
-            'dni' => 'Second Student DNI (987654321)',
+            'dni' => '87654321',
         ]);
         Student::create([
             'name' => 'Third Student Name',
@@ -36,7 +36,7 @@ class StudentSeeder extends Seeder
             'registration_date' => now(),
             'email' => 'thirdstudent@example.com',
             'phone' => 'Third Student Phone (+573123456789)',
-            'dni' => 'Third Student DNI (123987456)',
+            'dni' => '12398745'
         ]);
     }
 }

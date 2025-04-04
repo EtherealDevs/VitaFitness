@@ -49,9 +49,9 @@ class DatabaseSeeder extends Seeder
         $this->call(ClassScheduleTimeslotStudentSeeder::class);
         //class_schedule_timeslot_teachers
         $this->call(ClassScheduleTimeslotTeacherSeeder::class);
-        // //attendance
+        //attendance
         $this->call(AttendanceSeeder::class);
         //payment
-        // $this->call(PaymentSeeder::class);
+        $this->call(PaymentSeeder::class);
     }
 }

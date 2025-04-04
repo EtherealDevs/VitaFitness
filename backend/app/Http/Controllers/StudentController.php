@@ -129,30 +129,42 @@ class StudentController extends Controller
         $student = Student::with([
             'classScheduleTimeSlots.classSchedule.schedule',
             'classScheduleTimeSlots.timeslot',
-            'classScheduleTimeSlots.classSchedule.class.payments',
+            'classScheduleTimeSlots.classSchedule.class',
             'payments'
         ])->findOrFail($id);
 
-        $now = Carbon::now();
+
+        $now = Carbon::now('America/Argentina/Buenos_Aires');
         $currentDay = strtolower($now->format('l'));
-        $currentTime = $now->format('H:i');
+
 
         $hasClassNow = false;
         $currentClassId = null;
         $validPayment = null;
-
+        $dayMap = [
+            'monday' => 'lunes',
+            'tuesday' => 'martes',
+            'wednesday' => 'miércoles',
+            'thursday' => 'jueves',
+            'friday' => 'viernes',
+            'saturday' => 'sábado',
+            'sunday' => 'domingo',
+        ];
         // Buscar si tiene clase ahora
         foreach ($student->classScheduleTimeSlots as $timeSlot) {
             $days = $timeSlot->classSchedule->schedule->days ?? [];
-            $slotTime = Carbon::parse($timeSlot->timeslot->hour)->format('H:i');
 
-            if (in_array($currentDay, $days) && $slotTime === $currentTime) {
+            $slotBase = Carbon::createFromFormat('H:i:s', $timeSlot->timeslot->hour)
+                ->setDate($now->year, $now->month, $now->day);
+
+            $slotStart = $slotBase->copy()->subMinutes(5);
+            $slotEnd = Carbon::now('America/Argentina/Buenos_Aires')->addHour()->addMinutes(5);
+            if (in_array($dayMap[$currentDay], $days) && $now->between($slotStart, $slotEnd)) {
                 $hasClassNow = true;
                 $currentClassId = $timeSlot->classSchedule->class->id;
                 break;
             }
         }
-
         // Buscar si hay un pago válido para esa clase
         if ($hasClassNow && $currentClassId) {
             $validPayment = $student->payments

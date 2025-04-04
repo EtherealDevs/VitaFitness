@@ -76,7 +76,7 @@ class Student extends Model
 
     public function payments()
     {
-        return $this->hasManyThrough(Payment::class, Classe::class, 'id', 'class_id', 'id', 'id');
+        return $this->hasMany(Payment::class);
     }
 
 

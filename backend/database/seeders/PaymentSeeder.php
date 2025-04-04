@@ -23,6 +23,7 @@ class PaymentSeeder extends Seeder
             'status' => 'pagado',
             'expiration_date' => now()->addDays(30),
             'date_start' => now(),
+            'student_id' => 1,
         ]);
         Payment::create([
             'class_id' => $class2->id,
@@ -31,6 +32,7 @@ class PaymentSeeder extends Seeder
             'status' => 'pendiente',
             'expiration_date' => now()->addDays(30),
             'date_start' => now(),
+            'student_id' => 2,
         ]);
     }
 }
