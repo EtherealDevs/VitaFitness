@@ -27,6 +27,7 @@ import {
 import { toast } from '@/hooks/use-toast'
 import { useSchedules } from '@/hooks/schedules'
 import { Class, useClasses } from '@/hooks/classes'
+import { useClassSchedules } from '@/hooks/classSchedules'
 
 // Days of the week
 const daysOfWeek = [
@@ -58,7 +59,7 @@ export default function CreateSchedulePage() {
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const { createSchedule } = useSchedules()
+    const { createClassSchedule } = useClassSchedules()
     const { getClasses } = useClasses()
     const [classes, setClasses] = useState<Class[]>([])
     useEffect(() => {
@@ -68,6 +69,7 @@ export default function CreateSchedulePage() {
         }
         fetchClasses()
     }, [])
+    console.log(classes);
 
     const handleDayChange = (day: string, checked: boolean) => {
         if (checked) {
@@ -108,7 +110,7 @@ export default function CreateSchedulePage() {
             return
         }
 
-        setIsLoading(true)
+        // setIsLoading(true)
 
         try {
             const formData = new FormData()
@@ -118,7 +120,10 @@ export default function CreateSchedulePage() {
             })
             formData.append('time_start', startTime)
             formData.append('time_end', endTime)
-            const res = await createSchedule(formData)
+            for (const element of formData) {
+                console.log(element);
+            }
+            const res = await createClassSchedule(formData)
             console.log(res)
             toast({
                 title: 'Horario creado',
@@ -136,7 +141,7 @@ export default function CreateSchedulePage() {
                 variant: 'destructive',
             })
         } finally {
-            setIsLoading(false)
+            // setIsLoading(false)
         }
     }
 

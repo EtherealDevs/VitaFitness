@@ -24,7 +24,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('students', StudentController::class);
     Route::apiResource('branches', BranchController::class);
     Route::apiResource('teachers', TeacherController::class);
-    Route::apiResource('class-schedules', ClassScheduleController::class);
+    Route::apiResource('classSchedules', ClassScheduleController::class);
     Route::apiResource('payments', PaymentController::class);
     Route::apiResource('classes', ClasseController::class);
     Route::apiResource('products', ProductController::class)->except(['index', 'show']);

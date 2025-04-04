@@ -47,7 +47,6 @@ class ClassScheduleController extends Controller
         ]);
         // ------- ------------- -------
 
-
         // Inicializar variables
         $class_id = $request->class_id;
         $days = $request->days;
@@ -110,7 +109,7 @@ class ClassScheduleController extends Controller
         }
 
         return response()->json([
-            'message' => 'ClassScheduleTimeslot created successfully',
+            'message' => 'ClassSchedule created successfully',
             'status' => 'success (201)'
         ], 201);
         // $classSchedule = new ClassScheduleResource($classSchedule);
