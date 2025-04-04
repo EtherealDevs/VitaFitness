@@ -25,7 +25,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
-import { useSchedules } from '@/hooks/schedules'
+// import { useSchedules } from '@/hooks/schedules'
 import { Class, useClasses } from '@/hooks/classes'
 import { useClassSchedules } from '@/hooks/classSchedules'
 
@@ -69,7 +69,7 @@ export default function CreateSchedulePage() {
         }
         fetchClasses()
     }, [])
-    console.log(classes);
+    console.log(classes)
 
     const handleDayChange = (day: string, checked: boolean) => {
         if (checked) {
@@ -110,7 +110,7 @@ export default function CreateSchedulePage() {
             return
         }
 
-        // setIsLoading(true)
+        setIsLoading(true)
 
         try {
             const formData = new FormData()
@@ -121,7 +121,7 @@ export default function CreateSchedulePage() {
             formData.append('time_start', startTime)
             formData.append('time_end', endTime)
             for (const element of formData) {
-                console.log(element);
+                console.log(element)
             }
             const res = await createClassSchedule(formData)
             console.log(res)
@@ -141,7 +141,7 @@ export default function CreateSchedulePage() {
                 variant: 'destructive',
             })
         } finally {
-            // setIsLoading(false)
+            setIsLoading(false)
         }
     }
 

@@ -3,9 +3,8 @@
 import Image from 'next/image'
 import { Card } from '@/components/ui/card'
 import { useState, useEffect } from 'react'
-// import { Payment } from '@/hooks/payments'
-// import { Student } from '../admin/students/columns'
-// import axios from '@/lib/axios'
+import { Student } from '../admin/students/columns'
+import axios from '@/lib/axios'
 
 // Estados posibles
 type AccessStatus = 'authorized' | 'unauthorized' | 'pending' | 'error'
@@ -130,7 +129,7 @@ function AccessCard({
                             {status === 'authorized'
                                 ? 'ACCESO PERMITIDO'
                                 : status === 'unauthorized'
-                                ? 'ACCESO DENEGADO'
+                                ? `ACCESO DENEGADO ${errorMessage}`
                                 : errorMessage}
                         </p>
                     )}
@@ -156,56 +155,55 @@ function AccessCard({
         </div>
     )
 }
-
+interface access {
+    student_id: string
+    has_class_now: boolean
+    is_payment_valid: boolean
+    payment_date: string
+    expiration_date: string
+    access_granted: boolean
+}
 // Componente principal
 export default function AccessPage() {
     const [documentNumber, setDocumentNumber] = useState<string>('')
     const [status, setStatus] = useState<AccessStatus>('pending')
     const [errorMessage, setErrorMessage] = useState<string>('')
-    // const [payment, setPayment] = useState<Payment | null>(null)
-    // const [student, setStudent] = useState<Student>()
-    //funtion search student for dni
+    const [student, setStudent] = useState<Student>()
+    const [access, setAccess] = useState<access>({
+        student_id: '',
+        has_class_now: false,
+        is_payment_valid: false,
+        payment_date: '',
+        expiration_date: '',
+        access_granted: false,
+    })
 
-    // const fetchStudent = async (dni: string) => {
-    //     try {
-    //         const res = await axios.get('/api/student/search', {
-    //             params: {
-    //                 key: 'dni',
-    //                 value: dni,
-    //             },
-    //         })
-    //         console.log(res)
-    //         setStudent(res.data.student)
-    //     } catch (error) {
-    //         console.error(error)
-    //         throw error
-    //     }
-    // }
+    // funtion search student for dni
 
-    // const fetchPayment = async (id: string) => {
-    //     try {
-    //         const res = await axios.get(`payments/student/${id}`)
-    //         setPayment(res.data.payment)
-    //     } catch (error) {
-    //         console.error(error)
-    //         throw error
-    //     }
-    // }
+    const fetchStudent = async (dni: string) => {
+        try {
+            const res = await axios.get('/api/student/search', {
+                params: {
+                    field: 'dni',
+                    search: dni,
+                },
+            })
+            setStudent(res.data.students[0])
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
 
-    // const isValidPayment = (payment: Payment): boolean => {
-    //     const today = new Date()
-    //     const paymentDate = new Date(payment.payment_date)
-    //     const expirationDate = new Date(payment.expiration_date)
-
-    //     return (
-    //         paymentDate > today &&
-    //         payment.status === 'pagado' &&
-    //         expirationDate > today
-    //     )
-    // }
-
-    const today = new Date()
-    const lastPaymentDate = new Date('2025-03-20') // Ejemplo de fecha de pago
+    const fetchAccess = async (id: string) => {
+        try {
+            const res = await axios.get(`/api/student/${id}/class-status`)
+            setAccess(res.data)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
 
     // Validación del documento (debe tener 8 dígitos)
     const validateDocument = (docNumber: string): boolean =>
@@ -232,7 +230,15 @@ export default function AccessPage() {
                     setErrorMessage('')
                 }, 2000)
             } else {
-                if (lastPaymentDate <= today) {
+                // Llamar a la función para buscar el estudiante
+                fetchStudent(documentNumber)
+                // Llamar a la función para obtener el acceso si existe estudiante
+                console.log(student)
+                if (student) {
+                    fetchAccess(student.id)
+                }
+
+                if (access.access_granted) {
                     setStatus('authorized')
 
                     // Si el estado cambia a autorizado, limpiar el input después de 2 segundos
@@ -242,8 +248,23 @@ export default function AccessPage() {
                     }, 2000)
                 } else {
                     setStatus('unauthorized')
-                    setErrorMessage('El pago está vencido. No tienes acceso.')
+                    if (!access.has_class_now && !access.is_payment_valid) {
+                        setErrorMessage(
+                            'No tienes clases en este momento y tu pago está vencido.',
+                        )
+                    } else if (!access.has_class_now) {
+                        setErrorMessage(
+                            'No tienes clases programadas en este momento.',
+                        )
+                    } else if (!access.is_payment_valid) {
+                        setErrorMessage('El pago está vencido o no es válido.')
+                    }
                 }
+                setTimeout(() => {
+                    setDocumentNumber('')
+                    setStatus('pending')
+                    setErrorMessage('')
+                }, 2000)
             }
         }, 1000) // 1 segundo de espera
 
@@ -252,8 +273,8 @@ export default function AccessPage() {
 
     return (
         <AccessCard
-            name="SOFIA ALARCON"
-            paymentDate="22 DE ABRIL"
+            name={student ? `${student.name} ${student.last_name}` : ''}
+            paymentDate={access.expiration_date}
             status={status}
             errorMessage={errorMessage}
             documentNumber={documentNumber}

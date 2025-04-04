@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Resources\StudentResource;
 use App\Models\Branch;
 use App\Models\Student;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         // Retrieve all students from the database
         // Return the retrieved students as a JSON response
         try {
@@ -38,7 +40,7 @@ class StudentController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
         $student->load('branch');
-        
+
         $student = new StudentResource($student);
         $data = [
             'student' => $student,
@@ -53,7 +55,7 @@ class StudentController extends Controller
         // Return the created student as a JSON response
         $branches_ids = Branch::all()->pluck('id')->toArray();
         $request->validate([
-            'name' =>'required|string',
+            'name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'email|unique:students,email|nullable',
             'phone' => 'required|string|max:12',
@@ -89,7 +91,7 @@ class StudentController extends Controller
         // Return the updated student as a JSON response
         $branches_ids = Branch::all()->pluck('id')->toArray();
         $request->validate([
-            'name' =>'required|string',
+            'name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'email|nullable|unique:students,email,' . $id,
             'phone' => 'required|string|max:12',
@@ -109,6 +111,67 @@ class StudentController extends Controller
         ];
         return response()->json($data, 204);
     }
+    public function search(Request $request)
+    {
+        $searchTerm = $request->search;
+        $field = $request->field;
+        $students = Student::search($searchTerm, $field)->get();
+        $students = StudentResource::collection($students);
+        $data = [
+            'students' => $students,
+            'message' => 'Succesfully retrieved students',
+            'status' => 'success (200)'
+        ];
+        return response()->json($data, 200);
+    }
+    public function getClassStatus($id)
+    {
+        $student = Student::with([
+            'classScheduleTimeSlots.classSchedule.schedule',
+            'classScheduleTimeSlots.timeslot',
+            'classScheduleTimeSlots.classSchedule.class.payments',
+            'payments'
+        ])->findOrFail($id);
+
+        $now = Carbon::now();
+        $currentDay = strtolower($now->format('l'));
+        $currentTime = $now->format('H:i');
+
+        $hasClassNow = false;
+        $currentClassId = null;
+        $validPayment = null;
+
+        // Buscar si tiene clase ahora
+        foreach ($student->classScheduleTimeSlots as $timeSlot) {
+            $days = $timeSlot->classSchedule->schedule->days ?? [];
+            $slotTime = Carbon::parse($timeSlot->timeslot->hour)->format('H:i');
+
+            if (in_array($currentDay, $days) && $slotTime === $currentTime) {
+                $hasClassNow = true;
+                $currentClassId = $timeSlot->classSchedule->class->id;
+                break;
+            }
+        }
+
+        // Buscar si hay un pago válido para esa clase
+        if ($hasClassNow && $currentClassId) {
+            $validPayment = $student->payments
+                ->where('class_id', $currentClassId)
+                ->where('status', 'pagado')
+                ->filter(function ($payment) use ($now) {
+                    return $now->between($payment->payment_date, $payment->expiration_date);
+                })->first();
+        }
+
+        return response()->json([
+            'student_id' => $student->id,
+            'has_class_now' => $hasClassNow,
+            'is_payment_valid' => (bool) $validPayment,
+            'payment_date' => $validPayment?->payment_date,
+            'expiration_date' => $validPayment?->expiration_date,
+            'access_granted' => $hasClassNow && $validPayment !== null,
+        ]);
+    }
     public function destroy(Student $student)
     {
         // Delete an existing student from the database
@@ -118,8 +181,8 @@ class StudentController extends Controller
             $student->delete();
         }
         $data = [
-           'message' => 'Student deleted successfully',
-           'status' => 'success, resource deleted (204)'
+            'message' => 'Student deleted successfully',
+            'status' => 'success, resource deleted (204)'
         ];
         return response()->json($data, 204);
     }

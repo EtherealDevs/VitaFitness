@@ -36,3 +36,5 @@ Route::apiResource('plans', PlanController::class)->only(['index', 'show']);
 Route::apiResource('schedules', SchedulesController::class)->only(['index', 'show']);
 Route::get('payments/student/{id}', [PaymentController::class, 'student']);
 Route::put('payments/student/{id}', [PaymentController::class, 'updatestudent']);
+Route::get('student/search', [StudentController::class, 'search']);
+Route::get('/student/{id}/class-status', [StudentController::class, 'getClassStatus']);

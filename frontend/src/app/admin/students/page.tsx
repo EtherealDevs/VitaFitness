@@ -247,14 +247,14 @@ export default function StudentsPage() {
                                         </TableCell>
                                         <TableCell>{student.email}</TableCell>
                                         <TableCell>{student.phone}</TableCell>
-                                        <TableCell
+                                        {/* <TableCell
                                             className={`sm:table-cell ${
                                                 showDetails
                                                     ? 'table-cell'
                                                     : 'hidden'
                                             }`}>
                                             {student.branch.name}
-                                        </TableCell>
+                                        </TableCell> */}
                                         <TableCell
                                             className={`sm:table-cell ${
                                                 showDetails
@@ -449,7 +449,7 @@ export default function StudentsPage() {
                                     defaultValue={selectedStudent?.dni}
                                 />
                             </div>
-                            <div className="grid gap-2">
+                            {/* <div className="grid gap-2">
                                 <Label htmlFor="branch_id">Sucursal</Label>
                                 <select
                                     name="branch_id"
@@ -464,7 +464,7 @@ export default function StudentsPage() {
                                         </option>
                                     ))}
                                 </select>
-                            </div>
+                            </div> */}
                             <div className="grid gap-2">
                                 <Label htmlFor="status">Estado</Label>
                                 <select
