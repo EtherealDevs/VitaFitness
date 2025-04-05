@@ -17,7 +17,7 @@ class PaymentSeeder extends Seeder
     public function run(): void
     {
         $classSchedule = ClassSchedule::first();
-        
+
         foreach ($classSchedule->students as $student) {
             $student->payments()->create([
                 'classSchedule_id' => $classSchedule->id,
@@ -26,6 +26,7 @@ class PaymentSeeder extends Seeder
                 'status' => 'pagado',
                 'expiration_date' => now()->addDays(30),
                 'date_start' => now(),
+                'student_id' => 1,
             ]);
         }
     }

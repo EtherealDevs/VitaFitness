@@ -144,21 +144,22 @@ class StudentController extends Controller
         $dayMap = [
             'monday' => 'lunes',
             'tuesday' => 'martes',
-            'wednesday' => 'miércoles',
+            'wednesday' => 'miercoles',
             'thursday' => 'jueves',
             'friday' => 'viernes',
-            'saturday' => 'sábado',
+            'saturday' => 'sabado',
             'sunday' => 'domingo',
         ];
         // Buscar si tiene clase ahora
         foreach ($student->classScheduleTimeSlots as $timeSlot) {
             $days = $timeSlot->classSchedule->schedule->days ?? [];
 
-            $slotBase = Carbon::createFromFormat('H:i:s', $timeSlot->timeslot->hour)
+
+            $slotBase = Carbon::createFromFormat('H:i:s', $timeSlot->timeslot->hour, 'America/Argentina/Buenos_Aires')
                 ->setDate($now->year, $now->month, $now->day);
 
             $slotStart = $slotBase->copy()->subMinutes(5);
-            $slotEnd = Carbon::now('America/Argentina/Buenos_Aires')->addHour()->addMinutes(5);
+            $slotEnd = $slotBase->copy()->addHour(1);
             if (in_array($dayMap[$currentDay], $days) && $now->between($slotStart, $slotEnd)) {
                 $hasClassNow = true;
                 $currentClassScheduleId = $timeSlot->classSchedule->id;

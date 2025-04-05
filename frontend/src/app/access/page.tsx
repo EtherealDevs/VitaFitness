@@ -178,33 +178,6 @@ export default function AccessPage() {
         access_granted: false,
     })
 
-    // funtion search student for dni
-
-    const fetchStudent = async (dni: string) => {
-        try {
-            const res = await axios.get('/api/student/search', {
-                params: {
-                    field: 'dni',
-                    search: dni,
-                },
-            })
-            setStudent(res.data.students[0])
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
-
-    const fetchAccess = async (id: string) => {
-        try {
-            const res = await axios.get(`/api/student/${id}/class-status`)
-            setAccess(res.data)
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
-
     // Validación del documento (debe tener 8 dígitos)
     const validateDocument = (docNumber: string): boolean =>
         /^\d{8}$/.test(docNumber)
@@ -215,62 +188,81 @@ export default function AccessPage() {
             return
         }
 
-        // Espera 1 segundo antes de validar
         const timeout = setTimeout(() => {
-            if (!validateDocument(documentNumber)) {
-                setStatus('error')
-                setErrorMessage(
-                    'Número de documento inválido. Debe tener 8 dígitos.',
-                )
+            handleValidation(documentNumber)
+        }, 1000)
 
-                // Después de 2 segundos, volver al estado pendiente
-                setTimeout(() => {
-                    setDocumentNumber('')
-                    setStatus('pending')
-                    setErrorMessage('')
-                }, 2000)
-            } else {
-                // Llamar a la función para buscar el estudiante
-                fetchStudent(documentNumber)
-                // Llamar a la función para obtener el acceso si existe estudiante
-                console.log(student)
-                if (student) {
-                    fetchAccess(student.id)
-                }
-
-                if (access.access_granted) {
-                    setStatus('authorized')
-
-                    // Si el estado cambia a autorizado, limpiar el input después de 2 segundos
-                    setTimeout(() => {
-                        setDocumentNumber('')
-                        setStatus('pending')
-                    }, 2000)
-                } else {
-                    setStatus('unauthorized')
-                    if (!access.has_class_now && !access.is_payment_valid) {
-                        setErrorMessage(
-                            'No tienes clases en este momento y tu pago está vencido.',
-                        )
-                    } else if (!access.has_class_now) {
-                        setErrorMessage(
-                            'No tienes clases programadas en este momento.',
-                        )
-                    } else if (!access.is_payment_valid) {
-                        setErrorMessage('El pago está vencido o no es válido.')
-                    }
-                }
-                setTimeout(() => {
-                    setDocumentNumber('')
-                    setStatus('pending')
-                    setErrorMessage('')
-                }, 2000)
-            }
-        }, 1000) // 1 segundo de espera
-
-        return () => clearTimeout(timeout) // Evita validaciones innecesarias
+        return () => clearTimeout(timeout)
     }, [documentNumber])
 
+    const handleValidation = async (dni: string) => {
+        if (!validateDocument(dni)) {
+            setStatus('error')
+            setErrorMessage(
+                'Número de documento inválido. Debe tener 8 dígitos.',
+            )
+            resetAfterDelay()
+            return
+        }
+
+        try {
+            const studentRes = await axios.get('/api/student/search', {
+                params: {
+                    field: 'dni',
+                    search: dni,
+                },
+            })
+
+            const studentData = studentRes.data.students[0]
+            if (!studentData) {
+                setStatus('error')
+                setErrorMessage('Estudiante no encontrado.')
+                resetAfterDelay()
+                return
+            }
+
+            setStudent(studentData)
+
+            const accessRes = await axios.get(
+                `/api/student/${studentData.id}/class-status`,
+            )
+            const accessData = accessRes.data
+            setAccess(accessData)
+
+            if (accessData.access_granted) {
+                setStatus('authorized')
+            } else {
+                setStatus('unauthorized')
+
+                if (!accessData.has_class_now && !accessData.is_payment_valid) {
+                    setErrorMessage(
+                        'No tienes clases en este momento y tu pago está vencido.',
+                    )
+                } else if (!accessData.has_class_now) {
+                    setErrorMessage(
+                        'No tienes clases programadas en este momento.',
+                    )
+                } else if (!accessData.is_payment_valid) {
+                    setErrorMessage('El pago está vencido o no es válido.')
+                }
+            }
+
+            resetAfterDelay()
+        } catch (error) {
+            console.error(error)
+            setStatus('error')
+            setErrorMessage('Error al buscar el estudiante o su acceso.')
+            resetAfterDelay()
+        }
+    }
+
+    const resetAfterDelay = () => {
+        setTimeout(() => {
+            setDocumentNumber('')
+            setStatus('pending')
+            setErrorMessage('')
+        }, 2000)
+    }
     return (
         <AccessCard
             name={student ? `${student.name} ${student.last_name}` : ''}
