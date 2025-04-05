@@ -139,7 +139,7 @@ class StudentController extends Controller
 
 
         $hasClassNow = false;
-        $currentClassId = null;
+        $currentClassScheduleId = null;
         $validPayment = null;
         $dayMap = [
             'monday' => 'lunes',
@@ -161,14 +161,14 @@ class StudentController extends Controller
             $slotEnd = Carbon::now('America/Argentina/Buenos_Aires')->addHour()->addMinutes(5);
             if (in_array($dayMap[$currentDay], $days) && $now->between($slotStart, $slotEnd)) {
                 $hasClassNow = true;
-                $currentClassId = $timeSlot->classSchedule->class->id;
+                $currentClassScheduleId = $timeSlot->classSchedule->id;
                 break;
             }
         }
         // Buscar si hay un pago válido para esa clase
-        if ($hasClassNow && $currentClassId) {
+        if ($hasClassNow && $currentClassScheduleId) {
             $validPayment = $student->payments
-                ->where('class_id', $currentClassId)
+                ->where('classSchedule_id', $currentClassScheduleId)
                 ->where('status', 'pagado')
                 ->filter(function ($payment) use ($now) {
                     return $now->between($payment->payment_date, $payment->expiration_date);
