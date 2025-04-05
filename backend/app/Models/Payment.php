@@ -8,7 +8,7 @@ class Payment extends Model
 {
 
     protected $fillable = [
-        'class_id',
+        'classSchedule_id',
         'payment_date',
         'amount',
         'status',
@@ -16,18 +16,13 @@ class Payment extends Model
         'expiration_date',
     ];
 
-    public function class()
+    public function classSchedule()
     {
-        return $this->belongsTo(Classe::class, 'class_id');
+        return $this->belongsTo(ClassSchedule::class);
     }
 
     public function student()
     {
         return $this->belongsTo(Student::class);
-    }
-
-    public function plan()
-    {
-        return $this->belongsTo(Plan::class);
     }
 }

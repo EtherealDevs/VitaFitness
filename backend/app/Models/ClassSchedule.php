@@ -28,4 +28,8 @@ class ClassSchedule extends Model
     {
         return $this->hasMany(ClassScheduleTimeslot::class);
     }
+    public function students()
+    {
+        return $this->hasManyThrough(Student::class, ClassScheduleTimeslotStudent::class, 'c_sch_ts_id', 'id', 'id', 'student_id');
+    }
 }

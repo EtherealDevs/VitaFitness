@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('class_id')->constrained('classes');
+            $table->foreignId('classSchedule_id')->constrained('class_schedules');
             $table->foreignId('student_id')->constrained('students');
             $table->date('payment_date')->nullable();
             $table->decimal('amount', 8, 2);
