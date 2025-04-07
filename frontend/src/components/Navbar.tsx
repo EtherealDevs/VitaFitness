@@ -294,7 +294,7 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                             </div>
 
                             {/* Schedule Section */}
-                            <div className="mt-auto mb-8 bg-white/5 rounded-2xl p-6">
+                            <div className="mt-auto mb-8 bg-white/95 rounded-2xl p-6">
                                 <h3 className="text-xl font-semibold text-white mb-4">
                                     Horarios
                                 </h3>
