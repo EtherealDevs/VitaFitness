@@ -14,11 +14,12 @@ class Payment extends Model
         'status',
         'date_start',
         'expiration_date',
+        'student_id',
     ];
 
     public function classSchedule()
     {
-        return $this->belongsTo(ClassSchedule::class);
+        return $this->belongsTo(ClassSchedule::class, 'classSchedule_id');
     }
 
     public function student()

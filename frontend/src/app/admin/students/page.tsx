@@ -24,11 +24,11 @@ import {
 import { Label } from '../components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 
-import { useBranches } from '@/hooks/branches'
+// import { useBranches } from '@/hooks/branches'
 
 export default function StudentsPage() {
     const [students, setStudents] = useState<Student[]>([])
-    const [branches, setBranches] = useState<Branch[]>([])
+    // const [branches, setBranches] = useState<Branch[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [createStudentModalIsOpen, setCreateStudentModalIsOpen] =
         useState(false)
@@ -39,7 +39,7 @@ export default function StudentsPage() {
 
     const { getStudents, createStudent, updateStudent, deleteStudent } =
         useStudents()
-    const { getBranches } = useBranches()
+    // const { getBranches } = useBranches()
     const [showDetails, setShowDetails] = useState(false)
 
     function open(id: number) {
@@ -50,10 +50,10 @@ export default function StudentsPage() {
         setShowDetails(!showDetails)
     }
 
-    interface Branch {
-        id: number
-        name: string
-    }
+    // interface Branch {
+    //     id: number
+    //     name: string
+    // }
 
     interface Student {
         id: number
@@ -62,10 +62,6 @@ export default function StudentsPage() {
         email: string
         phone: string
         dni: string
-        branch: {
-            id: number
-            name: string
-        }
         status: string
     }
 
@@ -89,13 +85,13 @@ export default function StudentsPage() {
             console.error(error)
             throw error
         }
-        try {
-            const response = await getBranches()
-            setBranches(response.branches)
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
+        // try {
+        //     const response = await getBranches()
+        //     setBranches(response.branches)
+        // } catch (error) {
+        //     console.error(error)
+        //     throw error
+        // }
     }
 
     async function handleCreateStudentForm(
@@ -351,7 +347,7 @@ export default function StudentsPage() {
                                 <Label htmlFor="dni">DNI</Label>
                                 <Input id="dni" name="dni" placeholder="DNI" />
                             </div>
-                            <div className="grid gap-2">
+                            {/* <div className="grid gap-2">
                                 <Label htmlFor="branch_id">Sucursal</Label>
                                 <select name="branch_id" id="branch_id">
                                     <option value="">Seleccionar...</option>
@@ -363,7 +359,7 @@ export default function StudentsPage() {
                                         </option>
                                     ))}
                                 </select>
-                            </div>
+                            </div> */}
                             <div className="grid gap-2">
                                 <Label htmlFor="status">Estado</Label>
                                 <select name="status" id="status">

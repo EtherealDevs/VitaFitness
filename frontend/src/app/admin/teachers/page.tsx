@@ -34,7 +34,6 @@ export interface Teacher {
     email: string
     phone: string
     dni: string
-    branch?: { id: number; name: string }
 }
 
 interface Branch {
@@ -276,7 +275,7 @@ export default function TeacherIndex() {
                                     <TableHead>Email</TableHead>
                                     <TableHead>Teléfono</TableHead>
                                     <TableHead>DNI</TableHead>
-                                    <TableHead>Sucursal</TableHead>
+                                    {/* <TableHead>Sucursal</TableHead> */}
                                     <TableHead className="text-right">
                                         Acciones
                                     </TableHead>
@@ -299,9 +298,9 @@ export default function TeacherIndex() {
                                         <TableCell>{teacher.email}</TableCell>
                                         <TableCell>{teacher.phone}</TableCell>
                                         <TableCell>{teacher.dni}</TableCell>
-                                        <TableCell>
+                                        {/* <TableCell>
                                             {teacher.branch?.name}
-                                        </TableCell>
+                                        </TableCell> */}
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Button
@@ -459,7 +458,7 @@ export default function TeacherIndex() {
                                 <Label htmlFor="dni">DNI</Label>
                                 <Input id="dni" name="dni" placeholder="DNI" />
                             </div>
-                            <div className="grid gap-2">
+                            {/* <div className="grid gap-2">
                                 <Label htmlFor="branch_id">Sucursal</Label>
                                 <select
                                     id="branch_id"
@@ -476,7 +475,7 @@ export default function TeacherIndex() {
                                         </option>
                                     ))}
                                 </select>
-                            </div>
+                            </div> */}
                         </div>
                         <DialogFooter>
                             <Button

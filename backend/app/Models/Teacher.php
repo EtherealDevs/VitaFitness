@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Teacher extends Model
 {
-    protected $fillable = ['name', 'email', 'phone', 'dni', 'branch_id', 'last_name'];
+    protected $fillable = ['name', 'email', 'phone', 'dni', 'last_name'];
 
     public function timeslots()
     {

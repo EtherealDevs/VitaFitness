@@ -90,10 +90,10 @@ export default function PaymentsPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Lista de Pagos</CardTitle>
-                    <Link href="/admin/products/create">
+                    <Link href="/admin/payments/create">
                         <Button>
                             <Plus className="mr-2 h-4 w-4" />
-                            Nuevo Pago
+                            Cargar un Pago
                         </Button>
                     </Link>
                 </CardHeader>
@@ -104,7 +104,7 @@ export default function PaymentsPage() {
                                 <TableRow>
                                     <TableHead>Nombre</TableHead>
                                     <TableHead>Monto</TableHead>
-                                    <TableHead>Plan</TableHead>
+                                    <TableHead>Clase</TableHead>
                                     <TableHead>Fecha de inicio</TableHead>
                                     <TableHead>Fecha de pago</TableHead>
                                     <TableHead>Fecha de expiracion</TableHead>
@@ -124,9 +124,9 @@ export default function PaymentsPage() {
                                                 {payment.student_id}
                                             </Link>
                                         </TableCell>
-                                        <TableCell>{payment.amount}</TableCell>
+                                        <TableCell>${payment.amount}</TableCell>
                                         <TableCell>
-                                            ${payment.plan_id}
+                                            {payment.classSchedule_id}
                                         </TableCell>
                                         <TableCell>
                                             {payment.date_start}
