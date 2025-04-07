@@ -17,11 +17,11 @@ class PlanResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'classes' => ClasseResource::collection($this->whenLoaded('classes')),
             'description' => $this->description,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-
         ];
     }
 }

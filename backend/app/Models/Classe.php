@@ -33,7 +33,7 @@ class Classe extends Model
 
     public function classSchedules()
     {
-        return $this->hasMany(ClassSchedule::class);
+        return $this->hasMany(ClassSchedule::class, 'class_id', 'id');
     }
 
     // public function timeslot()
