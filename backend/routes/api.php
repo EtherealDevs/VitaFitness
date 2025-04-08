@@ -25,7 +25,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('students', StudentController::class);
-    Route::apiResource('branches', BranchController::class);
+    Route::apiResource('branches', BranchController::class)->except(['index', 'show']);
     Route::apiResource('teachers', TeacherController::class);
     Route::apiResource('classSchedules', ClassScheduleController::class);
     Route::apiResource('payments', PaymentController::class);
@@ -44,3 +44,4 @@ Route::put('payments/student/{id}', [PaymentController::class, 'updatestudent'])
 Route::get('student/search', [StudentController::class, 'search']);
 Route::get('/student/{id}/class-status', [StudentController::class, 'getClassStatus']);
 Route::get('/statistics', [StatisticsController::class, 'index']);
+Route::apiResource('branches', BranchController::class)->only(['index', 'show']);

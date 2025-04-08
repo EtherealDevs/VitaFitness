@@ -6,6 +6,7 @@ import { GradientTitle } from '@/components/ui/gradient-title'
 import Image from 'next/image'
 import { ArrowRight, Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { Branch, useBranches } from '@/hooks/branches'
 // Datos para la sección de transformaciones
 const transformations = [
     {
@@ -46,6 +47,17 @@ const transformations = [
 export default function CommitmentSection() {
     const [activeTransformation, setActiveTransformation] = useState(0)
     const transformationsRef = useRef<HTMLDivElement>(null)
+    const [branchs, setBranchs] = useState<Branch[]>([])
+    const { getBranches } = useBranches()
+    const fetchBranchs = async () => {
+        try {
+            const response = await getBranches()
+            setBranchs(response.branches)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
 
     const nextTransformation = () => {
         setActiveTransformation(prev => (prev + 1) % transformations.length)
@@ -60,12 +72,13 @@ export default function CommitmentSection() {
 
     // Cambiar automáticamente las transformaciones
     useEffect(() => {
+        fetchBranchs()
         const interval = setInterval(() => {
             nextTransformation()
         }, 8000)
         return () => clearInterval(interval)
     }, [])
-
+    console.log(branchs)
     return (
         <section className="py-16 bg-black">
             <div className="container mx-auto px-4">
@@ -109,33 +122,37 @@ export default function CommitmentSection() {
                                 NUESTRAS SEDES
                             </GradientTitle>
                             <div className="grid grid-cols-2 gap-4">
-                                {/* Sede 1 */}
-                                <Card className="relative h-[200px] overflow-hidden group">
-                                    <Image
-                                        src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000"
-                                        alt="Sede Corrientes 1"
-                                        fill
-                                        className="object-cover brightness-50 group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                                    <div className="absolute inset-0 p-4 flex flex-col justify-between">
-                                        <h3 className="text-2xl font-bold text-white">
-                                            CORRIENTES I
-                                        </h3>
-                                        <div>
-                                            <p className="text-gray-200 text-sm mb-2">
-                                                Avenida Ferre 1567
-                                            </p>
-                                            <button className="text-green-400 text-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                Ver mapa{' '}
-                                                <ArrowRight className="w-3 h-3" />
-                                            </button>
+                                {branchs.map((branch, index) => (
+                                    <Card
+                                        key={index}
+                                        className="relative h-[200px] overflow-hidden group">
+                                        <Image
+                                            src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000"
+                                            alt="Sede Corrientes 1"
+                                            fill
+                                            className="object-cover brightness-50 group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                                        <div className="absolute inset-0 p-4 flex flex-col justify-between">
+                                            <h3 className="text-2xl font-bold text-white">
+                                                {branch.name}
+                                            </h3>
+                                            <div>
+                                                <p className="text-gray-200 text-sm mb-2">
+                                                    {branch.address}
+                                                </p>
+                                                <button className="text-green-400 text-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                    Ver mapa{' '}
+                                                    <ArrowRight className="w-3 h-3" />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
+                                    </Card>
+                                ))}
+                                {/* Sede 1 */}
 
                                 {/* Sede 2 */}
-                                <Card className="relative h-[200px] overflow-hidden group">
+                                {/* <Card className="relative h-[200px] overflow-hidden group">
                                     <Image
                                         src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=80&w=1000"
                                         alt="Sede Corrientes 2"
@@ -157,7 +174,7 @@ export default function CommitmentSection() {
                                             </button>
                                         </div>
                                     </div>
-                                </Card>
+                                </Card> */}
                             </div>
                         </div>
                     </div>

@@ -1,11 +1,13 @@
 import axios from '@/lib/axios'
 import { useCallback } from 'react'
+import { Class } from './classes'
 
 export interface Plan {
     id: string
     name: string
     description: string
     status: string
+    classes?: Class[]
     createdAt?: string
     updatedAt?: string
 }

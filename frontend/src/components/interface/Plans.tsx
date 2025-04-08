@@ -7,137 +7,19 @@ import { PlanModal } from '@/components/ui/plan-modal'
 import { ProductModal } from '@/components/ui/product-modal'
 import { CatalogModal } from '@/components/ui/catalog-modal'
 import Image from 'next/image'
-import {
-    Clock,
-    Dumbbell,
-    Battery,
-    User,
-    ArrowRight,
-    ShoppingCart,
-} from 'lucide-react'
+import { User, ArrowRight, ShoppingCart } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Product, useProducts } from '@/hooks/products'
-
-// Lista ampliada de planes
-const plans = [
-    {
-        title: 'BICI',
-        description:
-            'Descubre los diferentes planes que ofrecemos para adaptarnos a tus necesidades y',
-        features: [
-            'Sesiones de 45 minutos',
-            'Entrenador especializado',
-            'Seguimiento personalizado',
-            'Acceso a app de ejercicios',
-        ],
-        stats: {
-            duration: '15 Mins',
-            level: 'Alto',
-            intensity: 'Exigente',
-            assistance: 'Con asistencia',
-        },
-        image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000',
-    },
-    {
-        title: 'CARDIO',
-        description:
-            'Mejora tu resistencia y quema calorías con nuestras sesiones de cardio',
-        features: [
-            'Clases grupales',
-            'Equipamiento moderno',
-            'Rutinas personalizadas',
-            'Evaluación mensual',
-        ],
-        stats: {
-            duration: '30 Mins',
-            level: 'Medio',
-            intensity: 'Moderado',
-            assistance: 'Con asistencia',
-        },
-        image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1000',
-    },
-    {
-        title: 'PILATES',
-        description:
-            'Fortalece tu core y mejora tu flexibilidad con nuestras clases de pilates',
-        features: [
-            'Grupos reducidos',
-            'Equipamiento especializado',
-            'Enfoque en postura',
-            'Todos los niveles',
-        ],
-        stats: {
-            duration: '45 Mins',
-            level: 'Bajo',
-            intensity: 'Suave',
-            assistance: 'Con asistencia',
-        },
-        image: 'https://images.unsplash.com/photo-1518310383802-640c2de311b2?q=80&w=1000',
-    },
-    {
-        title: 'FITBOXING',
-        description:
-            'Combina boxeo y fitness para un entrenamiento de alto impacto',
-        features: [
-            'Alta quema calórica',
-            'Técnicas de boxeo',
-            'Entrenamiento funcional',
-            'Música motivadora',
-        ],
-        stats: {
-            duration: '50 Mins',
-            level: 'Alto',
-            intensity: 'Intenso',
-            assistance: 'Con asistencia',
-        },
-        image: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?q=80&w=1000',
-    },
-    {
-        title: 'YOGA',
-        description:
-            'Conecta cuerpo y mente con nuestras sesiones de yoga para todos los niveles',
-        features: [
-            'Ambiente relajado',
-            'Instructores certificados',
-            'Mejora flexibilidad',
-            'Reduce estrés',
-        ],
-        stats: {
-            duration: '60 Mins',
-            level: 'Medio',
-            intensity: 'Variable',
-            assistance: 'Con asistencia',
-        },
-        image: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?q=80&w=1000',
-    },
-    {
-        title: 'CROSSFIT',
-        description:
-            'Entrenamiento funcional de alta intensidad para mejorar tu condición física general',
-        features: [
-            'Variedad de ejercicios',
-            'Comunidad motivadora',
-            'Resultados rápidos',
-            'Adaptable a tu nivel',
-        ],
-        stats: {
-            duration: '45 Mins',
-            level: 'Alto',
-            intensity: 'Muy intenso',
-            assistance: 'Con asistencia',
-        },
-        image: 'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?q=80&w=1000',
-    },
-]
+import { Plan, usePlans } from '@/hooks/plans'
 
 export default function Services() {
     const { getProducts } = useProducts()
     // const [allProducts, setProducts] = useState<Product[]>([])
-    const [selectedPlan, setSelectedPlan] = useState<(typeof plans)[0] | null>(
-        null,
-    )
+    const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
     const [allProducts, setProducts] = useState<Product[]>([])
     const [fullCatalog, setFullCatalog] = useState<Product[]>([])
+    const { getPlans } = usePlans()
+    const [plans, setPlans] = useState<Plan[]>([])
     const [selectedProduct, setSelectedProduct] = useState<
         (typeof allProducts)[0] | null
     >(null)
@@ -146,7 +28,7 @@ export default function Services() {
     const [visibleProducts, setVisibleProducts] = useState<number>(4)
     const plansContainerRef = useRef<HTMLDivElement>(null)
     const productsContainerRef = useRef<HTMLDivElement>(null)
-    const fetchData = async () => {
+    const fetchProducts = async () => {
         try {
             const response = await getProducts()
             setProducts(response.products)
@@ -156,9 +38,23 @@ export default function Services() {
             throw error
         }
     }
+    const fetchPlans = async () => {
+        try {
+            const response = await getPlans()
+            //filtrar solo los planes activos
+            const activePlans = response.plans.filter(
+                (plan: Plan) => plan.status === 'activo',
+            )
+            setPlans(activePlans)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
 
     useEffect(() => {
-        fetchData()
+        fetchProducts()
+        fetchPlans()
     }, [])
     // Función para manejar el scroll dentro del contenedor de planes
     const handlePlansScroll = () => {
@@ -237,10 +133,9 @@ export default function Services() {
                                             <div className="absolute inset-0">
                                                 <Image
                                                     src={
-                                                        plan.image ||
-                                                        '/placeholder.svg'
+                                                        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000'
                                                     }
-                                                    alt={plan.title}
+                                                    alt={plan.name}
                                                     fill
                                                     className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-500"
                                                 />
@@ -249,7 +144,7 @@ export default function Services() {
                                             <CardContent className="relative h-full z-10 p-6">
                                                 {/* Título siempre visible */}
                                                 <h3 className="text-white text-3xl font-bold absolute top-6 left-6">
-                                                    {plan.title}
+                                                    {plan.name}
                                                 </h3>
 
                                                 {/* Contenido visible en hover */}
@@ -260,43 +155,10 @@ export default function Services() {
                                                         <div className="flex justify-between items-center mb-4">
                                                             <div className="flex items-center gap-4">
                                                                 <div className="flex items-center gap-2">
-                                                                    <Clock className="w-5 h-5 text-white" />
-                                                                    <span className="text-sm text-white">
-                                                                        {
-                                                                            plan
-                                                                                .stats
-                                                                                .duration
-                                                                        }
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <Dumbbell className="w-5 h-5 text-white" />
-                                                                    <span className="text-sm text-white">
-                                                                        {
-                                                                            plan
-                                                                                .stats
-                                                                                .level
-                                                                        }
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <Battery className="w-5 h-5 text-white" />
-                                                                    <span className="text-sm text-white">
-                                                                        {
-                                                                            plan
-                                                                                .stats
-                                                                                .intensity
-                                                                        }
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
                                                                     <User className="w-5 h-5 text-white" />
                                                                     <span className="text-sm text-white">
-                                                                        {
-                                                                            plan
-                                                                                .stats
-                                                                                .assistance
-                                                                        }
+                                                                        Con
+                                                                        asistencia
                                                                     </span>
                                                                 </div>
                                                             </div>
