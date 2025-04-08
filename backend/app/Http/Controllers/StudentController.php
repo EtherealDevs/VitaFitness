@@ -129,8 +129,6 @@ class StudentController extends Controller
             'classScheduleTimeSlots.classSchedule.class',
             'payments'
         ])->findOrFail($id);
-
-
         $now = Carbon::now('America/Argentina/Buenos_Aires');
         $currentDay = strtolower($now->format('l'));
 
@@ -163,14 +161,17 @@ class StudentController extends Controller
                 break;
             }
         }
+
         // Buscar si hay un pago válido para esa clase
+
         if ($hasClassNow && $currentClassScheduleId) {
+
             $validPayment = $student->payments
                 ->where('classSchedule_id', $currentClassScheduleId)
                 ->where('status', 'pagado')
-                ->filter(function ($payment) use ($now) {
-                    return $now->between($payment->payment_date, $payment->expiration_date);
-                })->first();
+                ->where('date_start', '<=', $now)
+                ->where('expiration_date', '>=', $now)
+                ->first();
         }
 
         return response()->json([
