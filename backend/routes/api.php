@@ -8,10 +8,12 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SchedulesController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TeacherSchedulesController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -38,3 +40,4 @@ Route::get('payments/student/{id}', [PaymentController::class, 'student']);
 Route::put('payments/student/{id}', [PaymentController::class, 'updatestudent']);
 Route::get('student/search', [StudentController::class, 'search']);
 Route::get('/student/{id}/class-status', [StudentController::class, 'getClassStatus']);
+Route::get('/statistics', [StatisticsController::class, 'index']);

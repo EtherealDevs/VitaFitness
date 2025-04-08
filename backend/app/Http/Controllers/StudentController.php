@@ -61,7 +61,6 @@ class StudentController extends Controller
             'phone' => 'required|string|max:12',
             'dni' => 'required|string|unique:students,dni',
             'status' => 'required|string|in:activo,inactivo,pendiente',
-            'branch_id' => [Rule::in($branches_ids), 'required'],
         ]);
         try {
             $student = Student::create([
@@ -72,7 +71,6 @@ class StudentController extends Controller
                 'phone' => $request->phone,
                 'dni' => $request->dni,
                 'status' => $request->status,
-                'branch_id' => $request->branch_id,
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -97,7 +95,6 @@ class StudentController extends Controller
             'phone' => 'required|string|max:12',
             'dni' => 'required|string|unique:students,dni,' . $id,
             'status' => 'required|string|in:activo,inactivo,pendiente',
-            'branch_id' => [Rule::in($branches_ids), 'required'],
         ]);
         $student = Student::find($id);
         if ($student != null) {

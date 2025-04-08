@@ -16,7 +16,7 @@ export default function CreatePlan() {
         id: '',
         name: '',
         description: '',
-        status: '',
+        status: 'activo',
     })
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -28,6 +28,7 @@ export default function CreatePlan() {
         fromData.append('name', plan.name)
         fromData.append('description', plan.description)
         fromData.append('status', plan.status)
+        console.log(plan)
         try {
             await createPlan(fromData)
             router.push('/admin/plans')
@@ -88,9 +89,10 @@ export default function CreatePlan() {
                                 id="status"
                                 className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-950 dark:text-white"
                                 onChange={handleSelectChange}
+                                value={plan.status}
                                 name="status">
-                                <option value="active">Activo</option>
-                                <option value="inactive">Inactivo</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
                             </Select>
                         </div>
                     </div>

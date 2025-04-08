@@ -14,7 +14,7 @@ class ClassSchedule extends Model
 
     public function class()
     {
-        return $this->belongsTo(Classe::class);
+        return $this->belongsTo(Classe::class, 'class_id', 'id');
     }
     public function schedule()
     {
@@ -35,5 +35,9 @@ class ClassSchedule extends Model
     public function teachers()
     {
         return $this->hasManyThrough(Teacher::class, ClassScheduleTimeslotTeacher::class, 'c_sch_ts_id', 'id', 'id', 'teacher_id');
+    }
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

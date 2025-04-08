@@ -14,7 +14,6 @@ class Student extends Model
         'dni',
         'last_name',
         'status',
-        'branch_id',
         'registration_date',
     ];
     public function scopeSearch(Builder $query, string $searchTerm, ?string $field = null): Builder

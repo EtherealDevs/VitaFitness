@@ -50,7 +50,7 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
     }
 
     return (
-        <nav className="sticky w-full z-50 bg-black/95 backdrop-blur-md py-4 px-4 sm:px-8 border-b border-white/10">
+        <nav className="sticky w-full z-50 bg-black/95 backdrop-blur-md px-4 sm:px-8 border-b border-white/10">
             <div className="container mx-auto flex justify-between items-center">
                 {/* Logo */}
                 <Link href="/" className="relative z-50">
@@ -242,7 +242,7 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         className="fixed inset-0 z-40 md:hidden">
-                        <div className="absolute inset-0 bg-black/95 backdrop-blur-md" />
+                        <div className="absolute inset-0 bg-black/50" />
                         <div className="relative h-full flex flex-col pt-24 px-8">
                             {!isLoggedIn && (
                                 <div className="flex flex-col gap-4 mb-8">
@@ -294,7 +294,7 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                             </div>
 
                             {/* Schedule Section */}
-                            <div className="mt-auto mb-8 bg-white/5 rounded-2xl p-6">
+                            <div className="mt-auto mb-8 bg-white/95 rounded-2xl p-6">
                                 <h3 className="text-xl font-semibold text-white mb-4">
                                     Horarios
                                 </h3>

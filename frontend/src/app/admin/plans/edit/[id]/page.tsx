@@ -102,9 +102,10 @@ export default function EditPlan() {
                                 id="status"
                                 className="w-full p-2 border rounded-lg bg-white dark:bg-zinc-950 dark:text-white"
                                 onChange={handleSelectChange}
+                                value={plan.status}
                                 name="status">
-                                <option value="active">Activo</option>
-                                <option value="inactive">Inactivo</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
                             </Select>
                         </div>
                     </div>

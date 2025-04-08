@@ -14,7 +14,7 @@ class PlanController extends Controller
     public function index()
     {
         try {
-            $plans = Plan::all();
+            $plans = Plan::with('classes')->get();
         } catch (\Throwable $e) {
             throw $e;
         }
@@ -34,7 +34,7 @@ class PlanController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'status' => 'require|string'
+            'status' => 'required|string',
         ]);
         try {
             $plan = Plan::create($request->all());

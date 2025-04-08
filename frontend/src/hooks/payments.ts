@@ -1,8 +1,11 @@
+import { Student } from '@/app/admin/students/columns'
 import axios from '@/lib/axios'
 
 export interface Payment {
     id: string
-    class_id: string
+    classSchedule_id: string
+    student_id: string
+    student: Student
     date_start: string
     amount: number
     status: string

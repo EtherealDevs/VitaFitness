@@ -14,7 +14,7 @@ class PaymentController extends Controller
     public function index()
     {
         try {
-            $payments = Payment::with(['student', 'plan'])->all();
+            $payments = Payment::with(['student', 'classSchedule'])->get();
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -34,7 +34,8 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'class_id' => 'required|exists:classes,id',
+            'classSchedule_id' => 'required|exists:class_schedules,id',
+            'student_id' => 'required|exists:students,id',
             'date_start' => 'required|date',
             'amount' => 'required|numeric',
             'status' => 'required|string',
@@ -61,7 +62,7 @@ class PaymentController extends Controller
     public function show(string $id)
     {
         try {
-            $payment = Payment::with(['student', 'plan'])->find($id);
+            $payment = Payment::with(['student', 'classSchedule'])->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -77,7 +78,7 @@ class PaymentController extends Controller
     public function student(string $id)
     {
         try {
-            $payment = Payment::with(['student', 'plan'])->where('student_id', $id)->get();
+            $payment = Payment::with(['student', 'classSchedule'])->where('student_id', $id)->get();
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -96,7 +97,8 @@ class PaymentController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'class_id' => 'exists:classes,id',
+            'classSchedule_id' => 'exists:class_schedules,id',
+            'student_id' => 'exists:students,id',
             'date_start' => 'date',
             'amount' => 'numeric',
             'status' => 'string',
