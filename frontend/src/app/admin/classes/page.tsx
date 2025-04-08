@@ -1,11 +1,46 @@
 'use client'
 
-import { useClasses } from "@/hooks/classes"
-import { useEffect, useState } from "react"
+import { useClasses } from '@/hooks/classes'
+import { useEffect, useState } from 'react'
+import { Button } from '../components/ui/button'
+import { Plus } from 'lucide-react'
+import { DataTable } from '../components/ui/data-table'
+import type { ColumnDef } from '@tanstack/react-table'
+import Link from 'next/link'
+import { toast } from '@/hooks/use-toast'
+import { ToastAction } from '@radix-ui/react-toast'
+interface Schedule {
+    id: number
+    selectedDays: string[]
+    time_start: string
+    time_end: string
+}
 
-export default function Class() {
-    const { getClasses, getClass, createClass, updateClass, deleteClass } = useClasses()
-    const [classes, setClasses] = useState<any[]>()
+interface Plan {
+    id: number
+    name: string
+    description: string
+    status: string
+}
+
+interface Branch {
+    id: number
+    name: string
+    address: string
+}
+
+interface Class {
+    id: string
+    name: string
+    max_students: number
+    plan: Plan
+    branch: Branch
+    precio: number
+    schedules: Schedule[]
+}
+export default function ClassPage() {
+    const { getClasses, deleteClass } = useClasses()
+    const [classes, setClasses] = useState<Class[]>()
     // Fetch data from API
     const fetchData = async () => {
         try {
@@ -16,17 +51,137 @@ export default function Class() {
             throw error
         }
     }
-    console.log(classes)
     // Load all on first render
     useEffect(() => {
         fetchData()
     }, [])
-    console.log(classes);
+    const handleDelete = async (id: string) => {
+        const confirmed = window.confirm(
+            '¿Estás seguro que querés eliminar esta clase? Esta acción no se puede deshacer.',
+        )
+        if (!confirmed) return
+        try {
+            await deleteClass(id)
+            setClasses(prev => prev?.filter(cls => cls.id !== id))
+            toast({
+                title: 'Clase eliminada',
+                description: `La clase con ID ${id} fue eliminada.`,
+                action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
+            })
+        } catch (error) {
+            console.error('Error al eliminar clase:', error)
+        }
+    }
+    const columns: ColumnDef<Class>[] = [
+        {
+            accessorKey: 'name',
+            header: 'Clase',
+            cell: ({ row }) => row.original.id,
+        },
+        {
+            accessorKey: 'branch',
+            header: 'Sucursal',
+            cell: ({ row }) => {
+                const branch = row.original.branch
+                return (
+                    <div>
+                        <div className="font-semibold">{branch.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                            {branch.address}
+                        </div>
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: 'precio',
+            header: 'Precio',
+            cell: ({ row }) => {
+                const precio = row.original.precio
+                return (
+                    <div className="text-sm text-muted-foreground">
+                        ${precio}
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: 'plan',
+            header: 'Plan',
+            cell: ({ row }) => {
+                const plan = row.original.plan
+                return (
+                    <div>
+                        <div className="font-semibold">{plan.name}</div>
+                    </div>
+                )
+            },
+        },
+        {
+            accessorKey: 'max_students',
+            header: 'Máx. alumnos',
+            cell: ({ row }) => row.original.max_students,
+        },
+        {
+            accessorKey: 'schedules',
+            header: 'Horarios',
+            cell: ({ row }) => {
+                const schedules = row.original.schedules
+                return (
+                    <ul className="text-sm leading-tight">
+                        {schedules.map((s, i) => (
+                            <li key={i}>
+                                <span className="font-medium">
+                                    {s.selectedDays.join(', ')}
+                                </span>{' '}
+                                — {s.time_start} a {s.time_end}
+                            </li>
+                        ))}
+                    </ul>
+                )
+            },
+        },
+        {
+            id: 'actions',
+            header: 'Acciones',
+            cell: ({ row }) => {
+                const cls = row.original
+                return (
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                            Editar
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(cls.id)}>
+                            Eliminar
+                        </Button>
+                    </div>
+                )
+            },
+        },
+    ]
 
     return (
-        <>
-            <h1>Page</h1>
-            <p>Page content</p>
-        </>
+        <div className="py-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold">Permisos</h1>
+                <Link href="/admin/classes/create">
+                    <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Permiso
+                    </Button>
+                </Link>
+            </div>
+            <div className="mt-6">
+                <DataTable
+                    columns={columns}
+                    data={classes || []}
+                    filterColumn="name"
+                    filterPlaceholder="Filtrar clases..."
+                />
+            </div>
+        </div>
     )
 }

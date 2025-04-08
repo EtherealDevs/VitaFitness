@@ -9,8 +9,8 @@ export interface Class {
     id: string
     max_students: number
     precio: number
-    branch_id: string
-    plan_id: string
+    branch_id?: string
+    plan_id?: string
     plan?: Plan
     branch?: Branch
 }
