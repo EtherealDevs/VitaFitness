@@ -25,11 +25,14 @@ class ClassScheduleResource extends JsonResource
         }
         return [
             'id' => $this->id,
-            'class' => new ClasseResource($this->class),
-            'schedule' => new ScheduleResource($this->schedule),
+            'class' => new ClasseResource($this->whenLoaded('class')),
+            'schedule' => new ScheduleResource($this->whenLoaded('schedule')),
             'selectedDays' => $selectedDays,
             'time_start' => $timeslotStartTime,
             'time_end' => $timeslotEndTime,
+            'timeslots' => ClassScheduleTimeslotResource::collection($this->whenLoaded('classScheduleTimeslots')),
+            'students' => StudentResource::collection($this->whenLoaded('students')),
+            'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
         ];
     }
 }

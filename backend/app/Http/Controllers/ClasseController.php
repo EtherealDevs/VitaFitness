@@ -12,10 +12,12 @@ class ClasseController extends Controller
     {
         try {
             $classes = Classe::all();
+            $classes->load('classSchedules.classScheduleTimeslots.students', 'classSchedules.classScheduleTimeslots.teachers');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
         $classes = ClasseResource::collection($classes);
+        // dd($classes);
         $data = [
             'classes' => $classes,
             'message' => 'Classes retrieved successfully',
@@ -28,7 +30,7 @@ class ClasseController extends Controller
     public function show(string $id)
     {
         try {
-            $classe = Classe::with(['plan', 'branch'])->find($id);
+            $classe = Classe::with(['classSchedules.classScheduleTimeslots.students', 'classSchedules.classScheduleTimeslots.teachers'])->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

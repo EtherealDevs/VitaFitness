@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Classe extends Model
 {
-    protected $with = ['branch', 'plan', 'schedules'];
+    protected $with = ['branch', 'plan', 'classSchedules'];
+    //'classSchedules'
 
     protected $fillable = ['precio', 'max_students', 'branch_id', 'plan_id', 'schedule_id', 'teacher_id', 'student_id', 'timeslot_id'];
 
@@ -33,7 +34,7 @@ class Classe extends Model
 
     public function classSchedules()
     {
-        return $this->hasMany(ClassSchedule::class);
+        return $this->hasMany(ClassSchedule::class, 'class_id', 'id');
     }
 
     // public function timeslot()

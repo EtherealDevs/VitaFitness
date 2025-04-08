@@ -15,7 +15,13 @@ class ClassScheduleController extends Controller
 {
     public function index()
     {
-        $classSchedules = ClassSchedule::all();
+        try {
+            $classSchedules = ClassSchedule::all();
+            $classSchedules->load('class', 'schedule', 'students', 'teachers');
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        // return view('index-classSchedule', compact('classSchedules'));
         $data = [
             'classSchedules' => ClassScheduleResource::collection($classSchedules),
             'message' => 'ClassSchedules retrieved successfully',

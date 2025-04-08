@@ -16,6 +16,7 @@ export default function Class() {
             throw error
         }
     }
+    console.log(classes)
     // Load all on first render
     useEffect(() => {
         fetchData()
@@ -26,21 +27,6 @@ export default function Class() {
         <>
             <h1>Page</h1>
             <p>Page content</p>
-            {/* Render classes */}
-            {classes?.map((c) => (
-                <div key={c.id}>
-                    <h2>{c.plan.name}</h2>
-                    <p>{c.plan.description}</p>
-                    <p>{c.plan.status}</p>
-                    <h3>{c.schedules[0]?.days}</h3>
-                    <h4>{c.schedules[0]?.timeslots[0]?.hour}</h4>
-                    <hr />
-                    {/* <p>{c.student.name}</p>
-                    <p>{c.student.last_name}</p>
-                    <p>{c.student.dni}</p> */}
-                </div>
-
-            ))}
         </>
     )
 }

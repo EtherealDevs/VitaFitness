@@ -32,4 +32,8 @@ class ClassSchedule extends Model
     {
         return $this->hasManyThrough(Student::class, ClassScheduleTimeslotStudent::class, 'c_sch_ts_id', 'id', 'id', 'student_id');
     }
+    public function teachers()
+    {
+        return $this->hasManyThrough(Teacher::class, ClassScheduleTimeslotTeacher::class, 'c_sch_ts_id', 'id', 'id', 'teacher_id');
+    }
 }
