@@ -12,6 +12,7 @@ use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TeacherSchedulesController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('products', ProductController::class)->except(['index', 'show']);
     Route::apiResource('plans', PlanController::class)->except(['index', 'show']);
     Route::apiResource('schedules', ClassScheduleTimeslotController::class)->except(['index', 'show']);
+    Route::apiResource('users', UserController::class)->only(['index', 'update']);
+    Route::get('users/roles', [UserController::class, 'roles']);
 });
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 Route::apiResource('plans', PlanController::class)->only(['index', 'show']);
