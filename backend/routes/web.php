@@ -3,8 +3,10 @@
 use App\Http\Controllers\ClasseController;
 use App\Http\Controllers\ClassScheduleController;
 use App\Http\Controllers\ClassScheduleTimeslotController;
+use App\Http\Controllers\ClassScheduleTimeslotStudentController;
 use App\Http\Controllers\TestController;
 use App\Models\ClassSchedule;
+use App\Models\ClassScheduleTimeslotStudent;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,5 +23,11 @@ Route::get('testing/class/{id}/show', [ClasseController::class, 'show'])->name('
 Route::get('testing/class/create', [ClasseController::class, 'create'])->name('testing.class.create');
 Route::get('testing/class/{id}/edit', [ClasseController::class, 'edit'])->name('testing.class.edit');
 Route::post('testing/class/{id}', [ClasseController::class, 'update'])->name('testing.class.update');
+
+Route::get('testing/classStudents/{id}/edit', [ClassScheduleTimeslotStudentController::class, 'edit'])->name('testing.class.students.edit');
+Route::get('testing/classStudents/create', [ClassScheduleTimeslotStudentController::class, 'create'])->name('testing.class.students.create'); 
+Route::post('testing/classStudents', [ClassScheduleTimeslotStudentController::class, 'store'])->name('testing.class.students.store');
+Route::post('testing/classStudents/{id}', [ClassScheduleTimeslotStudentController::class, 'update'])->name('testing.class.students.update');
+
 
 require __DIR__.'/auth.php';

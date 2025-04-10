@@ -22,8 +22,12 @@ class ClassScheduleTimeslotStudent extends Model
         return $this->belongsTo(Student::class, 'student_id');
     }
 
-    public function timeslot()
+    public function scheduleTimeslot()
     {
         return $this->belongsTo(ClassScheduleTimeslot::class, 'c_sch_ts_id');
+    }
+    public function timeslot()
+    {
+        return $this->hasOneThrough(TimeSlot::class, ClassScheduleTimeslot::class, 'id', 'id', 'c_sch_ts_id', 'timeslot_id');
     }
 }
