@@ -21,6 +21,7 @@ import {
     AvatarFallback,
     AvatarImage,
 } from '@/app/admin/components/ui/avatar'
+import { useAuth } from '@/hooks/auth'
 
 interface NavbarProps {
     isLoggedIn?: boolean
@@ -34,7 +35,7 @@ interface NavbarProps {
 const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-
+    const {logout} = useAuth()
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen)
         if (!isMenuOpen) {
@@ -45,7 +46,8 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
     }
 
     const handleLogout = () => {
-        // Implementar lógica de logout
+       
+        logout()
         console.log('Logout')
     }
 
