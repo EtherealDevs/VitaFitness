@@ -75,22 +75,30 @@ class ClassScheduleTimeslotStudentController extends Controller
 
         return view('edit-classStudent', ['classScheduleTimeslot' => $classScheduleTimeslot, 'students' => $students]);
     }
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
         $request->validate([
-            'student_id' => 'required|integer|exists:students,id',
+            'students' => 'required|array',
+            'students.*' => 'required|integer|exists:students,id',
             'c_sch_ts_id' => 'required|integer|exists:class_schedule_timeslots,id',
         ]);
-        dd($request);
-        try {
-            $classScheduleTimeslotStudent = ClassScheduleTimeslotStudent::find($id);
-            $classScheduleTimeslotStudent->update($request->all());
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+        
+        $classScheduleTimeslot = ClassScheduleTimeslot::find($request->c_sch_ts_id);
+        foreach ($request->students as $student) {
+            $student = Student::find($student);
+            try {
+                $classScheduleTimeslot->students()->sync($student);
+                
+            } catch (\Exception $e) {
+                return response()->json(['message' => $e->getMessage()], 500);
+            }
         }
-        $classScheduleTimeslotStudent = new ClassScheduleTimeslotStudentResource($classScheduleTimeslotStudent);
+        $classScheduleTimeslotStudents = ClassScheduleTimeslotStudent::where('c_sch_ts_id', $request->c_sch_ts_id)->whereIn('student_id', $request->students)->get();
+        
+        // collection of resources
+        $classScheduleTimeslotStudentsResource = ClassScheduleTimeslotStudentResource::collection($classScheduleTimeslotStudents);
         $data = [
-            'classScheduleTimeslotStudent' => $classScheduleTimeslotStudent,
+            'classScheduleTimeslotStudents' => $classScheduleTimeslotStudentsResource,
             'message' => 'ClassScheduleTimeslotStudent updated successfully',
             'status' => 'success (204)'
         ];
