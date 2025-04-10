@@ -1,0 +1,382 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Home, CreditCard, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import Link from 'next/link'
+
+// Types for our payment data
+interface Payment {
+    id: string
+    date: string // ISO date string
+    amount: number
+    className: string
+    status: 'paid' | 'pending' | 'overdue'
+}
+
+interface PaymentSummary {
+    isUpToDate: boolean
+    nextPaymentDate: string | null
+    nextPaymentAmount: number | null
+    nextPaymentClass: string | null
+    totalPaid: number
+    paymentHistory: Payment[]
+}
+
+// Format currency helper
+const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+    }).format(amount)
+}
+
+// Format date helper
+const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('es-AR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    })
+}
+
+// Calculate days remaining or overdue
+const getDaysRemaining = (dateString: string): number => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const targetDate = new Date(dateString)
+    targetDate.setHours(0, 0, 0, 0)
+
+    const diffTime = targetDate.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    return diffDays
+}
+
+// Mock API function to simulate fetching payment data
+const fetchPaymentData = async (): Promise<PaymentSummary> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 800))
+
+    // Current date for generating relative dates
+    const today = new Date()
+
+    // Generate some sample payment history
+    const paymentHistory: Payment[] = [
+        {
+            id: 'pay_1',
+            date: new Date(
+                today.getFullYear(),
+                today.getMonth() - 2,
+                15,
+            ).toISOString(),
+            amount: 5000,
+            className: 'Yoga',
+            status: 'paid',
+        },
+        {
+            id: 'pay_2',
+            date: new Date(
+                today.getFullYear(),
+                today.getMonth() - 1,
+                15,
+            ).toISOString(),
+            amount: 5000,
+            className: 'Yoga',
+            status: 'paid',
+        },
+        {
+            id: 'pay_3',
+            date: new Date(
+                today.getFullYear(),
+                today.getMonth(),
+                15,
+            ).toISOString(),
+            amount: 5500,
+            className: 'Yoga + Pilates',
+            status: 'paid',
+        },
+    ]
+
+    // Calculate total paid
+    const totalPaid = paymentHistory.reduce((sum, payment) => {
+        return payment.status === 'paid' ? sum + payment.amount : sum
+    }, 0)
+
+    // Determine next payment
+    const nextPaymentDate = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        15,
+    ).toISOString()
+    const isUpToDate = true // In a real app, this would be calculated based on business rules
+
+    return {
+        isUpToDate,
+        nextPaymentDate,
+        nextPaymentAmount: 5500,
+        nextPaymentClass: 'Yoga + Pilates',
+        totalPaid,
+        paymentHistory,
+    }
+}
+
+export default function PaymentHistory() {
+    // State variables
+    const [loading, setLoading] = useState<boolean>(true)
+    const [error, setError] = useState<string | null>(null)
+    const [paymentData, setPaymentData] = useState<PaymentSummary | null>(null)
+
+    // Fetch payment data on component mount
+    useEffect(() => {
+        let isMounted = true
+
+        const getPaymentData = async () => {
+            if (!isMounted) return
+
+            setLoading(true)
+            setError(null)
+
+            try {
+                const data = await fetchPaymentData()
+
+                if (isMounted) {
+                    setPaymentData(data)
+                }
+            } catch (err) {
+                if (isMounted) {
+                    setError('Error al cargar los datos de pagos')
+                    console.error(err)
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false)
+                }
+            }
+        }
+
+        getPaymentData()
+
+        // Cleanup function
+        return () => {
+            isMounted = false
+        }
+    }, [])
+
+    // Get status details for next payment
+    const getNextPaymentStatus = () => {
+        if (!paymentData?.nextPaymentDate) return null
+
+        const daysRemaining = getDaysRemaining(paymentData.nextPaymentDate)
+
+        if (daysRemaining < 0) {
+            return {
+                label: 'Pago vencido',
+                daysText: `Vencido hace ${Math.abs(daysRemaining)} días`,
+                colorClass: 'text-red-600 dark:text-red-400',
+                bgClass: 'bg-red-100 dark:bg-red-900/30',
+                icon: (
+                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                ),
+            }
+        } else if (daysRemaining === 0) {
+            return {
+                label: 'Pago hoy',
+                daysText: 'Vence hoy',
+                colorClass: 'text-amber-600 dark:text-amber-400',
+                bgClass: 'bg-amber-100 dark:bg-amber-900/30',
+                icon: (
+                    <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                ),
+            }
+        } else if (daysRemaining <= 7) {
+            return {
+                label: 'Próximo pago',
+                daysText: `Vence en ${daysRemaining} días`,
+                colorClass: 'text-amber-600 dark:text-amber-400',
+                bgClass: 'bg-amber-100 dark:bg-amber-900/30',
+                icon: (
+                    <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                ),
+            }
+        } else {
+            return {
+                label: 'Próximo pago',
+                daysText: `Vence en ${daysRemaining} días`,
+                colorClass: 'text-green-600 dark:text-green-400',
+                bgClass: 'bg-green-100 dark:bg-green-900/30',
+                icon: (
+                    <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
+                ),
+            }
+        }
+    }
+
+    const nextPaymentStatus = paymentData ? getNextPaymentStatus() : null
+
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center p-4 px-10 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+            {/* Blurred background effect */}
+            <div className="absolute inset-0 backdrop-blur-sm z-0"></div>
+            <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
+
+            {/* Payment History Card */}
+            <div className="w-full max-w-md shadow-lg relative z-10 border border-opacity-50 rounded-lg bg-white/50 dark:bg-slate-900/80 backdrop-blur overflow-hidden">
+                {/* Card Header */}
+                <div className="flex flex-col items-center p-6 pb-2">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                        <CreditCard className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                        <h2 className="text-2xl font-bold text-center">
+                            Estado de Pagos
+                        </h2>
+                    </div>
+                </div>
+
+                {/* Card Content */}
+                {loading ? (
+                    <div className="flex justify-center items-center py-16">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    </div>
+                ) : error ? (
+                    <div className="text-center text-red-500 py-16">
+                        {error}
+                    </div>
+                ) : paymentData ? (
+                    <div className="p-6 space-y-6">
+                        {/* Payment Status Summary */}
+                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-4">
+                            <div className="flex items-center gap-2">
+                                {paymentData.isUpToDate ? (
+                                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                ) : (
+                                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                                )}
+                                <h3 className="font-semibold text-lg">
+                                    {paymentData.isUpToDate
+                                        ? 'Pagos al día'
+                                        : 'Pagos pendientes'}
+                                </h3>
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        Total pagado
+                                    </p>
+                                    <p className="font-semibold text-lg">
+                                        {formatCurrency(paymentData.totalPaid)}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        Clases activas
+                                    </p>
+                                    <p className="font-medium">
+                                        {paymentData.nextPaymentClass}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Next Payment */}
+                        {paymentData.nextPaymentDate && nextPaymentStatus && (
+                            <div
+                                className={`rounded-lg p-4 ${nextPaymentStatus.bgClass}`}>
+                                <div className="flex justify-between items-center mb-3">
+                                    <div className="flex items-center gap-2">
+                                        {nextPaymentStatus.icon}
+                                        <h3
+                                            className={`font-semibold ${nextPaymentStatus.colorClass}`}>
+                                            {nextPaymentStatus.label}
+                                        </h3>
+                                    </div>
+                                    <span
+                                        className={`text-sm font-medium ${nextPaymentStatus.colorClass}`}>
+                                        {nextPaymentStatus.daysText}
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                                            Monto
+                                        </p>
+                                        <p className="font-semibold">
+                                            {formatCurrency(
+                                                paymentData.nextPaymentAmount ||
+                                                    0,
+                                            )}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                                            Fecha
+                                        </p>
+                                        <p className="font-medium">
+                                            {formatDate(
+                                                paymentData.nextPaymentDate,
+                                            )}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Payment History */}
+                        <div className="space-y-3">
+                            <h3 className="font-semibold text-lg">
+                                Historial de pagos
+                            </h3>
+
+                            {paymentData.paymentHistory.length > 0 ? (
+                                <div className="space-y-3">
+                                    {paymentData.paymentHistory.map(payment => (
+                                        <div
+                                            key={payment.id}
+                                            className="bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium rounded-md">
+                                                    {payment.className}
+                                                </span>
+                                                <span className="text-sm font-medium">
+                                                    {formatDate(payment.date)}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                                                        Pagado
+                                                    </span>
+                                                </div>
+                                                <span className="font-semibold">
+                                                    {formatCurrency(
+                                                        payment.amount,
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                                    No hay pagos registrados
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : null}
+
+                {/* Back to Main Page Button */}
+                <div className="p-4 pt-2">
+                    <Link href="/">
+                        <button className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <Home className="h-5 w-5" />
+                            Volver a la página principal
+                        </button>
+                    </Link>
+                </div>
+            </div>
+        </div>
+    )
+}

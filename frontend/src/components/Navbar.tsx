@@ -9,7 +9,6 @@ import {
     ChevronRight,
     User,
     LogOut,
-    Calendar,
     CreditCard,
     ChevronDown,
     LayoutDashboard,
@@ -149,28 +148,22 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                                         </div>
                                     </div>
                                     <Link
-                                        href="/perfil"
+                                        href="/profile"
                                         className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">
                                         <User className="inline-block w-4 h-4 mr-2" />
                                         Mi Perfil
                                     </Link>
                                     <Link
-                                        href="/asistencias"
+                                        href="/assist"
                                         className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">
                                         <Clock className="inline-block w-4 h-4 mr-2" />
                                         Mis Asistencias
                                     </Link>
                                     <Link
-                                        href="/cuotas"
+                                        href="/payments"
                                         className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">
                                         <CreditCard className="inline-block w-4 h-4 mr-2" />
                                         Mis Cuotas
-                                    </Link>
-                                    <Link
-                                        href="/reservas"
-                                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">
-                                        <Calendar className="inline-block w-4 h-4 mr-2" />
-                                        Mis Reservas
                                     </Link>
                                     {user?.roles.some(
                                         role => role.name === 'admin',
