@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -21,6 +21,7 @@ import {
     AvatarImage,
 } from '@/app/admin/components/ui/avatar'
 import { useAuth } from '@/hooks/auth'
+import { cn } from '@/lib/utils'
 
 interface NavbarProps {
     isLoggedIn?: boolean
@@ -34,7 +35,52 @@ interface NavbarProps {
 const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-    const {logout} = useAuth()
+    const [isScrolled, setIsScrolled] = useState(false)
+    const [activeSection, setActiveSection] = useState('inicio')
+    const { logout } = useAuth()
+
+    // Detectar scroll para cambiar el estilo del navbar
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 10) {
+                setIsScrolled(true)
+            } else {
+                setIsScrolled(false)
+            }
+        }
+
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    // Detectar sección activa basada en el scroll
+    useEffect(() => {
+        const handleSectionScroll = () => {
+            const sections = [
+                'inicio',
+                'planes',
+                'productos',
+                'compromiso',
+                'resenas',
+                'contacto',
+            ]
+
+            for (const section of sections) {
+                const element = document.getElementById(section)
+                if (element) {
+                    const rect = element.getBoundingClientRect()
+                    if (rect.top <= 100 && rect.bottom >= 100) {
+                        setActiveSection(section)
+                        break
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('scroll', handleSectionScroll)
+        return () => window.removeEventListener('scroll', handleSectionScroll)
+    }, [])
+
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen)
         if (!isMenuOpen) {
@@ -45,14 +91,39 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
     }
 
     const handleLogout = () => {
-       
         logout()
+        setIsUserMenuOpen(false)
         console.log('Logout')
     }
 
+    // Navegación a secciones con scroll suave
+    const scrollToSection = (sectionId: string) => {
+        setIsMenuOpen(false)
+        const element = document.getElementById(sectionId)
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' })
+        }
+    }
+
+    // Mapeo de IDs de sección a rutas de navegación (removed unused variable)
+
+    // Opciones de navegación principal
+    const navItems = [
+        { id: 'inicio', label: 'Inicio', route: '/' },
+        { id: 'planes', label: 'Planes', route: '#services' },
+        { id: 'productos', label: 'Productos', route: '#productos' },
+        { id: 'compromiso', label: 'Nuestro Compromiso', route: '#compromiso' },
+        { id: 'resenas', label: 'Reseñas', route: '#resenas' },
+        { id: 'contacto', label: 'Contacto', route: '#contact' },
+    ]
+
     return (
-        <nav className="sticky w-full z-50 bg-black/95 backdrop-blur-md px-4 sm:px-8 border-b border-white/10">
-            <div className="container mx-auto flex justify-between items-center">
+        <nav
+            className={cn(
+                'sticky top-0 w-full z-50 transition-all duration-300 px-4 sm:px-8 border-b border-white/10',
+                isScrolled ? 'bg-black/95 backdrop-blur-md' : 'bg-black',
+            )}>
+            <div className="container mx-auto flex justify-between items-center h-16 md:h-20">
                 {/* Logo */}
                 <Link href="/" className="relative z-50">
                     <Image
@@ -66,36 +137,28 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex space-x-4 lg:space-x-8 text-white text-sm font-semibold">
-                    <Link
-                        href="/"
-                        className="hover:text-gray-300 transition-colors">
-                        Inicio
-                    </Link>
-                    <Link
-                        href="#services"
-                        className="hover:text-gray-300 transition-colors">
-                        Planes
-                    </Link>
-                    <Link
-                        href="#productos"
-                        className="hover:text-gray-300 transition-colors">
-                        Productos
-                    </Link>
-                    <Link
-                        href="#compromiso"
-                        className="hover:text-gray-300 transition-colors">
-                        Nuestro Compromiso
-                    </Link>
-                    <Link
-                        href="#resenas"
-                        className="hover:text-gray-300 transition-colors">
-                        Reseñas
-                    </Link>
-                    <Link
-                        href="#contact"
-                        className="hover:text-gray-300 transition-colors">
-                        Contacto
-                    </Link>
+                    {navItems.map(item => (
+                        <Link
+                            key={item.id}
+                            href={item.route}
+                            onClick={e => {
+                                if (item.route.startsWith('#')) {
+                                    e.preventDefault()
+                                    scrollToSection(item.id)
+                                }
+                            }}
+                            className={cn(
+                                'hover:text-gray-300 transition-colors relative py-2',
+                                activeSection === item.id
+                                    ? 'text-white'
+                                    : 'text-gray-300',
+                            )}>
+                            {item.label}
+                            {activeSection === item.id && (
+                                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-400" />
+                            )}
+                        </Link>
+                    ))}
                 </div>
 
                 {/* Auth Section */}
@@ -103,12 +166,12 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                     {isLoggedIn ? (
                         <div className="relative">
                             <button
-                                className="flex items-center gap-2 hover:opacity-80 transition-opacity "
+                                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                                 onClick={() =>
                                     setIsUserMenuOpen(!isUserMenuOpen)
                                 }>
-                                <div className="w-10 h-10 rounded-full overflow-hidden border-2 hover:border-purple-500 focus:border-purple-500 duration-100">
-                                    <Avatar className="h-8 w-8 ">
+                                <div className="w-10 h-10 rounded-full overflow-hidden border-2 hover:border-green-500 focus:border-green-500 duration-100">
+                                    <Avatar className="h-8 w-8">
                                         <AvatarImage
                                             src="/avatars/01.png"
                                             alt="@username"
@@ -149,19 +212,28 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                                     </div>
                                     <Link
                                         href="/profile"
-                                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">
+                                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
+                                        onClick={() =>
+                                            setIsUserMenuOpen(false)
+                                        }>
                                         <User className="inline-block w-4 h-4 mr-2" />
                                         Mi Perfil
                                     </Link>
                                     <Link
                                         href="/assist"
-                                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">
+                                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
+                                        onClick={() =>
+                                            setIsUserMenuOpen(false)
+                                        }>
                                         <Clock className="inline-block w-4 h-4 mr-2" />
                                         Mis Asistencias
                                     </Link>
                                     <Link
                                         href="/payments"
-                                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800">
+                                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
+                                        onClick={() =>
+                                            setIsUserMenuOpen(false)
+                                        }>
                                         <CreditCard className="inline-block w-4 h-4 mr-2" />
                                         Mis Cuotas
                                     </Link>
@@ -170,7 +242,10 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                                     ) && (
                                         <Link
                                             href="/admin"
-                                            className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 border-t border-gray-800">
+                                            className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 border-t border-gray-800"
+                                            onClick={() =>
+                                                setIsUserMenuOpen(false)
+                                            }>
                                             <LayoutDashboard className="inline-block w-4 h-4 mr-2" />
                                             Panel de Admin
                                         </Link>
@@ -236,10 +311,33 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 z-40 md:hidden">
-                        <div className="absolute inset-0 bg-black/50" />
+                        className="fixed inset-0 z-40 md:hidden bg-black/95 backdrop-blur-md">
                         <div className="relative h-full flex flex-col pt-24 px-8">
-                            {!isLoggedIn && (
+                            {isLoggedIn ? (
+                                <div className="flex items-center gap-4 mb-8 p-4 bg-gray-900/50 rounded-lg">
+                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-green-500">
+                                        <Avatar className="h-full w-full">
+                                            <AvatarImage
+                                                src="/avatars/01.png"
+                                                alt="@username"
+                                            />
+                                            <AvatarFallback className="text-xl font-bold">
+                                                {user?.name
+                                                    .substring(0, 2)
+                                                    .toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-base font-medium text-white">
+                                            {user?.name}
+                                        </span>
+                                        <span className="text-sm text-gray-400">
+                                            {user?.email}
+                                        </span>
+                                    </div>
+                                </div>
+                            ) : (
                                 <div className="flex flex-col gap-4 mb-8">
                                     <Link
                                         href="/login"
@@ -257,30 +355,32 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                             )}
 
                             <div className="space-y-6">
-                                {[
-                                    { href: '/', label: 'Inicio' },
-                                    { href: '#services', label: 'Planes' },
-                                    { href: '#productos', label: 'Productos' },
-                                    {
-                                        href: '#compromiso',
-                                        label: 'Nuestro Compromiso',
-                                    },
-                                    { href: '#resenas', label: 'Reseñas' },
-                                    { href: '#contact', label: 'Contacto' },
-                                ].map((item, index) => (
+                                {navItems.map((item, index) => (
                                     <motion.div
-                                        key={item.href}
+                                        key={item.id}
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{
                                             delay: 0.1 + index * 0.1,
                                         }}>
                                         <Link
-                                            href={item.href}
-                                            className="flex items-center justify-between text-white text-2xl font-light hover:text-gray-300 transition-colors"
-                                            onClick={() =>
-                                                setIsMenuOpen(false)
-                                            }>
+                                            href={item.route}
+                                            className={cn(
+                                                'flex items-center justify-between text-2xl font-light transition-colors',
+                                                activeSection === item.id
+                                                    ? 'text-white'
+                                                    : 'text-gray-300 hover:text-white',
+                                            )}
+                                            onClick={e => {
+                                                if (
+                                                    item.route.startsWith('#')
+                                                ) {
+                                                    e.preventDefault()
+                                                    scrollToSection(item.id)
+                                                } else {
+                                                    setIsMenuOpen(false)
+                                                }
+                                            }}>
                                             {item.label}
                                             <ChevronRight className="h-6 w-6 text-gray-400" />
                                         </Link>
@@ -288,46 +388,60 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
                                 ))}
                             </div>
 
-                            {/* Schedule Section */}
-                            <div className="mt-auto mb-8 bg-white/95 rounded-2xl p-6">
-                                <h3 className="text-xl font-semibold text-white mb-4">
-                                    Horarios
-                                </h3>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <p className="text-white font-medium">
-                                            Lunes y Martes
-                                        </p>
-                                        <p className="text-gray-400">
-                                            8:00 AM - 10:00 PM
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-white font-medium">
-                                            Miércoles y Jueves
-                                        </p>
-                                        <p className="text-gray-400">
-                                            10:00 AM - 10:00 PM
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-white font-medium">
-                                            Viernes
-                                        </p>
-                                        <p className="text-gray-400">
-                                            8:00 AM - 8:00 PM
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-white font-medium">
-                                            Sábados
-                                        </p>
-                                        <p className="text-gray-400">
-                                            8:00 AM - 2:00 PM
-                                        </p>
-                                    </div>
+                            {isLoggedIn && (
+                                <div className="mt-8 space-y-4 border-t border-gray-800 pt-6">
+                                    <Link
+                                        href="/profile"
+                                        className="flex items-center text-gray-300 hover:text-white"
+                                        onClick={() => setIsMenuOpen(false)}>
+                                        <User className="w-5 h-5 mr-3" />
+                                        <span className="text-lg">
+                                            Mi Perfil
+                                        </span>
+                                    </Link>
+                                    <Link
+                                        href="/assist"
+                                        className="flex items-center text-gray-300 hover:text-white"
+                                        onClick={() => setIsMenuOpen(false)}>
+                                        <Clock className="w-5 h-5 mr-3" />
+                                        <span className="text-lg">
+                                            Mis Asistencias
+                                        </span>
+                                    </Link>
+                                    <Link
+                                        href="/payments"
+                                        className="flex items-center text-gray-300 hover:text-white"
+                                        onClick={() => setIsMenuOpen(false)}>
+                                        <CreditCard className="w-5 h-5 mr-3" />
+                                        <span className="text-lg">
+                                            Mis Cuotas
+                                        </span>
+                                    </Link>
+                                    {user?.roles.some(
+                                        role => role.name === 'admin',
+                                    ) && (
+                                        <Link
+                                            href="/admin"
+                                            className="flex items-center text-gray-300 hover:text-white"
+                                            onClick={() =>
+                                                setIsMenuOpen(false)
+                                            }>
+                                            <LayoutDashboard className="w-5 h-5 mr-3" />
+                                            <span className="text-lg">
+                                                Panel de Admin
+                                            </span>
+                                        </Link>
+                                    )}
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center text-red-500 hover:text-red-400 w-full text-left">
+                                        <LogOut className="w-5 h-5 mr-3" />
+                                        <span className="text-lg">
+                                            Cerrar Sesión
+                                        </span>
+                                    </button>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </motion.div>
                 )}
