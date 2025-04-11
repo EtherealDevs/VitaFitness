@@ -31,13 +31,13 @@ export default function ProfileCard() {
     })
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="min-h-screen w-full flex items-center justify-center p-4 bg-black">
             {/* Blurred background effect */}
             <div className="absolute inset-0 backdrop-blur-sm z-0"></div>
             <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
 
             {/* Profile Card */}
-            <div className="w-full max-w-md shadow-lg relative z-10 border border-opacity-50 rounded-lg bg-white/50 dark:bg-slate-900/80 backdrop-blur overflow-hidden">
+            <div className="w-full max-w-md shadow-lg relative z-10 border border-opacity-50 rounded-lg bg-white/85   dark:bg-slate-900/80 backdrop-blur overflow-hidden">
                 {/* Card Header */}
                 <div className="flex flex-col items-center p-6 pb-2">
                     {/* Avatar */}
@@ -69,7 +69,7 @@ export default function ProfileCard() {
                             <Phone className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-bold text-gray-700 dark:text-gray-400">
                                 Teléfono
                             </p>
                             <p className="font-medium text-gray-700 dark:text-gray-500">

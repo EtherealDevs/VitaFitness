@@ -265,7 +265,7 @@ export default function Assists() {
         return (
             <button
                 key={`day-${day}`}
-                className={`aspect-square rounded-full flex items-center justify-center text-sm relative
+                className={`aspect-square rounded-full flex items-center text-gray-400 justify-center text-sm relative
           ${
               hasAttendance
                   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-medium'
@@ -286,18 +286,18 @@ export default function Assists() {
     }
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4 px-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="min-h-screen w-full flex items-center justify-center p-4 px-6 bg-black">
             {/* Blurred background effect */}
             <div className="absolute inset-0 backdrop-blur-sm z-0"></div>
             <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
 
             {/* Assists Card */}
-            <div className="w-full max-w-md shadow-lg relative z-10 border border-opacity-50 rounded-lg bg-white/50 dark:bg-slate-900/80 backdrop-blur overflow-hidden">
+            <div className="w-full max-w-md shadow-lg relative z-10 border border-opacity-50 rounded-lg bg-white/85 dark:bg-slate-900/80 backdrop-blur overflow-hidden">
                 {/* Card Header */}
                 <div className="flex flex-col items-center p-6 pb-2">
                     <div className="flex items-center justify-center gap-2 mb-4">
                         <Calendar className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                        <h2 className="text-2xl font-bold text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 text-center">
                             Asistencias
                         </h2>
                     </div>
@@ -306,16 +306,16 @@ export default function Assists() {
                     <div className="flex items-center justify-between w-full mb-4">
                         <button
                             onClick={() => navigateMonth(-1)}
-                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                            className="p-2 rounded-full text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                             aria-label="Mes anterior">
                             <ChevronLeft className="h-5 w-5" />
                         </button>
-                        <h3 className="text-lg font-medium">
+                        <h3 className="text-lg text-gray-900 font-medium">
                             {monthNames[currentMonth]} {currentYear}
                         </h3>
                         <button
                             onClick={() => navigateMonth(1)}
-                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                            className="p-2 rounded-full text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                             aria-label="Mes siguiente">
                             <ChevronRight className="h-5 w-5" />
                         </button>
@@ -329,7 +329,7 @@ export default function Assists() {
                         {dayNames.map((day, i) => (
                             <div
                                 key={i}
-                                className="text-center text-sm font-medium text-gray-500">
+                                className="text-center text-sm font-medium text-gray-700">
                                 {day}
                             </div>
                         ))}
@@ -355,7 +355,7 @@ export default function Assists() {
 
                 {/* Attendance Details */}
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                    <h3 className="font-semibold text-lg mb-3">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-3">
                         {selectedDay
                             ? `Clases asistidas el día ${selectedDay.date}`
                             : 'Selecciona un día para ver detalles'}

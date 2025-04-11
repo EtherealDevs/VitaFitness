@@ -215,18 +215,18 @@ export default function PaymentHistory() {
     const nextPaymentStatus = paymentData ? getNextPaymentStatus() : null
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4 px-10 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="min-h-screen w-full flex items-center justify-center p-4 px-10 bg-black">
             {/* Blurred background effect */}
             <div className="absolute inset-0 backdrop-blur-sm z-0"></div>
             <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
 
             {/* Payment History Card */}
-            <div className="w-full max-w-md shadow-lg relative z-10 border border-opacity-50 rounded-lg bg-white/50 dark:bg-slate-900/80 backdrop-blur overflow-hidden">
+            <div className="w-full max-w-md shadow-lg relative z-10 border border-opacity-50 rounded-lg bg-white/85 dark:bg-slate-900/80 backdrop-blur overflow-hidden">
                 {/* Card Header */}
                 <div className="flex flex-col items-center p-6 pb-2">
                     <div className="flex items-center justify-center gap-2 mb-4">
                         <CreditCard className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                        <h2 className="text-2xl font-bold text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 text-center">
                             Estado de Pagos
                         </h2>
                     </div>
@@ -251,7 +251,7 @@ export default function PaymentHistory() {
                                 ) : (
                                     <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
                                 )}
-                                <h3 className="font-semibold text-lg">
+                                <h3 className="font-semibold text-gray-800 text-lg">
                                     {paymentData.isUpToDate
                                         ? 'Pagos al día'
                                         : 'Pagos pendientes'}
@@ -263,7 +263,7 @@ export default function PaymentHistory() {
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
                                         Total pagado
                                     </p>
-                                    <p className="font-semibold text-lg">
+                                    <p className="font-semibold text-gray-700 text-lg">
                                         {formatCurrency(paymentData.totalPaid)}
                                     </p>
                                 </div>
@@ -271,7 +271,7 @@ export default function PaymentHistory() {
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
                                         Clases activas
                                     </p>
-                                    <p className="font-medium">
+                                    <p className="font-medium text-purple-600">
                                         {paymentData.nextPaymentClass}
                                     </p>
                                 </div>
@@ -298,10 +298,10 @@ export default function PaymentHistory() {
 
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                                        <p className="text-sm text-gray-500 dark:text-gray-300">
                                             Monto
                                         </p>
-                                        <p className="font-semibold">
+                                        <p className="font-semibold text-gray-700">
                                             {formatCurrency(
                                                 paymentData.nextPaymentAmount ||
                                                     0,
@@ -309,10 +309,10 @@ export default function PaymentHistory() {
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                                        <p className="text-sm text-gray-500 dark:text-gray-300">
                                             Fecha
                                         </p>
-                                        <p className="font-medium">
+                                        <p className="font-medium text-gray-700">
                                             {formatDate(
                                                 paymentData.nextPaymentDate,
                                             )}
@@ -324,7 +324,7 @@ export default function PaymentHistory() {
 
                         {/* Payment History */}
                         <div className="space-y-3">
-                            <h3 className="font-semibold text-lg">
+                            <h3 className="font-semibold text-gray-900 text-lg">
                                 Historial de pagos
                             </h3>
 
@@ -338,7 +338,7 @@ export default function PaymentHistory() {
                                                 <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium rounded-md">
                                                     {payment.className}
                                                 </span>
-                                                <span className="text-sm font-medium">
+                                                <span className="text-sm text-gray-500 font-medium">
                                                     {formatDate(payment.date)}
                                                 </span>
                                             </div>
@@ -349,7 +349,7 @@ export default function PaymentHistory() {
                                                         Pagado
                                                     </span>
                                                 </div>
-                                                <span className="font-semibold">
+                                                <span className="font-semibold text-gray-700">
                                                     {formatCurrency(
                                                         payment.amount,
                                                     )}
