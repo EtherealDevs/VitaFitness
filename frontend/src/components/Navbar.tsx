@@ -105,16 +105,13 @@ const Navbar = ({ isLoggedIn = false, user = null }: NavbarProps) => {
         }
     }
 
-    // Mapeo de IDs de sección a rutas de navegación (removed unused variable)
-
     // Opciones de navegación principal
     const navItems = [
         { id: 'inicio', label: 'Inicio', route: '/' },
-        { id: 'planes', label: 'Planes', route: '#services' },
-        { id: 'productos', label: 'Productos', route: '#productos' },
+        { id: 'productos', label: 'Planes y Productos', route: '#productos' },
         { id: 'compromiso', label: 'Nuestro Compromiso', route: '#compromiso' },
         { id: 'resenas', label: 'Reseñas', route: '#resenas' },
-        { id: 'contacto', label: 'Contacto', route: '#contact' },
+        { id: 'contact', label: 'Contacto', route: '#contact' },
     ]
 
     return (
