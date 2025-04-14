@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { Card } from '@/components/ui/card'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Student } from '../admin/students/columns'
 import axios from '@/lib/axios'
 
@@ -179,23 +179,7 @@ export default function AccessPage() {
     })
 
     // Validación del documento (debe tener 8 dígitos)
-    const validateDocument = (docNumber: string): boolean =>
-        /^\d{8}$/.test(docNumber)
-
-    useEffect(() => {
-        if (documentNumber === '') {
-            setStatus('pending')
-            return
-        }
-
-        const timeout = setTimeout(() => {
-            handleValidation(documentNumber)
-        }, 1000)
-
-        return () => clearTimeout(timeout)
-    }, [documentNumber])
-
-    const handleValidation = async (dni: string) => {
+    const handleValidation = useCallback(async (dni: string) => {
         if (!validateDocument(dni)) {
             setStatus('error')
             setErrorMessage(
@@ -254,7 +238,23 @@ export default function AccessPage() {
             setErrorMessage('Error al buscar el estudiante o su acceso.')
             resetAfterDelay()
         }
-    }
+    }, []) // <---- Poné dependencias si usás variables externas
+
+    const validateDocument = (docNumber: string): boolean =>
+        /^\d{8}$/.test(docNumber)
+
+    useEffect(() => {
+        if (documentNumber === '') {
+            setStatus('pending')
+            return
+        }
+
+        const timeout = setTimeout(() => {
+            handleValidation(documentNumber)
+        }, 1000)
+
+        return () => clearTimeout(timeout)
+    }, [documentNumber, handleValidation])
 
     const resetAfterDelay = () => {
         setTimeout(() => {

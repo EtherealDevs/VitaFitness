@@ -1,7 +1,7 @@
 'use client'
 
 import { useClasses } from '@/hooks/classes'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '../components/ui/button'
 import { Plus } from 'lucide-react'
 import { DataTable } from '../components/ui/data-table'
@@ -42,7 +42,7 @@ export default function ClassPage() {
     const { getClasses, deleteClass } = useClasses()
     const [classes, setClasses] = useState<Class[]>()
     // Fetch data from API
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const response = await getClasses()
             setClasses(response.classes)
@@ -50,11 +50,11 @@ export default function ClassPage() {
             console.error(error)
             throw error
         }
-    }
+    }, [getClasses])
     // Load all on first render
     useEffect(() => {
         fetchData()
-    }, [])
+    }, [fetchData])
     const handleDelete = async (id: string) => {
         const confirmed = window.confirm(
             '¿Estás seguro que querés eliminar esta clase? Esta acción no se puede deshacer.',

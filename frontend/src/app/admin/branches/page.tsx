@@ -49,7 +49,7 @@ export default function BranchesPage() {
             setBranches(res.branches)
         }
         fetchBranches()
-    }, [])
+    }, [getBranches])
 
     // Filter branches based on search term
     const filteredBranches = branches.filter(

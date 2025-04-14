@@ -68,7 +68,7 @@ export default function CreateSchedulePage() {
             setClasses(res.classes)
         }
         fetchClasses()
-    }, [])
+    }, [getClasses])
     console.log(classes)
 
     const handleDayChange = (day: string, checked: boolean) => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { GradientTitle } from '@/components/ui/gradient-title'
 import { PlanModal } from '@/components/ui/plan-modal'
@@ -28,7 +28,7 @@ export default function Services() {
     const [visibleProducts, setVisibleProducts] = useState<number>(4)
     const plansContainerRef = useRef<HTMLDivElement>(null)
     const productsContainerRef = useRef<HTMLDivElement>(null)
-    const fetchProducts = async () => {
+    const fetchProducts = useCallback(async () => {
         try {
             const response = await getProducts()
             setProducts(response.products)
@@ -37,8 +37,8 @@ export default function Services() {
             console.error(error)
             throw error
         }
-    }
-    const fetchPlans = async () => {
+    }, [getProducts])
+    const fetchPlans = useCallback(async () => {
         try {
             const response = await getPlans()
             //filtrar solo los planes activos
@@ -50,12 +50,15 @@ export default function Services() {
             console.error(error)
             throw error
         }
-    }
+    }, [getPlans])
 
     useEffect(() => {
-        fetchProducts()
-        fetchPlans()
-    }, [])
+        const fetchAllData = async () => {
+            await fetchProducts()
+            await fetchPlans()
+        }
+        fetchAllData()
+    }, [fetchProducts, fetchPlans])
     // Función para manejar el scroll dentro del contenedor de planes
     const handlePlansScroll = () => {
         if (!plansContainerRef.current) return

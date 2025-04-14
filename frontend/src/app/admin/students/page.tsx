@@ -134,8 +134,17 @@ export default function StudentsPage() {
     }
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getStudents()
+                setStudents(response.students)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
         fetchData()
-    }, [])
+    }, [getStudents])
 
     // Filtrar estudiantes según la búsqueda
     const filteredStudents = students?.filter(
@@ -385,7 +394,7 @@ export default function StudentsPage() {
 
             {/* Modal para editar alumno */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="w-full sm:max-w-[425px]">
+                <DialogContent className="w-2/3    sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Editar Alumno</DialogTitle>
                     </DialogHeader>

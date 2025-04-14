@@ -15,20 +15,20 @@ export default function PermissionsPage() {
     const [roles, setRoles] = useState<Roles[]>([])
     const { getUsers, getRoles, update } = useUser()
 
-    const fetchData = async () => {
-        try {
-            const response = await getUsers()
-            const roles = await getRoles()
-            setRoles(roles.roles)
-            setUsers(response.users)
-        } catch (error) {
-            console.error('Error al obtener los usuarios:', error)
-        }
-    }
-
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getUsers()
+                const roles = await getRoles()
+                setRoles(roles.roles)
+                setUsers(response.users)
+            } catch (error) {
+                console.error('Error al obtener los usuarios:', error)
+            }
+        }
+
         fetchData()
-    }, [])
+    }, [getUsers, getRoles])
 
     const columns: ColumnDef<Users>[] = [
         {

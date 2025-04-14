@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { GradientTitle } from '@/components/ui/gradient-title'
 import { Title } from '@/components/ui/title'
 import Button from '@/components/ui/Button'
-import { Facebook, Instagram, Linkedin, MessageCircle } from 'lucide-react'
+import { Facebook, Instagram, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Contact() {
@@ -80,7 +80,7 @@ export default function Contact() {
                                 type="text"
                                 placeholder="Nombre y Apellido"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={e => setName(e.target.value)}
                                 className="w-full bg-transparent border-b border-gray-600 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors"
                                 required
                             />
@@ -90,7 +90,7 @@ export default function Contact() {
                                 type="email"
                                 placeholder="Email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={e => setEmail(e.target.value)}
                                 className="w-full bg-transparent border-b border-gray-600 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors"
                                 required
                             />
@@ -100,7 +100,7 @@ export default function Contact() {
                                 placeholder="Mensaje"
                                 rows={3}
                                 value={message}
-                                onChange={(e) => setMessage(e.target.value)}
+                                onChange={e => setMessage(e.target.value)}
                                 className="w-full bg-transparent border-b border-gray-600 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors resize-none"
                                 required
                             />

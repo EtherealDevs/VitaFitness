@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Card } from '@/components/ui/card'
 import { GradientTitle } from '@/components/ui/gradient-title'
 import Image from 'next/image'
@@ -49,7 +49,7 @@ export default function CommitmentSection() {
     const transformationsRef = useRef<HTMLDivElement>(null)
     const [branchs, setBranchs] = useState<Branch[]>([])
     const { getBranches } = useBranches()
-    const fetchBranchs = async () => {
+    const fetchBranchs = useCallback(async () => {
         try {
             const response = await getBranches()
             setBranchs(response.branches)
@@ -57,7 +57,7 @@ export default function CommitmentSection() {
             console.error(error)
             throw error
         }
-    }
+    }, [getBranches])
 
     const nextTransformation = () => {
         setActiveTransformation(prev => (prev + 1) % transformations.length)
@@ -77,7 +77,7 @@ export default function CommitmentSection() {
             nextTransformation()
         }, 8000)
         return () => clearInterval(interval)
-    }, [])
+    }, [fetchBranchs])
     console.log(branchs)
     return (
         <section className="py-16 bg-black">

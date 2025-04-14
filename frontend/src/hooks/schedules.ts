@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 
 export interface Schedule {
     id: string
-    days: JSON
+    days: string[]
     start_time: string
     end_time: string
 }

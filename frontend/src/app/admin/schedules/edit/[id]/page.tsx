@@ -31,25 +31,24 @@ export default function EditSchedulePage() {
     const { updateSchedule, getSchedule } = useSchedules()
     const [schedule, setSchedule] = useState<Schedule>({
         id: '',
-        day: '',
+        days: [],
         start_time: '',
         end_time: '',
     })
     const router = useRouter()
-    const fetchData = async () => {
-        try {
-            const response = await getSchedule(id as string)
-            console.log(response)
-            setSchedule(response.schedule)
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
-
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getSchedule(id as string)
+                console.log(response)
+                setSchedule(response.schedule)
+            } catch (error) {
+                console.error(error)
+                throw error
+            }
+        }
         fetchData()
-    }, [])
+    }, [getSchedule, id])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -60,7 +59,7 @@ export default function EditSchedulePage() {
         e.preventDefault()
         // Handle form submission
         const formData = new FormData()
-        formData.append('day', String(schedule?.day))
+        formData.append('day', String(schedule?.days))
         formData.append('start_time', formatTime(schedule?.start_time))
         formData.append('end_time', formatTime(schedule?.end_time))
         try {
@@ -96,11 +95,11 @@ export default function EditSchedulePage() {
                                         Día de la semana
                                     </Label>
                                     <Select
-                                        value={schedule.day}
+                                        value={schedule.days[0] || ''}
                                         onValueChange={value =>
                                             setSchedule(prevSchedule => ({
                                                 ...prevSchedule,
-                                                day: value,
+                                                days: [value],
                                             }))
                                         }>
                                         <SelectTrigger
@@ -181,10 +180,10 @@ export default function EditSchedulePage() {
                                     Vista previa
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
-                                    {schedule.day ? (
+                                    {schedule.days ? (
                                         <>
                                             <span className="font-medium capitalize">
-                                                {schedule.day}
+                                                {schedule.days}
                                             </span>
                                             {schedule.start_time &&
                                             schedule.end_time ? (

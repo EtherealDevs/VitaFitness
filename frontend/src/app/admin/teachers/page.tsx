@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type React from 'react'
 
 import { useTeachers } from '@/hooks/teachers'
@@ -126,7 +126,7 @@ export default function TeacherIndex() {
         setCreateScheduleModalIsOpen(false)
     }
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const response = await getTeachers()
             setTeachers(response.teachers)
@@ -148,7 +148,7 @@ export default function TeacherIndex() {
             console.error(error)
             throw error
         }
-    }
+    }, [getTeachers, getTeacherSchedules, getBranches])
 
     async function handleCreateTeacherForm(
         e: React.FormEvent<HTMLFormElement>,
@@ -230,7 +230,7 @@ export default function TeacherIndex() {
 
     useEffect(() => {
         fetchData()
-    }, [])
+    }, [fetchData])
 
     // Filtrar profesores según la búsqueda
     const filteredTeachers = teachers?.filter(

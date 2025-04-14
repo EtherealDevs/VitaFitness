@@ -61,7 +61,7 @@ export default function CreateClassPage() {
             setBranches(res.branches)
         }
         fetchBranches()
-    }, [])
+    }, [getBranches, getPlans])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

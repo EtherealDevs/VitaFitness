@@ -1,14 +1,14 @@
 'use client'
 import { Schedule, useSchedules } from '@/hooks/schedules'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export default function Schedules() {
     const [schedules, setSchedules] = useState<Schedule[]>([])
     const [loading, setLoading] = useState(false)
     const { getSchedules, deleteSchedule } = useSchedules()
 
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         setLoading(true)
         try {
             const response = await getSchedules()
@@ -19,11 +19,11 @@ export default function Schedules() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [getSchedules])
 
     useEffect(() => {
         fetchData()
-    }, [])
+    }, [fetchData])
 
     const handleDelete = async (id: string) => {
         try {
@@ -76,7 +76,7 @@ export default function Schedules() {
                         {schedules.map((schedule, index) => (
                             <tr key={index}>
                                 <td className="py-4 px-6">{schedule.id}</td>
-                                <td className="px-6 py-4">{schedule.day}</td>
+                                <td className="px-6 py-4">{schedule.days}</td>
                                 <td className="px-6 py-4">
                                     {schedule.start_time}
                                 </td>

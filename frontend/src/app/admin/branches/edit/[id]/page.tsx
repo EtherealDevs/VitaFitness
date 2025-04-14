@@ -1,8 +1,7 @@
 'use client'
 
 import type React from 'react'
-
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Building, MapPin } from 'lucide-react'
 
 import Button from '@/components/ui/Button'
@@ -18,57 +17,56 @@ import Input from '@/components/ui/Input'
 import Label from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
-import { Branch, useBranches } from '@/hooks/branches'
+import { useBranches } from '@/hooks/branches'
 import { useParams, useRouter } from 'next/navigation'
+import { useStudents } from '@/hooks/students'
 
 export default function EditBranchPage() {
-    const { id } = useParams()
-    const [branch, setBranch] = useState<Branch>({
-        id: '',
-        name: '',
-        address: '',
-    })
-    const [name, setName] = useState(branch.name)
-    const [address, setAddress] = useState(branch.address)
-    useEffect(() => {
-        async function fetchBranch() {
-            const res = await getBranch(id as string)
-            setBranch(res.branch)
-            setName(res.branch.name)
-            setAddress(res.branch.address)
-        }
-        fetchBranch()
-    }, [])
-    const { updateBranch, getBranch } = useBranches()
+    const { updateBranch } = useBranches()
     const router = useRouter()
+    const { id } = useParams()
 
+    const { getStudents } = useStudents()
+
+    const [name, setName] = useState('')
+    const [address, setAddress] = useState('')
     const [isLoading, setIsLoading] = useState(false)
 
+    const fetchStudents = useCallback(async () => {
+        try {
+            await getStudents()
+        } catch (error) {
+            console.error(error)
+        }
+    }, [getStudents])
+
+    useEffect(() => {
+        fetchStudents()
+    }, [fetchStudents])
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
 
         try {
-            // Simulate API call
             const formData = new FormData()
             formData.append('name', name)
             formData.append('address', address)
+
             const res = await updateBranch(id as string, formData)
             console.log(res)
 
             toast({
-                title: 'Sucursal creada',
-                description: 'La sucursal ha sido creada exitosamente',
+                title: 'Sucursal editada',
+                description: 'La sucursal ha sido actualizada exitosamente',
                 variant: 'success',
             })
 
-            // Reset form or redirect
             router.push('/admin/branches')
         } catch (error) {
-            console.error('Error creating branch:', error)
+            console.error('Error updating branch:', error)
             toast({
                 title: 'Error',
-                description: 'Hubo un error al crear la sucursal',
+                description: 'Hubo un error al editar la sucursal',
                 variant: 'destructive',
             })
         } finally {
@@ -97,7 +95,6 @@ export default function EditBranchPage() {
 
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-6">
-                            {/* Required Information */}
                             <div className="space-y-4">
                                 <h3 className="text-sm font-medium text-muted-foreground dark:text-white">
                                     Información Básica
@@ -109,13 +106,13 @@ export default function EditBranchPage() {
                                             htmlFor="name"
                                             className="flex items-center">
                                             <Building className="h-4 w-4 mr-1 text-muted-foreground" />
-                                            Nombre de la Sucursal{' '}
+                                            Nombre de la Sucursal
                                             <span className="text-destructive ml-1">
                                                 *
                                             </span>
                                         </Label>
                                         <Input
-                                            className=" p-2 border rounded-lg dark:bg-transparent"
+                                            className="p-2 border rounded-lg dark:bg-transparent"
                                             type="text"
                                             name="name"
                                             id="name"
@@ -133,7 +130,7 @@ export default function EditBranchPage() {
                                             htmlFor="address"
                                             className="flex items-center">
                                             <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                                            Dirección{' '}
+                                            Dirección
                                             <span className="text-destructive ml-1">
                                                 *
                                             </span>
@@ -164,7 +161,7 @@ export default function EditBranchPage() {
                                 className="bg-transparent text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white"
                                 type="submit"
                                 disabled={isLoading}>
-                                {isLoading ? 'Creando...' : 'Editar Sucursal'}
+                                {isLoading ? 'Editando...' : 'Editar Sucursal'}
                             </Button>
                         </CardFooter>
                     </form>

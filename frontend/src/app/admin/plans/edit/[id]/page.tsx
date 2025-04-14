@@ -7,7 +7,7 @@ import { Plan, usePlans } from '@/hooks/plans'
 import { Select } from '@headlessui/react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export default function EditPlan() {
     const { updatePlan, getPlan } = usePlans()
@@ -20,18 +20,18 @@ export default function EditPlan() {
         status: '',
     })
 
-    const fetchPlan = async () => {
+    const fetchPlan = useCallback(async () => {
         try {
             const plan = await getPlan(id as string)
             setPlan(plan.plan)
         } catch (error) {
             console.error(error)
         }
-    }
+    }, [getPlan, id])
 
     useEffect(() => {
         fetchPlan()
-    }, [id])
+    }, [fetchPlan])
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setPlan(prev => ({ ...prev, [name]: value }))

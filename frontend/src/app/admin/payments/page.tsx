@@ -35,7 +35,7 @@ export default function PaymentsPage() {
         }
 
         fetchPayments()
-    }, [])
+    }, [getPayments])
 
     const handleDelete = async (id: string) => {
         const confirmDelete = confirm(
