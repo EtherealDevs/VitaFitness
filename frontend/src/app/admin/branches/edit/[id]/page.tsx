@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Building, MapPin } from 'lucide-react'
 
 import Button from '@/components/ui/Button'
@@ -25,13 +25,13 @@ export default function EditBranchPage() {
     const { updateBranch } = useBranches()
     const router = useRouter()
     const { id } = useParams()
-
     const { getStudents } = useStudents()
 
     const [name, setName] = useState('')
     const [address, setAddress] = useState('')
     const [isLoading, setIsLoading] = useState(false)
 
+    // ✅ Memoizamos la función para evitar que cambie en cada render
     const fetchStudents = useCallback(async () => {
         try {
             await getStudents()
@@ -40,9 +40,11 @@ export default function EditBranchPage() {
         }
     }, [getStudents])
 
+    // ✅ Ejecutamos la función una sola vez al montar el componente
     useEffect(() => {
         fetchStudents()
     }, [fetchStudents])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
@@ -79,7 +81,7 @@ export default function EditBranchPage() {
             <div className="max-w-3xl mx-auto">
                 <h1 className="text-2xl font-bold mb-6 flex items-center">
                     <Building className="mr-2 h-6 w-6 text-primary" />
-                    Crear Nueva Sucursal
+                    Editar Sucursal
                 </h1>
 
                 <Card className="bg-white rounded shadow-md dark:bg-zinc-950 dark:text-white">

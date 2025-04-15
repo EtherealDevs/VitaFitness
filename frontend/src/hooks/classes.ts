@@ -1,9 +1,7 @@
-/* import useSWR from 'swr' */
+import { useCallback } from 'react'
 import axios from '@/lib/axios'
 import { Plan } from '@/hooks/plans'
 import { Branch } from '@/hooks/branches'
-/* import { useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation' */
 
 export interface Class {
     id: string
@@ -16,8 +14,9 @@ export interface Class {
 }
 
 export const useClasses = () => {
-    const csrf = () => axios.get('/sanctum/csrf-cookie')
-    const getClasses = async () => {
+    const csrf = useCallback(() => axios.get('/sanctum/csrf-cookie'), [])
+
+    const getClasses = useCallback(async () => {
         await csrf()
         try {
             const response = await axios.get('/api/classes')
@@ -26,8 +25,9 @@ export const useClasses = () => {
             console.error(error)
             throw error
         }
-    }
-    const getClass = async (id: string) => {
+    }, [csrf])
+
+    const getClass = useCallback(async (id: string) => {
         try {
             const response = await axios.get(`/api/classes/${id}`)
             return response.data
@@ -35,42 +35,53 @@ export const useClasses = () => {
             console.error(error)
             throw error
         }
-    }
-    const createClass = async (formData: FormData) => {
-        await csrf()
-        try {
-            const response = await axios.post('/api/classes', formData)
-            return response.data
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
+    }, [])
 
-    const updateClass = async (id: string, formData: FormData) => {
-        await csrf()
-        try {
-            const response = await axios.post(
-                `/api/classes/${id}?_method=PUT`,
-                formData,
-            )
-            return response.data
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
+    const createClass = useCallback(
+        async (formData: FormData) => {
+            await csrf()
+            try {
+                const response = await axios.post('/api/classes', formData)
+                return response.data
+            } catch (error) {
+                console.error(error)
+                throw error
+            }
+        },
+        [csrf],
+    )
 
-    const deleteClass = async (id: string) => {
-        await csrf()
-        try {
-            const response = await axios.delete(`/api/classes/${id}`)
-            return response.data
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
+    const updateClass = useCallback(
+        async (id: string, formData: FormData) => {
+            await csrf()
+            try {
+                const response = await axios.post(
+                    `/api/classes/${id}?_method=PUT`,
+                    formData,
+                )
+                return response.data
+            } catch (error) {
+                console.error(error)
+                throw error
+            }
+        },
+        [csrf],
+    )
+
+    const deleteClass = useCallback(
+        async (id: string) => {
+            await csrf()
+            try {
+                const response = await axios.delete(`/api/classes/${id}`)
+                return response.data
+            } catch (error) {
+                console.error(error)
+                throw error
+            }
+        },
+        [csrf],
+    )
+
     return {
         getClass,
         getClasses,

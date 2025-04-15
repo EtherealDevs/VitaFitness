@@ -1,7 +1,7 @@
 'use client'
 
 import { useClasses } from '@/hooks/classes'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../components/ui/button'
 import { Plus } from 'lucide-react'
 import { DataTable } from '../components/ui/data-table'
@@ -9,6 +9,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import Link from 'next/link'
 import { toast } from '@/hooks/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
+
 interface Schedule {
     id: number
     selectedDays: string[]
@@ -38,23 +39,24 @@ interface Class {
     precio: number
     schedules: Schedule[]
 }
+
 export default function ClassPage() {
     const { getClasses, deleteClass } = useClasses()
-    const [classes, setClasses] = useState<Class[]>()
-    // Fetch data from API
-    const fetchData = useCallback(async () => {
-        try {
-            const response = await getClasses()
-            setClasses(response.classes)
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }, [getClasses])
-    // Load all on first render
+    const [classes, setClasses] = useState<Class[]>([])
+
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getClasses()
+                setClasses(response.classes)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
         fetchData()
-    }, [fetchData])
+    }, [getClasses])
+
     const handleDelete = async (id: string) => {
         const confirmed = window.confirm(
             '¿Estás seguro que querés eliminar esta clase? Esta acción no se puede deshacer.',
@@ -62,7 +64,7 @@ export default function ClassPage() {
         if (!confirmed) return
         try {
             await deleteClass(id)
-            setClasses(prev => prev?.filter(cls => cls.id !== id))
+            setClasses(prev => prev.filter(cls => cls.id !== id))
             toast({
                 title: 'Clase eliminada',
                 description: `La clase con ID ${id} fue eliminada.`,
@@ -72,11 +74,12 @@ export default function ClassPage() {
             console.error('Error al eliminar clase:', error)
         }
     }
+
     const columns: ColumnDef<Class>[] = [
         {
             accessorKey: 'name',
             header: 'Clase',
-            cell: ({ row }) => row.original.id,
+            cell: ({ row }) => row.original.name,
         },
         {
             accessorKey: 'branch',
@@ -96,26 +99,18 @@ export default function ClassPage() {
         {
             accessorKey: 'precio',
             header: 'Precio',
-            cell: ({ row }) => {
-                const precio = row.original.precio
-                return (
-                    <div className="text-sm text-muted-foreground">
-                        ${precio}
-                    </div>
-                )
-            },
+            cell: ({ row }) => (
+                <div className="text-sm text-muted-foreground">
+                    ${row.original.precio}
+                </div>
+            ),
         },
         {
             accessorKey: 'plan',
             header: 'Plan',
-            cell: ({ row }) => {
-                const plan = row.original.plan
-                return (
-                    <div>
-                        <div className="font-semibold">{plan.name}</div>
-                    </div>
-                )
-            },
+            cell: ({ row }) => (
+                <div className="font-semibold">{row.original.plan.name}</div>
+            ),
         },
         {
             accessorKey: 'max_students',
@@ -166,18 +161,18 @@ export default function ClassPage() {
     return (
         <div className="py-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Permisos</h1>
+                <h1 className="text-3xl font-bold">Clases</h1>
                 <Link href="/admin/classes/create">
                     <Button>
                         <Plus className="mr-2 h-4 w-4" />
-                        Nuevo Permiso
+                        Nueva Clase
                     </Button>
                 </Link>
             </div>
             <div className="mt-6">
                 <DataTable
                     columns={columns}
-                    data={classes || []}
+                    data={classes}
                     filterColumn="name"
                     filterPlaceholder="Filtrar clases..."
                 />

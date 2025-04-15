@@ -12,7 +12,6 @@ import {
     MapPin,
     MoreHorizontal,
 } from 'lucide-react'
-
 import { Button } from '@/app/admin/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import Input from '@/components/ui/Input'
@@ -35,8 +34,6 @@ import {
 import { toast } from '@/hooks/use-toast'
 import { Branch, useBranches } from '@/hooks/branches'
 
-// Mock data for branches
-
 export default function BranchesPage() {
     const router = useRouter()
     const [searchTerm, setSearchTerm] = useState('')
@@ -46,7 +43,7 @@ export default function BranchesPage() {
     useEffect(() => {
         async function fetchBranches() {
             const res = await getBranches()
-            setBranches(res.branches)
+            setBranches(res?.branches || res?.data?.branches || [])
         }
         fetchBranches()
     }, [getBranches])

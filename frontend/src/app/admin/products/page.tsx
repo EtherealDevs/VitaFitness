@@ -1,6 +1,7 @@
 'use client'
-import { type Product, useProducts } from '@/hooks/products'
+
 import { useState, useEffect } from 'react'
+import { type Product, useProducts } from '@/hooks/products'
 import { Plus, Edit2, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import {
@@ -20,13 +21,29 @@ export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(false)
     const [search, setSearch] = useState('')
+    const [debounceTimeout, setDebounceTimeout] =
+        useState<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
         async function fetchProducts() {
+            if (!search.trim()) {
+                setProducts([]) // Si la búsqueda está vacía, limpiamos los productos
+                return
+            }
+
             setLoading(true)
             try {
                 const response = await getProducts()
-                setProducts(response.products)
+                const filtered = response.products.filter(
+                    (product: Product) =>
+                        product.name
+                            .toLowerCase()
+                            .includes(search.toLowerCase()) ||
+                        product.description
+                            .toLowerCase()
+                            .includes(search.toLowerCase()),
+                )
+                setProducts(filtered)
             } catch (error) {
                 console.error(error)
             } finally {
@@ -34,8 +51,19 @@ export default function ProductsPage() {
             }
         }
 
-        fetchProducts()
-    }, [])
+        // Limitar las peticiones con debounce
+        if (debounceTimeout) clearTimeout(debounceTimeout) // Limpiar el timeout previo
+        const newTimeout = setTimeout(() => {
+            fetchProducts()
+        }, 300) // Esperar 300ms después de que el usuario deje de escribir
+
+        setDebounceTimeout(newTimeout)
+
+        // Cleanup
+        return () => {
+            if (debounceTimeout) clearTimeout(debounceTimeout)
+        }
+    }, [search, getProducts, debounceTimeout]) // Agregamos debounceTimeout al array de dependencias
 
     const handleDelete = async (id: string) => {
         const confirmDelete = confirm(
@@ -50,13 +78,6 @@ export default function ProductsPage() {
             console.error(error)
         }
     }
-
-    // Filtrar productos según la búsqueda
-    const filteredProducts = products?.filter(
-        (product: Product) =>
-            product.name?.toLowerCase().includes(search.toLowerCase()) ||
-            product.description?.toLowerCase().includes(search.toLowerCase()),
-    )
 
     if (loading) {
         return (
@@ -110,7 +131,7 @@ export default function ProductsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredProducts?.map((product: Product) => (
+                                {products?.map((product: Product) => (
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             <Link
