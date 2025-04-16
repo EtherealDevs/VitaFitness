@@ -24,7 +24,7 @@ export const useProducts = () => {
         }
     }, [])
 
-    const getProduct = async (id: string) => {
+    const getProduct = useCallback(async (id: string) => {
         try {
             const response = await axios.get(`/api/products/${id}`)
             return response.data
@@ -32,7 +32,7 @@ export const useProducts = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
 
     const createProduct = async (formData: FormData) => {
         await csrf()

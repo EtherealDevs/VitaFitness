@@ -66,18 +66,10 @@ export default function EditProductPage() {
         } catch (error) {
             console.error(error)
         }
-    }, [getProduct, id])
+    }, [getProduct])
     useEffect(() => {
         fetchData()
-        setImages(
-            product?.images.map(image => ({
-                id: `img-${Date.now()}-${Math.random()
-                    .toString(36)
-                    .substring(2, 9)}`,
-                url: image,
-            })) || [],
-        )
-    }, [fetchData, product?.images])
+    }, [fetchData])
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files || files.length === 0) return
