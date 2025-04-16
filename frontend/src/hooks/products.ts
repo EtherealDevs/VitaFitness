@@ -1,4 +1,6 @@
+import { useCallback } from 'react'
 import axios from '@/lib/axios'
+
 export interface Product {
     id: string
     name: string
@@ -11,7 +13,8 @@ export interface Product {
 
 export const useProducts = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')
-    const getProducts = async () => {
+
+    const getProducts = useCallback(async () => {
         try {
             const response = await axios.get('/api/products')
             return response.data
@@ -19,7 +22,7 @@ export const useProducts = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
 
     const getProduct = async (id: string) => {
         try {

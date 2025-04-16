@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { type Product, useProducts } from '@/hooks/products'
 import { Plus, Edit2, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -19,19 +19,15 @@ import Link from 'next/link'
 export default function ProductsPage() {
     const { getProducts, deleteProduct } = useProducts()
     const [products, setProducts] = useState<Product[]>([])
-    const [loading, setLoading] = useState(false)
     const [search, setSearch] = useState('')
-    const [debounceTimeout, setDebounceTimeout] =
-        useState<NodeJS.Timeout | null>(null)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
-        async function fetchProducts() {
-            if (!search.trim()) {
-                setProducts([]) // Si la búsqueda está vacía, limpiamos los productos
-                return
-            }
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current)
+        }
 
-            setLoading(true)
+        timeoutRef.current = setTimeout(async () => {
             try {
                 const response = await getProducts()
                 const filtered = response.products.filter(
@@ -45,25 +41,14 @@ export default function ProductsPage() {
                 )
                 setProducts(filtered)
             } catch (error) {
-                console.error(error)
-            } finally {
-                setLoading(false)
+                console.error('Error al obtener productos:', error)
             }
-        }
+        }, 300)
 
-        // Limitar las peticiones con debounce
-        if (debounceTimeout) clearTimeout(debounceTimeout) // Limpiar el timeout previo
-        const newTimeout = setTimeout(() => {
-            fetchProducts()
-        }, 300) // Esperar 300ms después de que el usuario deje de escribir
-
-        setDebounceTimeout(newTimeout)
-
-        // Cleanup
         return () => {
-            if (debounceTimeout) clearTimeout(debounceTimeout)
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
         }
-    }, [search, getProducts, debounceTimeout]) // Agregamos debounceTimeout al array de dependencias
+    }, [search, getProducts])
 
     const handleDelete = async (id: string) => {
         const confirmDelete = confirm(
@@ -77,17 +62,6 @@ export default function ProductsPage() {
         } catch (error) {
             console.error(error)
         }
-    }
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-4">Cargando productos...</p>
-                </div>
-            </div>
-        )
     }
 
     return (
@@ -105,7 +79,6 @@ export default function ProductsPage() {
                 />
             </div>
 
-            {/* Tabla de Productos */}
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Lista de Productos</CardTitle>
@@ -131,7 +104,7 @@ export default function ProductsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {products?.map((product: Product) => (
+                                {products.map(product => (
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             <Link
@@ -170,6 +143,8 @@ export default function ProductsPage() {
                             </TableBody>
                         </Table>
                     </div>
+
+                    {/* Responsive para móvil */}
                     <div className="block sm:hidden space-y-4">
                         {products.map(product => (
                             <div
