@@ -1,4 +1,5 @@
 import { Student } from '@/app/admin/students/columns'
+import { useCallback } from 'react'
 import axios from '@/lib/axios'
 
 export interface Payment {
@@ -17,7 +18,7 @@ export interface Payment {
 
 export const usePayments = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')
-    const getPayments = async () => {
+    const getPayments = useCallback(async () => {
         try {
             const response = await axios.get('/api/payments')
             return response.data
@@ -25,7 +26,7 @@ export const usePayments = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
     const getPayment = async (id: string) => {
         try {
             const response = await axios.get(`/api/payments/${id}`)
