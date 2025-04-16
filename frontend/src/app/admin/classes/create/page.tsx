@@ -9,6 +9,8 @@ import {
     Users,
     DollarSign,
     CalendarRange,
+    Calendar,
+    Clock,
 } from 'lucide-react'
 
 import Button from '@/components/ui/Button'
@@ -34,21 +36,35 @@ import { useClasses } from '@/hooks/classes'
 import { Plan, usePlans } from '@/hooks/plans'
 import { Branch, useBranches } from '@/hooks/branches'
 import { useRouter } from 'next/navigation'
+import { Checkbox } from '../../components/ui/checkbox'
+import { useClassSchedules } from '@/hooks/classSchedules'
 
 // Mock data for plans and branches
 
 export default function CreateClassPage() {
     const [selectedPlan, setSelectedPlan] = useState('')
     const [selectedBranch, setSelectedBranch] = useState('')
+    const [startTime, setStartTime] = useState('')
+    const [endTime, setEndTime] = useState('')
+    const [selectedDays, setSelectedDays] = useState<string[]>([])
     const [price, setPrice] = useState('')
     const [maxStudents, setMaxStudents] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const { createClass } = useClasses()
+    const { createClassSchedule } = useClassSchedules()
     const router = useRouter()
     const [plans, setPlans] = useState<Plan[]>([])
     const [branches, setBranches] = useState<Branch[]>([])
     const { getPlans } = usePlans()
     const { getBranches } = useBranches()
+
+    const handleDayChange = (day: string, checked: boolean) => {
+        if (checked) {
+            setSelectedDays([...selectedDays, day])
+        } else {
+            setSelectedDays(selectedDays.filter(d => d !== day))
+        }
+    }
 
     useEffect(() => {
         async function fetchPlans() {
@@ -62,6 +78,28 @@ export default function CreateClassPage() {
         }
         fetchBranches()
     }, [getBranches, getPlans])
+    // Days of the week
+const daysOfWeek = [
+    { id: 'lunes', label: 'Lunes' },
+    { id: 'martes', label: 'Martes' },
+    { id: 'miercoles', label: 'Miércoles' },
+    { id: 'jueves', label: 'Jueves' },
+    { id: 'viernes', label: 'Viernes' },
+    { id: 'sabado', label: 'Sábado' },
+    { id: 'domingo', label: 'Domingo' },
+]
+
+// Generate hours for select (only on-the-hour times)
+const generateHourOptions = () => {
+    const options = []
+    for (let i = 6; i <= 22; i++) {
+        const hour = i < 10 ? `0${i}` : `${i}`
+        options.push({ value: `${hour}:00`, label: `${hour}:00` })
+    }
+    return options
+}
+
+const hourOptions = generateHourOptions()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -73,17 +111,36 @@ export default function CreateClassPage() {
             formData.append('branch_id', selectedBranch)
             formData.append('precio', price)
             formData.append('max_students', maxStudents)
+
             const res = await createClass(formData)
-            console.log(res)
 
             toast({
                 title: 'Clase creada',
                 description: 'La clase ha sido creada exitosamente',
                 variant: 'success',
             })
-
+            // If response is success, create class schedule
+            if (res.status === "success (201)") {
+                const classScheduleFormData = new FormData()
+                classScheduleFormData.append('class_id', res.classe.id)
+                selectedDays.forEach((day, index) => {
+                    classScheduleFormData.append(`days[${index}]`, day)
+                })
+                classScheduleFormData.append('time_start', startTime)
+                classScheduleFormData.append('time_end', endTime)
+                for (const element of classScheduleFormData) {
+                    console.log(element)
+                }
+                const classScheduleRes = await createClassSchedule(classScheduleFormData)
+                console.log(classScheduleRes)
+                toast({
+                    title: 'Horario creado',
+                    description: 'El horario ha sido creado exitosamente',
+                    variant: 'success',
+                })
+            }
             // Reset form or redirect
-            router.push('/admin/classes')
+            // router.push('/admin/classes')
         } catch (error) {
             console.error('Error creating class:', error)
             toast({
@@ -230,6 +287,102 @@ export default function CreateClassPage() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div>
+                                <h1>Horario:</h1>
+                                {/* Days Selection */}
+                            <div className="space-y-3">
+                                <Label
+                                    htmlFor="days"
+                                    className="font-medium flex items-center">
+                                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                                    Días de la semana
+                                </Label>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                    {daysOfWeek.map(day => (
+                                        <div
+                                            key={day.id}
+                                            className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={day.id}
+                                                checked={selectedDays.includes(
+                                                    day.id,
+                                                )}
+                                                onCheckedChange={checked =>
+                                                    handleDayChange(
+                                                        day.id,
+                                                        checked === true,
+                                                    )
+                                                }
+                                            />
+                                            <Label
+                                                htmlFor={day.id}
+                                                className="text-sm cursor-pointer">
+                                                {day.label}
+                                            </Label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Time Selection */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Start Time */}
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="start_time"
+                                        className="font-medium flex items-center">
+                                        <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                                        Hora de inicio
+                                    </Label>
+                                    <Select
+                                        value={startTime}
+                                        onValueChange={setStartTime}>
+                                        <SelectTrigger
+                                            id="start_time"
+                                            className="w-full">
+                                            <SelectValue placeholder="Seleccionar hora" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {hourOptions.map(hour => (
+                                                <SelectItem
+                                                    key={hour.value}
+                                                    value={hour.value}>
+                                                    {hour.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* End Time */}
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="end_time"
+                                        className="font-medium flex items-center">
+                                        <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                                        Hora de fin
+                                    </Label>
+                                    <Select
+                                        value={endTime}
+                                        onValueChange={setEndTime}>
+                                        <SelectTrigger
+                                            id="end_time"
+                                            className="w-full">
+                                            <SelectValue placeholder="Seleccionar hora" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {hourOptions.map(hour => (
+                                                <SelectItem
+                                                    key={hour.value}
+                                                    value={hour.value}>
+                                                    {hour.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
                             </div>
                         </CardContent>
 

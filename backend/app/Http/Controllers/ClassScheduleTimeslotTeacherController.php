@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ClassScheduleTimeslotTeacherResource;
+use App\Models\ClassScheduleTimeslot;
 use App\Models\ClassScheduleTimeslotTeacher;
+use App\Models\Payment;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 
 class ClassScheduleTimeslotTeacherController extends Controller
