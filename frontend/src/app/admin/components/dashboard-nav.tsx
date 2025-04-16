@@ -11,13 +11,13 @@ import {
     FileText,
     BarChart2,
     BookOpen,
-    Calendar,
     CreditCard,
     ArrowLeft,
     UserRoundPen,
     ShoppingBag,
     NotepadText,
     CalendarCheck2,
+    Building,
 } from 'lucide-react'
 
 const navigation = [
@@ -33,11 +33,10 @@ const navigation = [
     { name: 'Profesores', href: '/admin/teachers', icon: UserRoundPen },
     { name: 'Clases', href: '/admin/classes', icon: BookOpen },
     { name: 'Horarios', href: '/admin/schedules', icon: CalendarCheck2 },
-    { name: 'Calendario', href: '/admin/schedules', icon: Calendar },
     { name: 'Pagos', href: '/admin/payments', icon: CreditCard },
     { name: 'Productos', href: '/admin/products', icon: ShoppingBag },
     { name: 'Planes', href: '/admin/plans', icon: NotepadText },
-    { name: 'Sucursales', href: '/admin/branches', icon: NotepadText },
+    { name: 'Sucursales', href: '/admin/branches', icon: Building },
     { name: 'Permisos', href: '/admin/permissions', icon: FileText },
     { name: 'Estadísticas', href: '/admin/statistics', icon: BarChart2 },
     { name: 'Configuración', href: '/admin/configuration', icon: Settings },
