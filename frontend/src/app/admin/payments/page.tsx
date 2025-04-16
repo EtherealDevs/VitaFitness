@@ -35,11 +35,11 @@ export default function PaymentsPage() {
         }
 
         fetchPayments()
-    }, [getPayments])
+    }, [getPayments]) // Se agrega `getPayments` como dependencia
 
     const handleDelete = async (id: string) => {
         const confirmDelete = confirm(
-            '¿Estás seguro de que deseas eliminar este producto?',
+            '¿Estás seguro de que deseas eliminar este pago?',
         )
         if (!confirmDelete) return
 
@@ -51,7 +51,7 @@ export default function PaymentsPage() {
         }
     }
 
-    // Filtrar productos según la búsqueda
+    // Filtrar pagos según la búsqueda
     const filteredPayments = payments?.filter(
         (payment: Payment) =>
             payment.status?.toLowerCase().includes(search.toLowerCase()) ||
@@ -86,7 +86,7 @@ export default function PaymentsPage() {
                 />
             </div>
 
-            {/* Tabla de Productos */}
+            {/* Tabla de Pagos */}
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Lista de Pagos</CardTitle>
@@ -107,7 +107,7 @@ export default function PaymentsPage() {
                                     <TableHead>Clase</TableHead>
                                     <TableHead>Fecha de inicio</TableHead>
                                     <TableHead>Fecha de pago</TableHead>
-                                    <TableHead>Fecha de expiracion</TableHead>
+                                    <TableHead>Fecha de expiración</TableHead>
                                     <TableHead>Estado</TableHead>
                                     <TableHead className="text-right">
                                         Acciones
