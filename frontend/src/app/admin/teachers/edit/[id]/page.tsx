@@ -10,10 +10,10 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-} from '../../components/ui/card'
-import { Button } from '../../components/ui/button'
-import { Badge } from '../../components/ui/badge'
-import { Calendar } from '../../components/ui/calendar'
+} from '../../../components/ui/card'
+import { Button } from '../../../components/ui/button'
+import { Badge } from '../../../components/ui/badge'
+import { Calendar } from '../../../components/ui/calendar'
 import {
     Table,
     TableBody,
@@ -21,17 +21,17 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from '../../components/ui/table'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
+} from '../../../components/ui/table'
+import { Input } from '../../../components/ui/input'
+import { Label } from '../../../components/ui/label'
 import { Mail, Phone, Edit2 } from 'lucide-react'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '../../components/ui/dialog'
+// import {
+//     Dialog,
+//     DialogContent,
+//     DialogHeader,
+//     DialogTitle,
+//     DialogFooter,
+// } from '../../../components/ui/dialog'
 import { useParams } from 'next/navigation'
 
 export default function TeacherProfile() {
@@ -41,7 +41,6 @@ export default function TeacherProfile() {
         last_name: string
         email: string
         phone: string
-        
     }
     const { id } = useParams() as { id: string }
     const [teacher, setTeacher] = useState<Teacher | null>(null)
@@ -53,7 +52,7 @@ export default function TeacherProfile() {
     )
     const [isEditingEmail, setIsEditingEmail] = useState(false)
     const [isEditingPhone, setIsEditingPhone] = useState(false)
-    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
+    // const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
 
     const { getTeacher, updateTeacher } = useTeachers()
     const { getTeacherSchedules, createTeacherSchedule } = useTeacherSchedules()
@@ -113,7 +112,7 @@ export default function TeacherProfile() {
 
         try {
             await createTeacherSchedule(formData)
-            setIsScheduleModalOpen(false)
+            // setIsScheduleModalOpen(false)
             // Recargar horarios
             const response = await getTeacherSchedules()
             const teacherSchedules = response.teacher_schedules.filter(
@@ -160,11 +159,7 @@ export default function TeacherProfile() {
                 </div>
                 <div className="flex gap-2">
                     <Button>Generar Pago</Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => setIsScheduleModalOpen(true)}>
-                        Horarios Nuevos
-                    </Button>
+                    <Button variant="outline">Horarios Nuevos</Button>
                 </div>
             </div>
 
@@ -325,7 +320,7 @@ export default function TeacherProfile() {
                 </CardContent>
             </Card>
 
-            {/* Modal para agregar horario */}
+            {/* Modal para agregar horario
             <Dialog
                 open={isScheduleModalOpen}
                 onOpenChange={setIsScheduleModalOpen}>
@@ -386,7 +381,7 @@ export default function TeacherProfile() {
                         </DialogFooter>
                     </form>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
         </div>
     )
 }

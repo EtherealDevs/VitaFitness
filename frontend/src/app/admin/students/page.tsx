@@ -13,39 +13,40 @@ import {
     TableHeader,
     TableRow,
 } from '../components/ui/table'
-import { Input } from '../components/ui/input'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '../components/ui/dialog'
-import { Label } from '../components/ui/label'
+// import { Input } from '../components/ui/input'
+// import {
+//     Dialog,
+//     DialogContent,
+//     DialogHeader,
+//     DialogTitle,
+//     DialogFooter,
+// } from '../components/ui/dialog'
+// import { Label } from '../components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 
 // import { useBranches } from '@/hooks/branches'
+import Link from 'next/link'
+// import { h } from 'vue'
 
 export default function StudentsPage() {
     const [students, setStudents] = useState<Student[]>([])
     // const [branches, setBranches] = useState<Branch[]>([])
-    const [isOpen, setIsOpen] = useState(false)
-    const [createStudentModalIsOpen, setCreateStudentModalIsOpen] =
-        useState(false)
-    const [selectedStudent, setSelectedStudent] = useState<
-        Student | undefined
-    >()
+    // const [isOpen, setIsOpen] = useState(false)
+    // const [createStudentModalIsOpen, setCreateStudentModalIsOpen] =
+    //     useState(false)
+    // const [selectedStudent, setSelectedStudent] = useState<
+    //     Student | undefined
+    // >()
     const [search, setSearch] = useState('')
 
-    const { getStudents, createStudent, updateStudent, deleteStudent } =
-        useStudents()
+    const { getStudents, deleteStudent } = useStudents()
     // const { getBranches } = useBranches()
     const [showDetails, setShowDetails] = useState(false)
 
-    function open(id: number) {
-        setIsOpen(true)
-        setSelectedStudent(students.find(student => student.id === id))
-    }
+    // function open(id: number) {
+    //     setIsOpen(true)
+    //     setSelectedStudent(students.find(student => student.id === id))
+    // }
     const toggleDetails = () => {
         setShowDetails(!showDetails)
     }
@@ -65,17 +66,17 @@ export default function StudentsPage() {
         status: string
     }
 
-    function close() {
-        setIsOpen(false)
-    }
+    // function close() {
+    //     setIsOpen(false)
+    // }
 
-    function openCreateStudentModal() {
-        setCreateStudentModalIsOpen(true)
-    }
+    // function openCreateStudentModal() {
+    //     setCreateStudentModalIsOpen(true)
+    // }
 
-    function closeCreateStudentModal() {
-        setCreateStudentModalIsOpen(false)
-    }
+    // function closeCreateStudentModal() {
+    //     setCreateStudentModalIsOpen(false)
+    // }
 
     const fetchData = async () => {
         try {
@@ -94,25 +95,25 @@ export default function StudentsPage() {
         // }
     }
 
-    async function handleCreateStudentForm(
-        e: React.FormEvent<HTMLFormElement>,
-    ) {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        await createStudent(formData)
-        closeCreateStudentModal()
-        fetchData()
-    }
+    // async function handleCreateStudentForm(
+    //     e: React.FormEvent<HTMLFormElement>,
+    // ) {
+    //     e.preventDefault()
+    //     const formData = new FormData(e.currentTarget)
+    //     await createStudent(formData)
+    //     closeCreateStudentModal()
+    //     fetchData()
+    // }
 
-    async function handleUpdateStudentForm(
-        e: React.FormEvent<HTMLFormElement>,
-    ) {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        await updateStudent(formData.get('id') as string, formData)
-        close()
-        fetchData()
-    }
+    // async function handleUpdateStudentForm(
+    //     e: React.FormEvent<HTMLFormElement>,
+    // ) {
+    //     e.preventDefault()
+    //     const formData = new FormData(e.currentTarget)
+    //     await updateStudent(formData.get('id') as string, formData)
+    //     close()
+    //     fetchData()
+    // }
 
     async function handleDeleteStudent(id: number) {
         const confirmDelete = confirm(
@@ -167,10 +168,12 @@ export default function StudentsPage() {
                     </Button>
                 </div>
                 <div className="hidden sm:flex justify-end gap-2">
-                    <Button onClick={openCreateStudentModal}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nuevo Alumno
-                    </Button>
+                    <Link href="/admin/students/create">
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Nuevo Alumno
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
@@ -188,10 +191,6 @@ export default function StudentsPage() {
             <Card className="w-full">
                 <CardHeader className="flex flex-wrap flex-row items-center justify-between gap-2">
                     <CardTitle>Lista de Alumnos</CardTitle>
-                    <Button onClick={openCreateStudentModal}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nuevo Alumno
-                    </Button>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border overflow-scroll max-w-full">
@@ -270,14 +269,14 @@ export default function StudentsPage() {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        open(student.id)
-                                                    }>
-                                                    <Edit2 className="h-4 w-4" />
-                                                </Button>
+                                                <Link
+                                                    href={`/admin/students/edit/${student.id}`}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm">
+                                                        <Edit2 className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
                                                 <Button
                                                     variant="destructive"
                                                     size="sm"
@@ -305,196 +304,197 @@ export default function StudentsPage() {
                     </div>
                 </CardContent>
             </Card>
-
-            {/* Modal para agregar alumno */}
-            <Dialog
-                open={createStudentModalIsOpen}
-                onOpenChange={setCreateStudentModalIsOpen}>
-                <DialogContent className="w-full max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Agregar Alumno</DialogTitle>
-                    </DialogHeader>
-                    <form
-                        id="createStudentForm"
-                        onSubmit={handleCreateStudentForm}
-                        className="space-y-4">
-                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2">
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Nombre</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    placeholder="Nombre"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="last_name">Apellido</Label>
-                                <Input
-                                    id="last_name"
-                                    name="last_name"
-                                    placeholder="Apellido"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="Email"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="phone">Teléfono</Label>
-                                <Input
-                                    id="phone"
-                                    name="phone"
-                                    placeholder="Teléfono"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="dni">DNI</Label>
-                                <Input id="dni" name="dni" placeholder="DNI" />
-                            </div>
-                            {/* <div className="grid gap-2">
-                                <Label htmlFor="branch_id">Sucursal</Label>
-                                <select name="branch_id" id="branch_id">
-                                    <option value="">Seleccionar...</option>
-                                    {branches?.map((branch: Branch) => (
-                                        <option
-                                            key={branch.id}
-                                            value={branch.id}>
-                                            {branch.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div> */}
-                            <div className="grid gap-2">
-                                <Label htmlFor="status">Estado</Label>
-                                <select name="status" id="status">
-                                    <option value="">Seleccionar...</option>
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                    <option value="pendiente">Pendiente</option>
-                                </select>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={closeCreateStudentModal}>
-                                Cancelar
-                            </Button>
-                            <Button type="submit">Guardar</Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
-
-            {/* Modal para editar alumno */}
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="w-2/3    sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Editar Alumno</DialogTitle>
-                    </DialogHeader>
-                    <form
-                        id="updateStudentForm"
-                        onSubmit={handleUpdateStudentForm}
-                        className="space-y-4">
-                        <input
-                            type="hidden"
-                            name="id"
-                            value={selectedStudent?.id}
-                        />
-                        <div className="grid gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Nombre</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    placeholder="Nombre"
-                                    defaultValue={selectedStudent?.name}
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="last_name">Apellido</Label>
-                                <Input
-                                    id="last_name"
-                                    name="last_name"
-                                    placeholder="Apellido"
-                                    defaultValue={selectedStudent?.last_name}
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="Email"
-                                    defaultValue={selectedStudent?.email}
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="phone">Teléfono</Label>
-                                <Input
-                                    id="phone"
-                                    name="phone"
-                                    placeholder="Teléfono"
-                                    defaultValue={selectedStudent?.phone}
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="dni">DNI</Label>
-                                <Input
-                                    id="dni"
-                                    name="dni"
-                                    placeholder="DNI"
-                                    defaultValue={selectedStudent?.dni}
-                                />
-                            </div>
-                            {/* <div className="grid gap-2">
-                                <Label htmlFor="branch_id">Sucursal</Label>
-                                <select
-                                    name="branch_id"
-                                    id="branch_id"
-                                    defaultValue={selectedStudent?.branch.id}>
-                                    <option value="">Seleccionar...</option>
-                                    {branches?.map((branch: Branch) => (
-                                        <option
-                                            key={branch.id}
-                                            value={branch.id}>
-                                            {branch.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div> */}
-                            <div className="grid gap-2">
-                                <Label htmlFor="status">Estado</Label>
-                                <select
-                                    name="status"
-                                    id="status"
-                                    defaultValue={selectedStudent?.status}>
-                                    <option value="">Seleccionar...</option>
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                    <option value="pendiente">Pendiente</option>
-                                </select>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={close}>
-                                Cancelar
-                            </Button>
-                            <Button type="submit">Guardar Cambios</Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
         </div>
     )
 }
+
+//     {/* Modal para agregar alumno
+//     <Dialog
+//         open={createStudentModalIsOpen}
+//         onOpenChange={setCreateStudentModalIsOpen}>
+//         <DialogContent className="w-full max-w-[425px]">
+//             <DialogHeader>
+//                 <DialogTitle>Agregar Alumno</DialogTitle>
+//             </DialogHeader>
+//             <form
+//                 id="createStudentForm"
+//                 onSubmit={handleCreateStudentForm}
+//                 className="space-y-4">
+//                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2">
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="name">Nombre</Label>
+//                         <Input
+//                             id="name"
+//                             name="name"
+//                             placeholder="Nombre"
+//                         />
+//                     </div>
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="last_name">Apellido</Label>
+//                         <Input
+//                             id="last_name"
+//                             name="last_name"
+//                             placeholder="Apellido"
+//                         />
+//                     </div>
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="email">Email</Label>
+//                         <Input
+//                             id="email"
+//                             name="email"
+//                             type="email"
+//                             placeholder="Email"
+//                         />
+//                     </div>
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="phone">Teléfono</Label>
+//                         <Input
+//                             id="phone"
+//                             name="phone"
+//                             placeholder="Teléfono"
+//                         />
+//                     </div>
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="dni">DNI</Label>
+//                         <Input id="dni" name="dni" placeholder="DNI" />
+//                     </div>
+//                     {/* <div className="grid gap-2">
+//                         <Label htmlFor="branch_id">Sucursal</Label>
+//                         <select name="branch_id" id="branch_id">
+//                             <option value="">Seleccionar...</option>
+//                             {branches?.map((branch: Branch) => (
+//                                 <option
+//                                     key={branch.id}
+//                                     value={branch.id}>
+//                                     {branch.name}
+//                                 </option>
+//                             ))}
+//                         </select>
+//                     </div> */}
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="status">Estado</Label>
+//                         <select name="status" id="status">
+//                             <option value="">Seleccionar...</option>
+//                             <option value="activo">Activo</option>
+//                             <option value="inactivo">Inactivo</option>
+//                             <option value="pendiente">Pendiente</option>
+//                         </select>
+//                     </div>
+//                 </div>
+//                 <DialogFooter>
+//                     <Button
+//                         type="button"
+//                         variant="outline"
+//                         onClick={closeCreateStudentModal}>
+//                         Cancelar
+//                     </Button>
+//                     <Button type="submit">Guardar</Button>
+//                 </DialogFooter>
+//             </form>
+//         </DialogContent>
+//     </Dialog>
+
+//     {/* Modal para editar alumno */}
+//     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+//         <DialogContent className="w-2/3    sm:max-w-[425px]">
+//             <DialogHeader>
+//                 <DialogTitle>Editar Alumno</DialogTitle>
+//             </DialogHeader>
+//             <form
+//                 id="updateStudentForm"
+//                 onSubmit={handleUpdateStudentForm}
+//                 className="space-y-4">
+//                 <input
+//                     type="hidden"
+//                     name="id"
+//                     value={selectedStudent?.id}
+//                 />
+//                 <div className="grid gap-4">
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="name">Nombre</Label>
+//                         <Input
+//                             id="name"
+//                             name="name"
+//                             placeholder="Nombre"
+//                             defaultValue={selectedStudent?.name}
+//                         />
+//                     </div>
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="last_name">Apellido</Label>
+//                         <Input
+//                             id="last_name"
+//                             name="last_name"
+//                             placeholder="Apellido"
+//                             defaultValue={selectedStudent?.last_name}
+//                         />
+//                     </div>
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="email">Email</Label>
+//                         <Input
+//                             id="email"
+//                             name="email"
+//                             type="email"
+//                             placeholder="Email"
+//                             defaultValue={selectedStudent?.email}
+//                         />
+//                     </div>
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="phone">Teléfono</Label>
+//                         <Input
+//                             id="phone"
+//                             name="phone"
+//                             placeholder="Teléfono"
+//                             defaultValue={selectedStudent?.phone}
+//                         />
+//                     </div>
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="dni">DNI</Label>
+//                         <Input
+//                             id="dni"
+//                             name="dni"
+//                             placeholder="DNI"
+//                             defaultValue={selectedStudent?.dni}
+//                         />
+//                     </div>
+//                     {/* <div className="grid gap-2">
+//                         <Label htmlFor="branch_id">Sucursal</Label>
+//                         <select
+//                             name="branch_id"
+//                             id="branch_id"
+//                             defaultValue={selectedStudent?.branch.id}>
+//                             <option value="">Seleccionar...</option>
+//                             {branches?.map((branch: Branch) => (
+//                                 <option
+//                                     key={branch.id}
+//                                     value={branch.id}>
+//                                     {branch.name}
+//                                 </option>
+//                             ))}
+//                         </select>
+//                     </div> */}
+//                     <div className="grid gap-2">
+//                         <Label htmlFor="status">Estado</Label>
+//                         <select
+//                             name="status"
+//                             id="status"
+//                             defaultValue={selectedStudent?.status}>
+//                             <option value="">Seleccionar...</option>
+//                             <option value="activo">Activo</option>
+//                             <option value="inactivo">Inactivo</option>
+//                             <option value="pendiente">Pendiente</option>
+//                         </select>
+//                     </div>
+//                 </div>
+//                 <DialogFooter>
+//                     <Button
+//                         type="button"
+//                         variant="outline"
+//                         onClick={close}>
+//                         Cancelar
+//                     </Button>
+//                     <Button type="submit">Guardar Cambios</Button>
+//                 </DialogFooter>
+//             </form>
+//         </DialogContent>
+//     </Dialog>
+// </div> */}
