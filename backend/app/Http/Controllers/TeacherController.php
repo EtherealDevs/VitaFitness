@@ -38,7 +38,7 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $teacher->load('branch', 'plans', 'schedules');
+        $teacher->load('schedules');
         $teacher = new TeacherResource($teacher);
 
         $data = [

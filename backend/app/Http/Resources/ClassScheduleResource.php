@@ -16,12 +16,13 @@ class ClassScheduleResource extends JsonResource
     public function toArray(Request $request): array
     {
         $selectedDays = $this->schedule->days;
-        $timeslots = $this->timeslots()->orderBy('hour')->get(); 
+        $timeslots = $this->timeslots()->orderBy('hour')->get();
         try {
             $timeslotStartTime = Carbon::parse($timeslots->first()->hour)->format('H:i');
             $timeslotEndTime = Carbon::parse($timeslots->last()->hour)->format('H:i');
         } catch (\Throwable $th) {
-            dd($selectedDays, $timeslots, $this, $th);
+            $timeslotStartTime = null;
+            $timeslotEndTime = null;
         }
         return [
             'id' => $this->id,
