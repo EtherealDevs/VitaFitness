@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { DataTable } from '../components/ui/data-table'
-import { Button } from '../components/ui/button'
-import { Checkbox } from '@/app/admin/components/ui/checkbox'
-import type { ColumnDef } from '@tanstack/react-table'
+import Link from 'next/link'
+
 import { Roles, Users, useUser } from '@/hooks/users'
 import { toast } from '@/hooks/use-toast'
 import { ToastAction } from '@/components/ui/toast'
+
+import { Button } from '../components/ui/button'
+import { Checkbox } from '@/app/admin/components/ui/checkbox'
+import { DataTable } from '../components/ui/data-table'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Table } from '../components/ui/table'
+
+import type { ColumnDef } from '@tanstack/react-table'
 
 export default function PermissionsPage() {
     const [users, setUsers] = useState<Users[]>([])
@@ -108,25 +114,35 @@ export default function PermissionsPage() {
         },
     ]
 
-    if (!roles.length) return null // Opcional: esperar a que carguen los roles
+    if (!roles.length) return null
 
     return (
-        <div className="py-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Permisos</h1>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nuevo Permiso
-                </Button>
+        <div className="space-y-6 p-6 max-w-full">
+            <div className="flex flex-wrap items-center justify-between">
+                <h1 className="text-2xl md:text-3xl font-bold">Permisos</h1>
+                <Link href="/admin/permissions/create">
+                    <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Permiso
+                    </Button>
+                </Link>
             </div>
-            <div className="mt-6">
-                <DataTable
-                    columns={columns}
-                    data={users}
-                    filterColumn="name"
-                    filterPlaceholder="Filtrar permisos..."
-                />
-            </div>
+
+            <Card className="w-full">
+                <CardHeader className="flex flex-wrap flex-row items-center justify-between gap-2">
+                    <CardTitle>Gestión de Permisos</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <Table>
+                        <DataTable
+                            columns={columns}
+                            data={users}
+                            filterColumn="name"
+                            filterPlaceholder="Filtrar permisos..."
+                        />
+                    </Table>
+                </CardContent>
+            </Card>
         </div>
     )
 }
