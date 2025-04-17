@@ -99,7 +99,9 @@ export default function EditStudentPage() {
 
     return (
         <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded-lg dark:bg-zinc-950">
-            <h1 className="text-2xl font-bold mb-4">Editar Estudiante</h1>
+            <h1 className="text-2xl font-bold mb-4 dark:text-white">
+                Editar Estudiante
+            </h1>
             {errors.general && (
                 <div className="mb-4 text-red-500">
                     {errors.general.map((err, idx) => (
@@ -145,7 +147,7 @@ export default function EditStudentPage() {
                     error={errors.dni}
                 />
                 <div>
-                    <label className="block font-medium text-sm text-gray-700">
+                    <label className="block font-medium text-sm text-gray-700 dark:text-white">
                         Estado
                     </label>
                     <select
@@ -204,7 +206,7 @@ const InputField = ({
             onChange={onChange}
             className={`mt-1 block w-full border ${
                 error ? 'border-red-500' : 'border-gray-300'
-            } rounded-md shadow-sm`}
+            } rounded-md shadow-sm dark:text-white`}
         />
         {error && <p className="text-sm text-red-500">{error[0]}</p>}
     </div>
