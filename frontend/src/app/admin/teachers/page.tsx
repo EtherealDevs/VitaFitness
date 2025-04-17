@@ -458,7 +458,7 @@ export default function TeacherIndex() {
                                 <Label htmlFor="dni">DNI</Label>
                                 <Input id="dni" name="dni" placeholder="DNI" />
                             </div>
-                            {/* <div className="grid gap-2">
+                            <div className="grid gap-2">
                                 <Label htmlFor="branch_id">Sucursal</Label>
                                 <select
                                     id="branch_id"
@@ -475,7 +475,7 @@ export default function TeacherIndex() {
                                         </option>
                                     ))}
                                 </select>
-                            </div> */}
+                            </div>
                         </div>
                         <DialogFooter>
                             <Button

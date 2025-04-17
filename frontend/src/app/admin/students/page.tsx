@@ -13,15 +13,6 @@ import {
     TableHeader,
     TableRow,
 } from '../components/ui/table'
-// import { Input } from '../components/ui/input'
-// import {
-//     Dialog,
-//     DialogContent,
-//     DialogHeader,
-//     DialogTitle,
-//     DialogFooter,
-// } from '../components/ui/dialog'
-// import { Label } from '../components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 
 // import { useBranches } from '@/hooks/branches'
@@ -178,17 +169,17 @@ export default function StudentsPage() {
             </div>
 
             {/* Barra de Busqueda */}
-            <div className="flex  sm:justify-start w-full">
+            <div className="flex sm:justify-start w-full">
                 <input
                     type="text"
                     placeholder="Buscar alumno..."
-                    className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl px-4 py-2 border rounded-md text-sm md:text-base"
+                    className="w-full max-w-xs dark:bg-gray-200 sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl px-4 py-2 border rounded-md text-sm md:text-base"
                     onChange={e => setSearch(e.target.value)}
                 />
             </div>
 
             {/* Tabla de Alumnos */}
-            <Card className="w-full">
+            <Card className="w-full ">
                 <CardHeader className="flex flex-wrap flex-row items-center justify-between gap-2">
                     <CardTitle>Lista de Alumnos</CardTitle>
                 </CardHeader>

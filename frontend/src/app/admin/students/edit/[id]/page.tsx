@@ -4,6 +4,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useStudents } from '@/hooks/students'
 import { AxiosError } from 'axios'
+import { Card, CardContent } from '@/components/ui/card'
+import { Label } from '@/app/admin/components/ui/label'
+import { Input } from '@/app/admin/components/ui/input'
+import { Button } from '@/app/admin/components/ui/button'
 
 interface Student {
     id?: number
@@ -55,6 +59,7 @@ export default function EditStudentPage() {
             setLoading(false)
         }
     }, [getStudent])
+
     useEffect(() => {
         fetchStudent()
     }, [fetchStudent])
@@ -91,86 +96,85 @@ export default function EditStudentPage() {
 
     if (loading) {
         return (
-            <div className="text-center mt-10 text-gray-600">
+            <div className="text-center mt-10 text-muted-foreground">
                 Cargando estudiante...
             </div>
         )
     }
 
     return (
-        <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded-lg dark:bg-zinc-950">
-            <h1 className="text-2xl font-bold mb-4 dark:text-white">
-                Editar Estudiante
-            </h1>
-            {errors.general && (
-                <div className="mb-4 text-red-500">
-                    {errors.general.map((err, idx) => (
-                        <p key={idx}>{err}</p>
-                    ))}
-                </div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <InputField
-                    label="Nombre"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    error={errors.name}
-                />
-                <InputField
-                    label="Apellido"
-                    name="last_name"
-                    value={formData.last_name}
-                    onChange={handleChange}
-                    error={errors.last_name}
-                />
-                <InputField
-                    label="Email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    error={errors.email}
-                />
-                <InputField
-                    label="Teléfono"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    error={errors.phone}
-                />
-                <InputField
-                    label="DNI"
-                    name="dni"
-                    value={formData.dni}
-                    onChange={handleChange}
-                    error={errors.dni}
-                />
-                <div>
-                    <label className="block font-medium text-sm text-gray-700 dark:text-white">
-                        Estado
-                    </label>
-                    <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border p-1 rounded-md shadow-sm dark:text-white dark:border-white">
-                        <option value="pendiente">Pendiente</option>
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
-                    </select>
-                    {errors.status && (
-                        <p className="text-sm text-red-500">
-                            {errors.status[0]}
-                        </p>
+        <div className="max-w-xl mx-auto mt-10">
+            <Card>
+                <CardContent className="p-6">
+                    <h1 className="text-2xl font-bold mb-4">
+                        Editar Estudiante
+                    </h1>
+                    {errors.general && (
+                        <div className="mb-4 text-red-500">
+                            {errors.general.map((err, idx) => (
+                                <p key={idx}>{err}</p>
+                            ))}
+                        </div>
                     )}
-                </div>
-                <button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                    Guardar cambios
-                </button>
-            </form>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <InputField
+                            label="Nombre"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            error={errors.name}
+                        />
+                        <InputField
+                            label="Apellido"
+                            name="last_name"
+                            value={formData.last_name}
+                            onChange={handleChange}
+                            error={errors.last_name}
+                        />
+                        <InputField
+                            label="Email"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            error={errors.email}
+                        />
+                        <InputField
+                            label="Teléfono"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            error={errors.phone}
+                        />
+                        <InputField
+                            label="DNI"
+                            name="dni"
+                            value={formData.dni}
+                            onChange={handleChange}
+                            error={errors.dni}
+                        />
+                        <div>
+                            <Label htmlFor="status">Estado</Label>
+                            <select
+                                id="status"
+                                name="status"
+                                value={formData.status}
+                                onChange={handleChange}
+                                className="mt-1 block w-full border rounded-md shadow-sm p-2 text-sm dark:bg-zinc-900 dark:text-white">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                            {errors.status && (
+                                <p className="text-sm text-red-500 mt-1">
+                                    {errors.status[0]}
+                                </p>
+                            )}
+                        </div>
+                        <Button type="submit">Guardar cambios</Button>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
     )
 }
@@ -193,21 +197,14 @@ const InputField = ({
     error,
 }: InputProps) => (
     <div>
-        <label
-            htmlFor={name}
-            className="block font-medium text-sm text-gray-700 dark:text-white">
-            {label}
-        </label>
-        <input
+        <Label htmlFor={name}>{label}</Label>
+        <Input
             id={name}
             name={name}
             type={type}
             value={value}
             onChange={onChange}
-            className={`mt-1 block w-full border ${
-                error ? 'border-red-500' : 'border-gray-300'
-            } rounded-md shadow-sm dark:text-white`}
         />
-        {error && <p className="text-sm text-red-500">{error[0]}</p>}
+        {error && <p className="text-sm text-red-500 mt-1">{error[0]}</p>}
     </div>
 )
