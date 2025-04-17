@@ -143,9 +143,13 @@ export default function ClassPage() {
                 const cls = row.original
                 return (
                     <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                            Editar
-                        </Button>
+                        <Link
+                            href="/admin/classes/edit/[id]"
+                            as={`/admin/classes/edit/${cls.id}`}>
+                            <Button variant="outline" size="sm">
+                                Editar
+                            </Button>
+                        </Link>
                         <Button
                             variant="destructive"
                             size="sm"

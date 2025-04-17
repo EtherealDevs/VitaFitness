@@ -175,7 +175,7 @@ export default function CreateSchedulePage() {
                     Crear Nuevo Horario
                 </h1>
 
-                <Card className="bg-white shadow-md rounded-md dark:bg-zinc-950 dark:text-white">
+                <Card className="bg-white shadow-md rounded-md ">
                     <CardHeader>
                         <CardTitle>Información del Horario</CardTitle>
                         <CardDescription>

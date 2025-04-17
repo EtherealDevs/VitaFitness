@@ -79,7 +79,7 @@ export default function EditSchedulePage() {
                     Crear Nuevo Horario
                 </h1>
 
-                <Card className="bg-white rounded shadow-md dark:bg-zinc-950 dark:text-white">
+                <Card className="bg-white rounded shadow-md">
                     <CardHeader>
                         <CardTitle>Información del Horario</CardTitle>
                     </CardHeader>
@@ -147,7 +147,7 @@ export default function EditSchedulePage() {
                                             name="start_time"
                                             value={schedule.start_time}
                                             onChange={handleInputChange}
-                                            className="p-1 rounded-md"
+                                            className="p-1 px-3 rounded-md bg-gray-200"
                                             required
                                         />
                                     </div>
@@ -167,7 +167,7 @@ export default function EditSchedulePage() {
                                             name="end_time"
                                             value={schedule.end_time}
                                             onChange={handleInputChange}
-                                            className="p-1 rounded-md"
+                                            className="p-1 px-3 rounded-md bg-gray-200"
                                             required
                                         />
                                     </div>

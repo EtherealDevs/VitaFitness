@@ -1,7 +1,24 @@
 'use client'
 import { Schedule, useSchedules } from '@/hooks/schedules'
-import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
+
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/app/admin/components/ui/card'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/app/admin/components/ui/table'
+import { Button } from '@/app/admin/components/ui/button'
+import { Plus, Edit2, Trash2 } from 'lucide-react'
 
 export default function Schedules() {
     const [schedules, setSchedules] = useState<Schedule[]>([])
@@ -15,7 +32,6 @@ export default function Schedules() {
             setSchedules(response.schedules)
         } catch (error) {
             console.error(error)
-            throw error
         } finally {
             setLoading(false)
         }
@@ -26,87 +42,93 @@ export default function Schedules() {
     }, [fetchData])
 
     const handleDelete = async (id: string) => {
+        const confirmDelete = confirm('¿Estás seguro de eliminar este horario?')
+        if (!confirmDelete) return
+
         try {
             await deleteSchedule(id)
             fetchData()
         } catch (error) {
             console.error(error)
-            throw error
         }
     }
-    return loading ? (
-        <div>
-            <h1>Loading...</h1>
-        </div>
-    ) : (
-        <div className="space-y-4 overflow-x-auto">
-            <div className="flex justify-between align-bottom">
-                <h1>Horarios</h1>
-                <Link href={'/admin/schedules/create'}>
-                    <button className="py-2 px-4 bg-blue-600  rounded-xl">
-                        nuevo horario
-                    </button>
+
+    return (
+        <div className="space-y-6 p-6 max-w-full">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+                <h1 className="text-2xl md:text-3xl font-bold">Horarios</h1>
+                <Link href="/admin/schedules/create">
+                    <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Horario
+                    </Button>
                 </Link>
             </div>
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg bg-white p-4 rounded-lg">
-                {/* desktop view */}
-                <table
-                    className="w-full text-sm text-left text-gray-500 dark:text-gray-400
-                ">
-                    <thead className="text-xs text-gray-500 uppercase bg-gray-200 dark:bg-zinc-950">
-                        <tr>
-                            <th scope="col" className="py-3 px-6">
-                                id
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Dia
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Hora de inicio
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Hora de fin
-                            </th>
-                            <th scope="col" colSpan={2} className="px-6 py-3">
-                                Acciones
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="">
-                        {schedules.map((schedule, index) => (
-                            <tr key={index}>
-                                <td className="py-4 px-6">{schedule.id}</td>
-                                <td className="px-6 py-4">{schedule.days}</td>
-                                <td className="px-6 py-4">
-                                    {schedule.start_time}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {schedule.end_time}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <Link
-                                        href={`/admin/schedules/edit/${schedule.id}`}>
-                                        Edit
-                                    </Link>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <button
-                                        type="button"
-                                        className="py-2 px-4 bg-red-600 text-white rounded-lg w-full hover:bg-red-700"
-                                        aria-label={`Eliminar ${schedule.id}`}
-                                        onClick={() =>
-                                            handleDelete(schedule.id)
-                                        }>
-                                        Eliminar
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
 
-                {/* mobile view */}
-            </div>
+            <Card className="w-full">
+                <CardHeader className="flex items-center justify-between">
+                    <CardTitle>Lista de Horarios</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {loading ? (
+                        <div className="text-center py-10">Cargando...</div>
+                    ) : (
+                        <div className="rounded-md border overflow-scroll max-w-full">
+                            <Table className="min-w-full">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>ID</TableHead>
+                                        <TableHead>Día</TableHead>
+                                        <TableHead>Hora de Inicio</TableHead>
+                                        <TableHead>Hora de Fin</TableHead>
+                                        <TableHead className="text-right">
+                                            Acciones
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {schedules.map(schedule => (
+                                        <TableRow key={schedule.id}>
+                                            <TableCell>{schedule.id}</TableCell>
+                                            <TableCell>
+                                                {schedule.days}
+                                            </TableCell>
+                                            <TableCell>
+                                                {schedule.start_time}
+                                            </TableCell>
+                                            <TableCell>
+                                                {schedule.end_time}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex justify-end gap-2">
+                                                    <Link
+                                                        href={`/admin/schedules/edit/${schedule.id}`}>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm">
+                                                            <Edit2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                schedule.id,
+                                                            )
+                                                        }>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     )
 }
