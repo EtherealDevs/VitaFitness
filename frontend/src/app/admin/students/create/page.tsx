@@ -24,7 +24,7 @@ export default function CreateStudentPage() {
         email: '',
         phone: '',
         dni: '',
-        status: 'active',
+        status: 'pendiente',
     })
 
     const [errors, setErrors] = useState<
@@ -86,8 +86,10 @@ export default function CreateStudentPage() {
     }
 
     return (
-        <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded-lg">
-            <h1 className="text-2xl font-bold mb-4">Crear Estudiante</h1>
+        <div className="max-w-xl mx-auto mt-10 p-6 bg-white dark:bg-zinc-950 shadow rounded-lg">
+            <h1 className="text-2xl font-bold mb-4 dark:text-white">
+                Crear Estudiante
+            </h1>
             {errors.general && (
                 <div className="mb-4 text-red-500">
                     {errors.general.map((err, idx) => (
@@ -133,16 +135,17 @@ export default function CreateStudentPage() {
                     error={errors.dni}
                 />
                 <div>
-                    <label className="block font-medium text-sm text-gray-700">
+                    <label className="block font-medium text-sm text-gray-700 dark:text-white">
                         Estado
                     </label>
                     <select
                         name="status"
                         value={formData.status}
                         onChange={handleChange}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <option value="active">Activo</option>
-                        <option value="inactive">Inactivo</option>
+                        className="mt-1 block w-full border rounded-md shadow-sm dark:text-white dark:border-white p-1">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
                     </select>
                     {errors.status && (
                         <p className="text-sm text-red-500">
@@ -181,7 +184,7 @@ const InputField = ({
     <div>
         <label
             htmlFor={name}
-            className="block font-medium text-sm text-gray-700">
+            className="block font-medium text-sm text-gray-700 dark:text-white">
             {label}
         </label>
         <input
