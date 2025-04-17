@@ -78,13 +78,13 @@ class PaymentController extends Controller
     public function student(string $id)
     {
         try {
-            $payment = Payment::with(['student', 'classSchedule'])->where('student_id', $id)->get();
+            $payments = Payment::with(['student', 'classSchedule'])->where('student_id', $id)->get();
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $payment = new PaymentResource($payment);
+        $payments = PaymentResource::collection($payments);
         $data = [
-            'payment' => $payment,
+            'payment' => $payments,
             'message' => 'Payment retrieved successfully',
             'status' => 'success (200)'
         ];

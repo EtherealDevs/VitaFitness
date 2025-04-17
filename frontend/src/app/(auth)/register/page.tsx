@@ -17,6 +17,7 @@ const Register = () => {
 
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
+    const [dni, setDni] = useState('')
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -25,6 +26,7 @@ const Register = () => {
     const [errors, setErrors] = useState<{
         name?: string[]
         email?: string[]
+        dni?: string[]
         password?: string[]
         password_confirmation?: string[]
     }>({})
@@ -35,6 +37,7 @@ const Register = () => {
         register({
             name,
             email,
+            dni,
             password,
             password_confirmation: passwordConfirmation,
             setErrors,
@@ -144,6 +147,37 @@ const Register = () => {
                                     {errors.email && (
                                         <p className="mt-2 text-sm text-red-500">
                                             {errors.email.join(', ')}
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label
+                                        htmlFor="dni"
+                                        className="title-font text-lg text-white block mb-2">
+                                        DNI
+                                    </label>
+
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <AtSign className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <input
+                                            id="dni"
+                                            name="dni"
+                                            type="dni"
+                                            value={dni}
+                                            className="block w-full pl-10 pr-3 py-3 bg-zinc-800 border-b border-gray-600 focus:border-teal-400 outline-none transition-colors rounded-md text-white"
+                                            onChange={event =>
+                                                setDni(event.target.value)
+                                            }
+                                            required
+                                            placeholder="12345678"
+                                        />
+                                    </div>
+
+                                    {errors.dni && (
+                                        <p className="mt-2 text-sm text-red-500">
+                                            {errors.dni.join(', ')}
                                         </p>
                                     )}
                                 </div>

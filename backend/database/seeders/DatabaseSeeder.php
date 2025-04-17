@@ -18,11 +18,13 @@ class DatabaseSeeder extends Seeder
         $hashedPassword = Hash::make(env('ADMIN_PASS'));
         User::factory()->create([
             'name' => 'Test User',
+            'dni' => '12345698',
             'email' => 'test@example.com',
         ]);
         User::factory()->create([
             'name' => env('ADMIN_NAME'),
             'email' => env('ADMIN_EMAIL'),
+            'dni' => '12345678',
             'password' => $hashedPassword,
         ]);
         $this->call(RolePermissionSeeder::class);
