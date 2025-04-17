@@ -69,9 +69,9 @@ export default function CreateBranchPage() {
                     Crear Nueva Sucursal
                 </h1>
 
-                <Card className="bg-white rounded shadow-md dark:bg-zinc-950 dark:text-white">
+                <Card className="bg-white rounded shadow-md">
                     <CardHeader>
-                        <CardTitle className="dark:text-white">
+                        <CardTitle className="">
                             Información de la Sucursal
                         </CardTitle>
                         <CardDescription>
@@ -84,7 +84,7 @@ export default function CreateBranchPage() {
                         <CardContent className="space-y-6">
                             {/* Required Information */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-medium text-muted-foreground dark:text-white">
+                                <h3 className="text-sm font-medium text-muted-foreground ">
                                     Información Básica
                                 </h3>
 
@@ -100,7 +100,7 @@ export default function CreateBranchPage() {
                                             </span>
                                         </Label>
                                         <Input
-                                            className=" p-2 border rounded-lg dark:bg-transparent"
+                                            className=" p-2 border rounded-lg dark:border-gray-400 dark:bg-gray-300"
                                             type="text"
                                             name="name"
                                             id="name"

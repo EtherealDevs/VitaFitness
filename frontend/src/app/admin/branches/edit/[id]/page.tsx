@@ -84,11 +84,9 @@ export default function EditBranchPage() {
                     Editar Sucursal
                 </h1>
 
-                <Card className="bg-white rounded shadow-md dark:bg-zinc-950 dark:text-white">
+                <Card className="bg-white rounded shadow-md">
                     <CardHeader>
-                        <CardTitle className="dark:text-white">
-                            Información de la Sucursal
-                        </CardTitle>
+                        <CardTitle>Información de la Sucursal</CardTitle>
                         <CardDescription>
                             Ingresa los datos para registrar una nueva sucursal
                             en el sistema.
@@ -98,7 +96,7 @@ export default function EditBranchPage() {
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-6">
                             <div className="space-y-4">
-                                <h3 className="text-sm font-medium text-muted-foreground dark:text-white">
+                                <h3 className="text-sm font-medium text-muted-foreground ">
                                     Información Básica
                                 </h3>
 
@@ -114,7 +112,7 @@ export default function EditBranchPage() {
                                             </span>
                                         </Label>
                                         <Input
-                                            className="p-2 border rounded-lg dark:bg-transparent"
+                                            className="p-2 border rounded-lg dark:border-gray-400 dark:bg-gray-300"
                                             type="text"
                                             name="name"
                                             id="name"
