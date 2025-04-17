@@ -1,6 +1,7 @@
 // import useSWR from 'swr'
 import axios from '@/lib/axios'
-/* import { useEffect } from 'react'
+import { useCallback } from 'react'
+/* import { useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation' */
 
 export const useStudents = () => {
@@ -15,7 +16,7 @@ export const useStudents = () => {
             throw error
         }
     }
-    const getStudent = async (id: string) => {
+    const getStudent = useCallback(async (id: string) => {
         try {
             const response = await axios.get(`/api/students/${id}`)
             return response.data
@@ -23,7 +24,7 @@ export const useStudents = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
     const createStudent = async (formData: FormData) => {
         await csrf()
         try {

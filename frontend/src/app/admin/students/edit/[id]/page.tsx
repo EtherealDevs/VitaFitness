@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useStudents } from '@/hooks/students'
 import { AxiosError } from 'axios'
@@ -30,34 +30,34 @@ export default function EditStudentPage() {
         email: '',
         phone: '',
         dni: '',
-        status: 'active',
+        status: 'pendiente',
     })
 
     const [errors, setErrors] = useState<ValidationErrors>({})
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        const fetchStudent = async () => {
-            try {
-                const student = await getStudent(id)
-                setFormData({
-                    name: student.name,
-                    last_name: student.last_name,
-                    email: student.email,
-                    phone: student.phone,
-                    dni: student.dni,
-                    status: student.status,
-                })
-            } catch (error) {
-                console.error(error)
-                setErrors({ general: ['Error al obtener el estudiante.'] })
-            } finally {
-                setLoading(false)
-            }
+    const fetchStudent = useCallback(async () => {
+        try {
+            const res = await getStudent(id)
+            const student = res.student
+            setFormData({
+                name: student.name,
+                last_name: student.last_name,
+                email: student.email,
+                phone: student.phone,
+                dni: student.dni,
+                status: student.status,
+            })
+        } catch (error) {
+            console.error(error)
+            setErrors({ general: ['Error al obtener el estudiante.'] })
+        } finally {
+            setLoading(false)
         }
-
+    }, [getStudent])
+    useEffect(() => {
         fetchStudent()
-    }, [id, getStudent])
+    }, [fetchStudent])
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -98,7 +98,7 @@ export default function EditStudentPage() {
     }
 
     return (
-        <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded-lg">
+        <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded-lg dark:bg-zinc-950">
             <h1 className="text-2xl font-bold mb-4">Editar Estudiante</h1>
             {errors.general && (
                 <div className="mb-4 text-red-500">
@@ -152,9 +152,10 @@ export default function EditStudentPage() {
                         name="status"
                         value={formData.status}
                         onChange={handleChange}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <option value="active">Activo</option>
-                        <option value="inactive">Inactivo</option>
+                        className="mt-1 block w-full border p-1 rounded-md shadow-sm dark:text-white dark:border-white">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
                     </select>
                     {errors.status && (
                         <p className="text-sm text-red-500">
@@ -192,7 +193,7 @@ const InputField = ({
     <div>
         <label
             htmlFor={name}
-            className="block font-medium text-sm text-gray-700">
+            className="block font-medium text-sm text-gray-700 dark:text-white">
             {label}
         </label>
         <input
