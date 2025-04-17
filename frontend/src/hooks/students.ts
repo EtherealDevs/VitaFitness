@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation' */
 
 export const useStudents = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')
-    const getStudents = async () => {
+    const getStudents = useCallback(async () => {
         await csrf()
         try {
             const response = await axios.get('/api/students')
@@ -15,7 +15,7 @@ export const useStudents = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
     const getStudent = useCallback(async (id: string) => {
         try {
             const response = await axios.get(`/api/students/${id}`)
