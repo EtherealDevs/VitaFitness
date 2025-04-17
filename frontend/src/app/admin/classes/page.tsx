@@ -144,6 +144,12 @@ export default function ClassPage() {
                 return (
                     <div className="flex gap-2">
                         <Link
+                        href={`/admin/classes/show/${cls.id}`}>
+                        <Button variant="outline" size="sm">
+                            Alumnos / Profes
+                        </Button>
+                        </Link>
+                        <Link
                             href="/admin/classes/edit/[id]"
                             as={`/admin/classes/edit/${cls.id}`}>
                             <Button variant="outline" size="sm">

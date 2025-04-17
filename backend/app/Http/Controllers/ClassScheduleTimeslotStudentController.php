@@ -63,18 +63,18 @@ class ClassScheduleTimeslotStudentController extends Controller
         ];
         return response()->json($data, 201);
     }
-    public function edit(Request $request)
-    {
-        $classScheduleTimeslot = ClassScheduleTimeslot::find($id);
-        $students = [];
-        $studentsInClass = $classScheduleTimeslot->students;
-        $payments = Payment::where('status', 'pagado')->where('classSchedule_id', $classScheduleTimeslot->classSchedule->id)->get();
-        foreach ($payments as $payment) {
-            $students[] = $payment->student;
-        }
+    // public function edit(Request $request)
+    // {
+    //     $classScheduleTimeslot = ClassScheduleTimeslot::find($id);
+    //     $students = [];
+    //     $studentsInClass = $classScheduleTimeslot->students;
+    //     $payments = Payment::where('status', 'pagado')->where('classSchedule_id', $classScheduleTimeslot->classSchedule->id)->get();
+    //     foreach ($payments as $payment) {
+    //         $students[] = $payment->student;
+    //     }
 
-        return view('edit-classStudent', ['classScheduleTimeslot' => $classScheduleTimeslot, 'students' => $students]);
-    }
+    //     return view('edit-classStudent', ['classScheduleTimeslot' => $classScheduleTimeslot, 'students' => $students]);
+    // }
     public function update(Request $request)
     {
         $request->validate([

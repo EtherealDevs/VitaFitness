@@ -38,7 +38,33 @@ class SchedulesController extends Controller
         ]);
         try {
             $schedule = new Schedule();
-            $schedule->days = $request->days;
+            $orderedDays = [];
+            foreach ($request->days as $day) {
+                switch ($day) {
+                    case 'lunes':
+                        $orderedDays[0] = $day;
+                        break;
+                    case 'martes':
+                        $orderedDays[1] = $day;
+                        break;
+                    case 'miercoles':
+                        $orderedDays[2] = $day;
+                        break;
+                    case 'jueves':
+                        $orderedDays[3] = $day;
+                        break;
+                    case 'viernes':
+                        $orderedDays[4] = $day;
+                        break;
+                    case 'sabado':
+                        $orderedDays[5] = $day;
+                        break;
+                    case 'domingo':
+                        $orderedDays[6] = $day;
+                        break;
+                }
+            }
+            $schedule->days = $orderedDays;
             $schedule->save();
             $schedule = new ScheduleResource($schedule);
         } catch (\Exception $e) {
