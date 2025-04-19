@@ -11,6 +11,12 @@ import axios from '@/lib/axios'
 import { useRouter } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
+interface Admin {
+    name: string
+    email: string
+    roles: { name: string }[]
+    dni: string
+}
 
 export default function AdminLayout({
     children,
@@ -19,6 +25,7 @@ export default function AdminLayout({
 }) {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
+    const [admin, setAdmin] = useState<Admin | null>(null)
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -28,12 +35,13 @@ export default function AdminLayout({
                 // Obtener el usuario autenticado
                 const res = await axios.get('/api/user')
 
-                const user: { roles: { name: string }[] } = res.data
-
+                const user: Admin = res.data
+                console.log(user)
                 // Verificar si es admin
                 if (!user.roles.some(role => role.name === 'admin')) {
                     router.push('/')
                 } else {
+                    setAdmin(user)
                     setLoading(false)
                 }
             } catch (error) {
@@ -68,7 +76,7 @@ export default function AdminLayout({
 
                     {/* Main content */}
                     <div className="flex-1 md:ml-64 text-black bg-[#EDEDED]  dark:bg-[#afafaf] ">
-                        <DashboardHeader />
+                        {admin && <DashboardHeader admin={admin} />}
                         <main className="container p-4 md:p-6 lg:p-8">
                             {children}
                         </main>

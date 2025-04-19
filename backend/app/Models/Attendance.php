@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Attendance extends Model
 {
 
-    protected $fillable = ['c_sch_ts_student_id', 'status', 'attended_at'];
+    protected $fillable = ['c_sch_ts_student_id', 'status', 'date'];
 
     public function timeslotStudent()
     {
