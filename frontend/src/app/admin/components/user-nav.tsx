@@ -1,15 +1,13 @@
 'use client'
 
-import { CreditCard, LogOut, Settings, User, Bell } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Button } from './ui/button'
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { useEffect, useState } from 'react'
@@ -34,12 +32,6 @@ export function UserNav({ admin }: UserNavProps) {
 
     return (
         <div className="flex items-center gap-4 text-black dark:text-white">
-            {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500" />
-            </Button>
-
             {/* User dropdown */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -74,22 +66,6 @@ export function UserNav({ admin }: UserNavProps) {
                             </p>
                         </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup className="text-black dark:text-white">
-                        <DropdownMenuItem>
-                            <User className="mr-2 h-4 w-4" />
-                            <span>Mi Perfil</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <CreditCard className="mr-2 h-4 w-4" />
-                            <span>Facturación</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Configuración</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-red-600">
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Cerrar Sesión</span>
