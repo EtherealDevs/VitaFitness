@@ -92,8 +92,6 @@ export default function EditProductPage() {
             }
             reader.readAsDataURL(file)
         })
-
-        // Reset the input value so the same file can be selected again
         e.target.value = ''
     }
 
@@ -181,16 +179,16 @@ export default function EditProductPage() {
 
     return (
         <div className="container mx-auto py-10">
-            <Card className="dark:bg-zinc-950 dark:text-white">
+            <Card className="dark:bg-zinc-750 dark:text-white">
                 <CardHeader>
-                    <CardTitle className="dark:text-white">
+                    <CardTitle className="dark:text-white ">
                         Editar Nuevo Producto
                     </CardTitle>
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="block">
+                            <Label htmlFor="name" className="block text-white">
                                 Nombre
                             </Label>
                             <Input

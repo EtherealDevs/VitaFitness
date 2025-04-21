@@ -8,7 +8,7 @@ const Card = React.forwardRef<
     <div
         ref={ref}
         className={cn(
-            'rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-2xl transition-shadow duration-200',
+            'rounded-lg border dark:border-gray-500 bg-card text-card-foreground shadow-sm hover:shadow-2xl transition-shadow duration-200',
             'p-4 sm:p-5 md:p-6', // Solo cambia en mobile
             className,
         )}
