@@ -17,9 +17,9 @@ class ClassScheduleTimeslotTeacherResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'hour' => $this->timeslot->hour,
-            'students' => StudentResource::collection($this->whenLoaded('students')),
-            'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
+            'teacher' => $this->teacher,
+            'timeslot' => new TimeslotResource($this->whenloaded('timeslot')),
+            // 'scheduleTimeslot' => $this->timeslot,
         ];
     }
 }

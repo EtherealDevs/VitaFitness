@@ -12,7 +12,7 @@ class ClasseController extends Controller
     {
         try {
             $classes = Classe::all();
-            $classes->load('classSchedules.classScheduleTimeslots.students', 'classSchedules.classScheduleTimeslots.teachers');
+            $classes->load('classSchedules.classScheduleTimeslots.classStudents', 'classSchedules.classScheduleTimeslots.classTeachers');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -30,7 +30,7 @@ class ClasseController extends Controller
     public function show(string $id)
     {
         try {
-            $classe = Classe::with(['classSchedules.classScheduleTimeslots.students', 'classSchedules.classScheduleTimeslots.teachers'])->find($id);
+            $classe = Classe::with(['classSchedules.classScheduleTimeslots.classStudents', 'classSchedules.classScheduleTimeslots.classTeachers'])->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

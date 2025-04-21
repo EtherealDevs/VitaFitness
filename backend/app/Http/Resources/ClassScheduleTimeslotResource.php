@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ClassSchedule;
+use App\Models\ClassScheduleTimeslot;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,8 +20,8 @@ class ClassScheduleTimeslotResource extends JsonResource
         return [
             'id' => $this->id,
             'hour' => $this->timeslot->hour,
-            'students' => StudentResource::collection($this->whenLoaded('students')),
-            'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
+            'classStudents' => ClassScheduleTimeslotStudentResource::collection($this->whenLoaded('classStudents')),
+            'classTeachers' => ClassScheduleTimeslotTeacherResource::collection($this->whenLoaded('classTeachers')),
         ];
     }
 }

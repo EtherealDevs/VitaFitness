@@ -3,6 +3,8 @@
 import { useBranches } from "@/hooks/branches";
 import { useClasses } from "@/hooks/classes"
 import { usePlans } from "@/hooks/plans";
+import { useClassStudents } from "@/hooks/classStudents"
+import { useClassTeachers } from "@/hooks/classTeachers"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { use } from 'react';
@@ -10,8 +12,8 @@ import { use } from 'react';
 interface Timeslot {
     id: number
     hour: string
-    students: Student[]
-    teachers: Teacher[]
+    classStudents: ClassStudent[]
+    classTeachers: ClassTeacher[]
 }
 
 interface Schedule {
@@ -45,6 +47,14 @@ interface Class {
     schedules: Schedule[]
     timeslots: Timeslot[]
 }
+interface ClassStudent {
+    id: string
+    student: Student
+}
+interface ClassTeacher {
+    id: string
+    teacher: Teacher
+}
 interface Student {
     id: string
     name: string
@@ -70,50 +80,66 @@ export default function ShowClassPage({ params }: { params: Promise<{ id: string
     const { getClass, deleteClass, updateClass } = useClasses();
     const { getBranches } = useBranches()
     const { getPlans } = usePlans()
+    const { updateClassStudent, deleteClassStudent, createClassStudent } = useClassStudents()
+    const { updateClassTeacher, deleteClassTeacher, createClassTeacher } = useClassTeachers()
 
     const [classData, setClassData] = useState<Class>()
     const [branches, setBranches] = useState<Branch[]>([])
     const [plans, setPlans] = useState<Plan[]>([])
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getClass(id as string)
-                setClassData(response.classe)
-            } catch (error) {
-                console.error(error)
-            }
+    const fetchClasses = async () => {
+        try {
+            const response = await getClass(id as string)
+            setClassData(response.classe)
+        } catch (error) {
+            console.error(error)
         }
-
-        fetchData()
+    }
+    useEffect(() => {
+        fetchClasses()
     }, [getClass])
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getBranches()
-                setBranches(response.branches)
-            } catch (error) {
-                console.error(error)
-            }
+
+    const fetchBranches = async () => {
+        try {
+            const response = await getBranches()
+            setBranches(response.branches)
+        } catch (error) {
+            console.error(error)
         }
-        fetchData()
+    }
+    useEffect(() => {
+        fetchBranches()
     }, [branches])
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getPlans()
-                setPlans(response.plans)
-            } catch (error) {
-                console.error(error)
-            }
+    const fetchPlans = async () => {
+        try {
+            const response = await getPlans()
+            setPlans(response.plans)
+        } catch (error) {
+            console.error(error)
         }
-
-        fetchData()
+    }
+    useEffect(() => {
+        fetchPlans()
     }, [plans])
-
+    console.log(classData, branches, plans)
+    const fetchAllData = async () => {
+        await fetchClasses()
+        await fetchBranches()
+        await fetchPlans()
+    }
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         console.log(classData)
+    }
+    const removeStudent = (classStudent: ClassStudent) => {
+        try {
+            const res = deleteClassStudent(classStudent.id)
+            console.log(classStudent)
+            console.log(res)
+        } catch (error) {
+            console.error(error)
+        }
+        fetchAllData();
     }
 
     return (
@@ -170,13 +196,13 @@ export default function ShowClassPage({ params }: { params: Promise<{ id: string
                                 <p>{schedule.selectedDays?.join(', ')}</p>
                                 {schedule.timeslots?.map((timeslot, index) => {
                                     return (
-                                        <p key={index}>{timeslot.hour} - Estudiantes: {timeslot.students.map((student, index) => {
+                                        <p key={index}>{timeslot.hour} - Estudiantes: {timeslot.classStudents.map((classStudent, index) => {
                                             return (
-                                                <span key={index}>{student.name}</span>
+                                                <span key={index}>{classStudent.student?.name}<button onClick={() => removeStudent(classStudent)}>Eliminar</button></span>
                                             )
-                                        })} - Profesores: {timeslot.teachers.map((teacher, index) => {
+                                        })} - Profesores: {timeslot.classTeachers.map((classTeacher, index) => {
                                             return (
-                                                <span key={index}>{teacher.name}</span>
+                                                <span key={index}>{classTeacher.teacher?.name}</span>
                                             )
                                         })}</p>
                                     )
@@ -184,6 +210,9 @@ export default function ShowClassPage({ params }: { params: Promise<{ id: string
                             </div>
                         )
                     })}
+                    {/* <button onClick={addStudent}>Agregar estudiante</button>
+                    <button onClick={addTeacher}>Agregar profesor</button>
+                    <button onClick={() => removeTeacher(teacher)}>Eliminar</button> */}
                 </div>
                 </form>
         </div>

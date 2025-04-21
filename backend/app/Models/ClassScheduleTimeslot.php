@@ -28,6 +28,14 @@ class ClassScheduleTimeslot extends Model
     {
         return $this->belongsTo(TimeSlot::class);
     }
+    public function classStudents()
+    {
+        return $this->hasMany(ClassScheduleTimeslotStudent::class, 'c_sch_ts_id');
+    }
+    public function classTeachers()
+    {
+        return $this->hasMany(ClassScheduleTimeslotTeacher::class, 'c_sch_ts_id');
+    }
     public function students()
     {
         return $this->belongsToMany(Student::class, 'class_schedule_timeslot_students', 'c_sch_ts_id', 'student_id');
