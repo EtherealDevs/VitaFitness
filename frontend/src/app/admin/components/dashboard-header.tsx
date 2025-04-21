@@ -8,7 +8,16 @@ import { DashboardNav } from './dashboard-nav'
 import { ModeToggle } from './client/mode-toggle'
 import Image from 'next/image'
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+    admin: {
+        name: string
+        email: string
+        roles: { name: string }[]
+        dni: string
+    } // Replace 'any' with the appropriate type if known
+}
+
+export function DashboardHeader({ admin }: DashboardHeaderProps) {
     return (
         <header className="sticky top-0 z-30 flex h-14 w-full items-center bg-white px-4 dark:bg-zinc-950">
             <div className="flex flex-1 items-center gap-4 ">
@@ -54,7 +63,7 @@ export function DashboardHeader() {
             <div className="ml-auto flex items-center gap-2 text-black dark:text-white">
                 {/* Botón de cambio de tema */}
                 <ModeToggle />
-                <UserNav />
+                <UserNav admin={admin} />
             </div>
         </header>
     )

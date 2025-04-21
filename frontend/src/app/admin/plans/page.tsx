@@ -2,7 +2,7 @@
 
 import { Plan, usePlans } from '@/hooks/plans'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -20,17 +20,17 @@ export default function PlansPage() {
     const { getPlans, deletePlan } = usePlans()
     const [plans, setPlans] = useState<Plan[]>([])
 
-    useEffect(() => {
-        async function fetchPlans() {
-            try {
-                const response = await getPlans()
-                setPlans(response.plans)
-            } catch (error) {
-                console.error(error)
-            }
+    const fetchPlans = useCallback(async () => {
+        try {
+            const response = await getPlans()
+            setPlans(response.plans)
+        } catch (error) {
+            console.error(error)
         }
-        fetchPlans()
     }, [getPlans])
+    useEffect(() => {
+        fetchPlans()
+    }, [fetchPlans])
 
     const handleDelete = async (id: string) => {
         const confirmDelete = confirm('¿Estás seguro de eliminar este plan?')

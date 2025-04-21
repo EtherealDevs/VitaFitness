@@ -13,8 +13,15 @@ import {
     DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { useEffect, useState } from 'react'
-
-export function UserNav() {
+interface UserNavProps {
+    admin: {
+        name: string
+        email: string
+        roles: { name: string }[]
+        dni: string
+    } // Replace 'any' with the appropriate type if known
+}
+export function UserNav({ admin }: UserNavProps) {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -47,9 +54,11 @@ export function UserNav() {
                             <AvatarFallback>AD</AvatarFallback>
                         </Avatar>
                         <div className="hidden flex-col items-start text-sm md:flex">
-                            <span className="font-medium">Admin User</span>
+                            <span className="font-medium">
+                                Admin {admin.name}
+                            </span>
                             <span className="text-xs text-muted-foreground">
-                                admin@example.com
+                                {admin.email}
                             </span>
                         </div>
                     </Button>
@@ -58,10 +67,10 @@ export function UserNav() {
                     <DropdownMenuLabel className="font-normal text-black dark:text-white">
                         <div className="flex flex-col space-y-1">
                             <p className="text-sm font-medium leading-none">
-                                Admin User
+                                {admin.name}
                             </p>
                             <p className="text-xs leading-none text-muted-foreground">
-                                admin@example.com
+                                {admin.email}
                             </p>
                         </div>
                     </DropdownMenuLabel>
