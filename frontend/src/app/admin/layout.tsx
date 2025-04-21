@@ -36,7 +36,6 @@ export default function AdminLayout({
                 const res = await axios.get('/api/user')
 
                 const user: Admin = res.data
-                console.log(user)
                 // Verificar si es admin
                 if (!user.roles.some(role => role.name === 'admin')) {
                     router.push('/')

@@ -63,7 +63,6 @@ export default function Statistics() {
             name: `Clase ${c.class_id} (${c.plan})`,
             students: c.students_count,
         })) ?? []
-    console.log('classData', statistics.students_per_class.classes)
     return (
         <div className="grid gap-4 md:grid-cols-3">
             {/* Gráfico de Distribución de Alumnos por Clase */}

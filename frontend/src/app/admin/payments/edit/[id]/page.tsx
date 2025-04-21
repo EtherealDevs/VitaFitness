@@ -21,7 +21,7 @@ interface ClassSchedules {
     id: string
     class: Class
     schedule: Schedule
-    timesSlots: { hour: string }
+    scheduleTimeslot: { hour: string }
     students: string[]
 }
 
@@ -30,6 +30,10 @@ export default function EditPayment({ params }: EditPaymentProps) {
     const { getPayment, updatePayment } = usePayments()
     const [students, setStudents] = useState<Student[]>([])
     const [classSchedule, setClassSchedule] = useState<ClassSchedules[]>([])
+    const [selectedClass, setSelectedClass] = useState<ClassSchedules | null>(
+        null,
+    )
+    const [loadingData, setLoadingData] = useState(false)
     const { getStudents } = useStudents()
 
     const [form, setForm] = useState({
@@ -77,6 +81,8 @@ export default function EditPayment({ params }: EditPaymentProps) {
     }, [])
 
     useEffect(() => {
+        setLoadingData(true)
+
         if (id) {
             getPayment(id)
                 .then(data => {
@@ -101,14 +107,27 @@ export default function EditPayment({ params }: EditPaymentProps) {
         fetchStudents().catch(console.error)
     }, [id, getPayment, fetchClassSchedule, fetchStudents])
 
+    useEffect(() => {
+        try {
+            const selected = classSchedule.find(
+                s => s.id === form.classSchedule_id,
+            )
+            setSelectedClass(selected ?? null)
+        } finally {
+            setLoadingData(false)
+        }
+    }, [classSchedule, form.classSchedule_id])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         setError(null)
 
         const formData = new FormData()
+        console.log('schedule', form.classSchedule_id)
+        console.log('student', form.student_id)
         formData.append('student_id', form.student_id)
-        formData.append('classSchedule_id', form.classSchedule_id)
+        formData.append('classSchedule_id', form.classSchedule_id as string)
         formData.append('amount', form.amount)
         formData.append('status', form.status)
         formData.append('date_start', form.date_start)
@@ -129,10 +148,16 @@ export default function EditPayment({ params }: EditPaymentProps) {
             setLoading(false)
         }
     }
-    const selectedClass = classSchedule.find(
-        s => s.id === form.classSchedule_id,
-    )
-    console.log('selectedClass', selectedClass)
+    if (loadingData) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4">Cargando pago...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="p-6 space-y-6">
@@ -152,7 +177,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                                     value={form.student_id}
                                     onChange={handleChange}
                                     required
-                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-zinc-950 text-black dark:text-white">
+                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-[#1f2122] text-black dark:text-white">
                                     <option value="">Seleccionar alumno</option>
                                     {students.map(student => (
                                         <option
@@ -170,15 +195,15 @@ export default function EditPayment({ params }: EditPaymentProps) {
                                     value={form.classSchedule_id}
                                     onChange={handleChange}
                                     required
-                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-zinc-950 text-black dark:text-white">
+                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-[#1f2122] text-black dark:text-white">
                                     <option value="">Seleccionar clase</option>
 
                                     {/* Si aún no se ha cargado el schedule completo, mostrar esta opción temporal */}
                                     {selectedClass && (
                                         <option value={selectedClass.id}>
                                             Clase ID {selectedClass.id} - Hora:{' '}
-                                            {selectedClass.timesSlots?.hour ??
-                                                '---'}
+                                            {selectedClass.scheduleTimeslot
+                                                ?.hour ?? '---'}
                                         </option>
                                     )}
 
