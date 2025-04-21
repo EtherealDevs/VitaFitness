@@ -1,22 +1,36 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { usePayments } from '@/hooks/payments'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/app/admin/components/ui/input'
 import { Label } from '@/app/admin/components/ui/label'
 import { Button } from '@/app/admin/components/ui/button'
-
+import { useStudents } from '@/hooks/students'
+import axios from '@/lib/axios'
+import { Student } from '@/app/admin/students/columns'
+import { Class } from '@/hooks/classes'
+import { Schedule } from '@/hooks/schedules'
 interface EditPaymentProps {
     params: {
         id?: string
     }
 }
+interface ClassSchedules {
+    id: string
+    class: Class
+    schedule: Schedule
+    timesSlots: { hour: string }
+    students: string[]
+}
 
 export default function EditPayment({ params }: EditPaymentProps) {
     const router = useRouter()
     const { getPayment, updatePayment } = usePayments()
+    const [students, setStudents] = useState<Student[]>([])
+    const [classSchedule, setClassSchedule] = useState<ClassSchedules[]>([])
+    const { getStudents } = useStudents()
 
     const [form, setForm] = useState({
         student_id: '',
@@ -31,30 +45,61 @@ export default function EditPayment({ params }: EditPaymentProps) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const { id } = useParams() as { id: string }
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    ) => {
+        const { name, value } = e.target
         setForm(prev => ({
             ...prev,
-            [e.target.name]: e.target.value,
+            [name]: value,
         }))
+        if (name === 'student_id') {
+            fetchClassSchedule(value)
+        }
     }
+    const fetchStudents = useCallback(async () => {
+        try {
+            const response = await getStudents()
+            setStudents(response.students)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }, [getStudents])
+    const fetchClassSchedule = useCallback(async (id: string) => {
+        try {
+            const response = await axios.get(`/api/class/students/${id}`)
+            setClassSchedule(response.data.classScheduleTimeslotStudent)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }, [])
 
     useEffect(() => {
         if (id) {
             getPayment(id)
                 .then(data => {
                     setForm({
-                        student_id: data.student_id,
-                        classSchedule_id: data.classSchedule_id,
-                        amount: data.amount,
-                        status: data.status,
-                        date_start: data.date_start,
-                        payment_date: data.payment_date,
-                        expiration_date: data.expiration_date,
+                        student_id: data.payment.student_id,
+                        classSchedule_id: data.payment.classSchedule_id,
+                        amount: data.payment.amount,
+                        status: data.payment.status,
+                        date_start: data.payment.date_start,
+                        payment_date: data.payment.payment_date,
+                        expiration_date: data.payment.expiration_date,
                     })
+
+                    // ⚠️ Traer las clases correspondientes después de setear el estudiante
+                    if (data.payment.student_id) {
+                        fetchClassSchedule(data.payment.student_id)
+                    }
                 })
                 .catch(console.error)
         }
-    }, [id, getPayment])
+
+        fetchStudents().catch(console.error)
+    }, [id, getPayment, fetchClassSchedule, fetchStudents])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -84,6 +129,10 @@ export default function EditPayment({ params }: EditPaymentProps) {
             setLoading(false)
         }
     }
+    const selectedClass = classSchedule.find(
+        s => s.id === form.classSchedule_id,
+    )
+    console.log('selectedClass', selectedClass)
 
     return (
         <div className="p-6 space-y-6">
@@ -98,25 +147,61 @@ export default function EditPayment({ params }: EditPaymentProps) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <Label>Alumno</Label>
-                                <Input
+                                <select
                                     name="student_id"
                                     value={form.student_id}
                                     onChange={handleChange}
                                     required
-                                />
+                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-zinc-950 text-black dark:text-white">
+                                    <option value="">Seleccionar alumno</option>
+                                    {students.map(student => (
+                                        <option
+                                            key={student.id}
+                                            value={student.id}>
+                                            {student.name} {student.last_name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
                                 <Label>Clase</Label>
-                                <Input
+                                <select
                                     name="classSchedule_id"
                                     value={form.classSchedule_id}
                                     onChange={handleChange}
                                     required
-                                />
+                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-zinc-950 text-black dark:text-white">
+                                    <option value="">Seleccionar clase</option>
+
+                                    {/* Si aún no se ha cargado el schedule completo, mostrar esta opción temporal */}
+                                    {selectedClass && (
+                                        <option value={selectedClass.id}>
+                                            Clase ID {selectedClass.id} - Hora:{' '}
+                                            {selectedClass.timesSlots?.hour ??
+                                                '---'}
+                                        </option>
+                                    )}
+
+                                    {classSchedule.map(
+                                        (schedule: {
+                                            id: string
+                                            scheduleTimeslot?: { hour: string }
+                                        }) => (
+                                            <option
+                                                key={schedule.id}
+                                                value={schedule.id}>
+                                                Clase ID {schedule.id} - Hora:{' '}
+                                                {schedule.scheduleTimeslot
+                                                    ?.hour ?? '---'}
+                                            </option>
+                                        ),
+                                    )}
+                                </select>
                             </div>
                             <div>
                                 <Label>Monto</Label>
                                 <Input
+                                    className="dark:text-white border-gray-300 dark:border-gray-300 dark:bg-transparent"
                                     name="amount"
                                     type="number"
                                     value={form.amount}
@@ -127,6 +212,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Estado</Label>
                                 <Input
+                                    className="dark:text-white border-gray-300 dark:border-gray-300 dark:bg-transparent"
                                     name="status"
                                     value={form.status}
                                     onChange={handleChange}
@@ -136,6 +222,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Fecha de inicio</Label>
                                 <Input
+                                    className="dark:text-white border-gray-300 dark:border-gray-300 dark:bg-transparent"
                                     name="date_start"
                                     type="date"
                                     value={form.date_start}
@@ -146,6 +233,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Fecha de pago</Label>
                                 <Input
+                                    className="dark:text-white border-gray-300 dark:border-gray-300 dark:bg-transparent"
                                     name="payment_date"
                                     type="date"
                                     value={form.payment_date}
@@ -156,6 +244,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Fecha de expiración</Label>
                                 <Input
+                                    className="dark:text-white border-gray-300 dark:border-gray-300 dark:bg-transparent"
                                     name="expiration_date"
                                     type="date"
                                     value={form.expiration_date}

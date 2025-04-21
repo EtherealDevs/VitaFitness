@@ -10,7 +10,6 @@ import { Button } from '@/app/admin/components/ui/button'
 import { AxiosError } from 'axios'
 import { Student } from '../../students/columns'
 import { useStudents } from '@/hooks/students'
-import { useClassSchedules } from '@/hooks/classSchedules'
 import axios from '@/lib/axios'
 
 export default function CreatePayment() {
@@ -19,7 +18,6 @@ export default function CreatePayment() {
     const [students, setStudents] = useState<Student[]>([])
     const [classSchedule, setClassSchedule] = useState([])
     const { getStudents } = useStudents()
-    const { getClassSchedule } = useClassSchedules()
     const [form, setForm] = useState({
         student_id: '',
         classSchedule_id: '',
@@ -41,18 +39,15 @@ export default function CreatePayment() {
             throw error
         }
     }, [getStudents])
-    const fetchClassSchedule = useCallback(
-        async (id: string) => {
-            try {
-                const response = await axios.get(`/api/class/students/${id}`)
-                setClassSchedule(response.data.classScheduleTimeslotStudent)
-            } catch (error) {
-                console.error(error)
-                throw error
-            }
-        },
-        [getClassSchedule],
-    )
+    const fetchClassSchedule = useCallback(async (id: string) => {
+        try {
+            const response = await axios.get(`/api/class/students/${id}`)
+            setClassSchedule(response.data.classScheduleTimeslotStudent)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }, [])
 
     useEffect(() => {
         fetchStudents()
