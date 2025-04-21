@@ -57,7 +57,6 @@ export function DashboardHeader({ admin }: DashboardHeaderProps) {
                         alt="Logo"
                         className="h-8 w-8"
                     /> */}
-                    <span className="ml-2 text-lg font-semibold">Vitta</span>
                 </div>
             </div>
 

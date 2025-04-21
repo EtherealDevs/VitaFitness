@@ -15,7 +15,7 @@ export function DashboardMetrics({
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-bold">
                         Total Alumnos
                     </CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
@@ -29,7 +29,7 @@ export function DashboardMetrics({
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-bold">
                         Clases Hoy
                     </CardTitle>
                     <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -43,7 +43,7 @@ export function DashboardMetrics({
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-bold">
                         Ingresos
                     </CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -57,7 +57,7 @@ export function DashboardMetrics({
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-bold">
                         Asistencia
                     </CardTitle>
                     <Activity className="h-4 w-4 text-muted-foreground" />
