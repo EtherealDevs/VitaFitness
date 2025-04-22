@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import axios from '@/lib/axios'
 import { useRouter } from 'next/navigation'
+import { LoadingProvider } from '@/app/admin/lib/loading-context'
 
 const inter = Inter({ subsets: ['latin'] })
 interface Admin {
@@ -77,7 +78,7 @@ export default function AdminLayout({
                     <div className="flex-1 md:ml-64 text-black bg-[#EDEDED]  dark:bg-[#737373] ">
                         {admin && <DashboardHeader admin={admin} />}
                         <main className="container p-4 md:p-6 lg:p-8">
-                            {children}
+                            <LoadingProvider>{children}</LoadingProvider>
                         </main>
                     </div>
                 </div>
