@@ -24,6 +24,9 @@ class StudentResource extends JsonResource
             'phone' => $this->phone,
             'dni' => $this->dni,
             'branch' => new BranchResource($this->whenLoaded('branch')),
+            'classes' => ClasseResource::collection($this->whenLoaded('classes')),
+            'attendances' => AttendanceResource::collection($this->whenLoaded('attendances')),
+            'payments' => PaymentResource::collection($this->whenLoaded('payments')),
         ];
     }
 }

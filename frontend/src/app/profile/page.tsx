@@ -1,34 +1,39 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Phone, Calendar, Home } from 'lucide-react'
-import Image from 'next/image'
+// import Image from 'next/image'
 import Link from 'next/link'
-
-interface Class {
-    name: string
-    schedule: string
-}
-
-interface UserProfile {
-    name: string
-    phone: string
-    avatar?: string
-    classes: Class[]
-}
+import { useAuth } from '@/hooks/auth'
+import { Student } from '../admin/students/columns'
+import axios from '@/lib/axios'
 
 export default function ProfileCard() {
-    // Sample user data - in a real app, this would come from props or an API
-    const [user] = useState<UserProfile>({
-        name: 'María González',
-        phone: '+34 612 345 678',
-        avatar: '/placeholder.svg?height=100&width=100',
-        classes: [
-            { name: 'Yoga', schedule: 'Lunes y Miércoles, 18:00 - 19:30' },
-            { name: 'Pilates', schedule: 'Martes y Jueves, 10:00 - 11:00' },
-            { name: 'Meditación', schedule: 'Viernes, 19:00 - 20:00' },
-        ],
-    })
+    const { user } = useAuth()
+    const [student, setStudent] = useState<Student>()
+    const fetchStudentData = async () => {
+        if (!user?.dni) return
+        try {
+            const response = await axios.get('/api/student/search', {
+                params: {
+                    field: 'dni',
+                    search: user.dni,
+                },
+            })
+            const studentData = response.data.students[0]
+
+            console.log(studentData.classes)
+            setStudent(studentData)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+    useEffect(() => {
+        if (user?.dni) {
+            fetchStudentData()
+        }
+    }, [user])
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 bg-black">
@@ -42,22 +47,22 @@ export default function ProfileCard() {
                 <div className="flex flex-col items-center p-6 pb-2">
                     {/* Avatar */}
                     <div className="h-24 w-24 mb-4 rounded-full overflow-hidden border">
-                        <Image
+                        {/* <Image
                             width={100}
                             height={100}
                             src={user.avatar || '/placeholder.svg'}
-                            alt={user.name}
+                            alt={student?.name || 'Avatar'}
                             className="h-full w-full object-cover"
                             onError={e => {
                                 const target = e.target as HTMLImageElement
                                 target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                    user.name,
+                                    student?.name || 'Usuario no encontrado',
                                 )}&background=random`
                             }}
-                        />
+                        /> */}
                     </div>
                     <h2 className="text-2xl font-bold text-gray-700 text-center">
-                        {user.name}
+                        {student?.name || 'Usuario no encontrado'}
                     </h2>
                 </div>
 
@@ -73,7 +78,7 @@ export default function ProfileCard() {
                                 Teléfono
                             </p>
                             <p className="font-medium text-gray-700 dark:text-gray-500">
-                                {user.phone}
+                                {student?.phone || 'Teléfono no encontrado'}
                             </p>
                         </div>
                     </div>
@@ -84,18 +89,26 @@ export default function ProfileCard() {
                             Clases
                         </h3>
                         <div className="space-y-3">
-                            {user.classes.map((cls, index) => (
+                            {student?.classes?.map((cls, index) => (
                                 <div
                                     key={index}
                                     className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-lg">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-md">
-                                            {cls.name}
+                                            {cls.plan?.name}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                                         <Calendar className="h-4 w-4" />
-                                        <span>{cls.schedule}</span>
+                                        {cls.schedules?.map(
+                                            (schedule, index) => (
+                                                <span key={index}>
+                                                    {schedule.selectedDays?.join(
+                                                        ', ',
+                                                    )}
+                                                </span>
+                                            ),
+                                        )}
                                     </div>
                                 </div>
                             ))}

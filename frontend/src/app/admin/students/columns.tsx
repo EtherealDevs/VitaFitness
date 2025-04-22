@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "../components/ui/badge"
-import { Button } from "../components/ui/button"
+import type { ColumnDef } from '@tanstack/react-table'
+import { Badge } from '../components/ui/badge'
+import { Button } from '../components/ui/button'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,30 +10,34 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu"
-import { MoreHorizontal, Pencil, Trash } from "lucide-react"
-import Link from "next/link"
+} from '../components/ui/dropdown-menu'
+import { MoreHorizontal, Pencil, Trash } from 'lucide-react'
+import Link from 'next/link'
+import { Class } from '@/hooks/classes'
 
 export type Student = {
     id: string
     name: string
     last_name: string
     registration_date: string
-    status: "activo" | "inactivo" | "pendiente"
+    status: 'activo' | 'inactivo' | 'pendiente'
     email: string
     phone: string
     dni: string
+    classes?: [Class]
 }
 
 export const columns: ColumnDef<Student>[] = [
     {
-        accessorKey: "name",
-        header: "Nombre",
+        accessorKey: 'name',
+        header: 'Nombre',
         cell: ({ row }) => {
             return (
                 <div className="flex items-center">
-                    <Link href={`/admin/students/${row.original.id}`} className="font-medium">
-                        {row.getValue("name")}
+                    <Link
+                        href={`/admin/students/${row.original.id}`}
+                        className="font-medium">
+                        {row.getValue('name')}
                     </Link>
                 </div>
             )
@@ -41,38 +45,49 @@ export const columns: ColumnDef<Student>[] = [
     },
     {
         accessorKey: 'last_name',
-        header: "Apellido",
+        header: 'Apellido',
     },
     {
-        accessorKey: "status",
-        header: "Estado",
+        accessorKey: 'status',
+        header: 'Estado',
         cell: ({ row }) => {
-            const status = row.getValue("status") as string
+            const status = row.getValue('status') as string
             return (
-                <Badge variant={status === "activo" ? "success" : status === "pendiente" ? "warning" : "destructive"}>
-                    {status === "activo" ? "Activo" : status === "pendiente" ? "Pendiente" : "Inactivo"}
+                <Badge
+                    variant={
+                        status === 'activo'
+                            ? 'success'
+                            : status === 'pendiente'
+                            ? 'warning'
+                            : 'destructive'
+                    }>
+                    {status === 'activo'
+                        ? 'Activo'
+                        : status === 'pendiente'
+                        ? 'Pendiente'
+                        : 'Inactivo'}
                 </Badge>
             )
         },
     },
     {
-        accessorKey: "email",
-        header: "Email",
+        accessorKey: 'email',
+        header: 'Email',
     },
     {
-        accessorKey: "dni",
-        header: "DNI",
+        accessorKey: 'dni',
+        header: 'DNI',
     },
     {
-        accessorKey: "phone",
-        header: "Teléfono",
+        accessorKey: 'phone',
+        header: 'Teléfono',
     },
     {
-        accessorKey: "registration_date",
-        header: "Fecha de registro",
+        accessorKey: 'registration_date',
+        header: 'Fecha de registro',
     },
     {
-        id: "actions",
+        id: 'actions',
         cell: ({ row }) => {
             const student = row.original
 
@@ -86,10 +101,17 @@ export const columns: ColumnDef<Student>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(student.id)}>Copiar ID</DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() =>
+                                navigator.clipboard.writeText(student.id)
+                            }>
+                            Copiar ID
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
-                            <Link href={`/admin/students/${student.id}`} className="flex items-center">
+                            <Link
+                                href={`/admin/students/${student.id}`}
+                                className="flex items-center">
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Editar
                             </Link>
@@ -104,4 +126,3 @@ export const columns: ColumnDef<Student>[] = [
         },
     },
 ]
-

@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import axios from '@/lib/axios'
 import { Plan } from '@/hooks/plans'
 import { Branch } from '@/hooks/branches'
+import { Schedule } from './schedules'
 
 export interface Class {
     id: string
@@ -11,6 +12,7 @@ export interface Class {
     plan_id?: string
     plan?: Plan
     branch?: Branch
+    schedules: [Schedule]
 }
 
 export const useClasses = () => {

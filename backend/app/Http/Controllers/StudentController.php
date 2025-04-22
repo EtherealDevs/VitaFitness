@@ -40,6 +40,9 @@ class StudentController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
         $student->load('branch');
+        $student->load('plans');
+        $student->load('attendances');
+        $student->load('classes');
 
         $student = new StudentResource($student);
         $data = [
@@ -113,6 +116,10 @@ class StudentController extends Controller
         $searchTerm = $request->search;
         $field = $request->field;
         $students = Student::search($searchTerm, $field)->get();
+        $students->load('branch');
+        $students->load('attendances');
+        $students->load('classes');
+        $students->load('payments');
         $students = StudentResource::collection($students);
         $data = [
             'students' => $students,
