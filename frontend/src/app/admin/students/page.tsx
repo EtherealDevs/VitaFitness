@@ -215,14 +215,6 @@ export default function StudentsPage() {
                                         }`}>
                                         Email
                                     </TableHead>
-                                    <TableHead
-                                        className={`sm:table-cell ${
-                                            showDetails
-                                                ? 'table-cell'
-                                                : 'hidden'
-                                        }`}>
-                                        Sucursal
-                                    </TableHead>
                                     <TableHead>Estado</TableHead>
                                     <TableHead className="text-right">
                                         Acciones
@@ -240,8 +232,8 @@ export default function StudentsPage() {
                                         <TableCell>
                                             {student.last_name}
                                         </TableCell>
-                                        <TableCell>{student.email}</TableCell>
                                         <TableCell>{student.phone}</TableCell>
+                                        <TableCell>{student.email}</TableCell>
                                         {/* <TableCell
                                             className={`sm:table-cell ${
                                                 showDetails
