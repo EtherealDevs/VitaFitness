@@ -3,15 +3,19 @@
 import { useState, useEffect } from 'react'
 import { Home, CreditCard, CheckCircle, AlertCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
+import { useAuth } from '@/hooks/auth'
+import axios from '@/lib/axios'
+import { Student } from '../admin/students/columns'
+import { Payment, usePayments } from '@/hooks/payments'
 
 // Types for our payment data
-interface Payment {
-    id: string
-    date: string // ISO date string
-    amount: number
-    className: string
-    status: 'paid' | 'pending' | 'overdue'
-}
+// interface Payment {
+//     id: string
+//     date: string // ISO date string
+//     amount: number
+//     className: string
+//     status: 'paid' | 'pending' | 'overdue'
+// }
 
 interface PaymentSummary {
     isUpToDate: boolean
@@ -54,70 +58,130 @@ const getDaysRemaining = (dateString: string): number => {
 }
 
 // Mock API function to simulate fetching payment data
-const fetchPaymentData = async (): Promise<PaymentSummary> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800))
+// const fetchPaymentData = async (): Promise<PaymentSummary> => {
+//     // Simulate API delay
+//     await new Promise(resolve => setTimeout(resolve, 800))
 
-    // Current date for generating relative dates
-    const today = new Date()
+//     // Current date for generating relative dates
+//     const today = new Date()
 
-    // Generate some sample payment history
-    const paymentHistory: Payment[] = [
-        {
-            id: 'pay_1',
-            date: new Date(
-                today.getFullYear(),
-                today.getMonth() - 2,
-                15,
-            ).toISOString(),
-            amount: 5000,
-            className: 'Yoga',
-            status: 'paid',
-        },
-        {
-            id: 'pay_2',
-            date: new Date(
-                today.getFullYear(),
-                today.getMonth() - 1,
-                15,
-            ).toISOString(),
-            amount: 5000,
-            className: 'Yoga',
-            status: 'paid',
-        },
-        {
-            id: 'pay_3',
-            date: new Date(
-                today.getFullYear(),
-                today.getMonth(),
-                15,
-            ).toISOString(),
-            amount: 5500,
-            className: 'Yoga + Pilates',
-            status: 'paid',
-        },
-    ]
+//     // Generate some sample payment history
+//     const paymentHistory: Payment[] = [
+//         {
+//             id: 'pay_1',
+//             date: new Date(
+//                 today.getFullYear(),
+//                 today.getMonth() - 2,
+//                 15,
+//             ).toISOString(),
+//             amount: 5000,
+//             className: 'Yoga',
+//             status: 'paid',
+//         },
+//         {
+//             id: 'pay_2',
+//             date: new Date(
+//                 today.getFullYear(),
+//                 today.getMonth() - 1,
+//                 15,
+//             ).toISOString(),
+//             amount: 5000,
+//             className: 'Yoga',
+//             status: 'paid',
+//         },
+//         {
+//             id: 'pay_3',
+//             date: new Date(
+//                 today.getFullYear(),
+//                 today.getMonth(),
+//                 15,
+//             ).toISOString(),
+//             amount: 5500,
+//             className: 'Yoga + Pilates',
+//             status: 'paid',
+//         },
+//     ]
 
-    // Calculate total paid
-    const totalPaid = paymentHistory.reduce((sum, payment) => {
-        return payment.status === 'paid' ? sum + payment.amount : sum
-    }, 0)
+//     // Calculate total paid
+//     const totalPaid = paymentHistory.reduce((sum, payment) => {
+//         return payment.status === 'paid' ? sum + payment.amount : sum
+//     }, 0)
 
-    // Determine next payment
-    const nextPaymentDate = new Date(
-        today.getFullYear(),
-        today.getMonth() + 1,
-        15,
-    ).toISOString()
-    const isUpToDate = true // In a real app, this would be calculated based on business rules
+//     // Determine next payment
+//     const nextPaymentDate = new Date(
+//         today.getFullYear(),
+//         today.getMonth() + 1,
+//         15,
+//     ).toISOString()
+//     const isUpToDate = true // In a real app, this would be calculated based on business rules
+
+//     return {
+//         isUpToDate,
+//         nextPaymentDate,
+//         nextPaymentAmount: 5500,
+//         nextPaymentClass: 'Yoga + Pilates',
+//         totalPaid,
+//         paymentHistory,
+//     }
+// }
+export const fetchPaymentData = async (
+    payments: Payment[],
+): Promise<PaymentSummary> => {
+    // Simula delay
+    await new Promise(resolve => setTimeout(resolve, 200))
+
+    // Filtra pagos con estado "pagado"
+    const paidPayments = payments.filter(
+        p => p.status.toLowerCase() === 'pagado',
+    )
+
+    // Total pagado
+    const totalPaid = paidPayments.reduce(
+        (sum, p) => sum + parseFloat(p.amount),
+        0,
+    )
+
+    // Ordenar por fecha de pago descendente
+    const sortedPayments = [...paidPayments].sort(
+        (a, b) =>
+            new Date(b.payment_date).getTime() -
+            new Date(a.payment_date).getTime(),
+    )
+
+    // Último pago realizado
+    const lastPayment = sortedPayments[0]
+
+    // Calcular próxima fecha de pago (usamos expiration_date como referencia)
+    const nextPaymentDate = lastPayment
+        ? new Date(new Date(lastPayment.expiration_date)).toISOString()
+        : null
+
+    // Información de la clase (si existe relación cargada)
+    const nextPaymentClass =
+        lastPayment?.classSchedule?.id || 'Sin clase asignada'
 
     return {
-        isUpToDate,
+        isUpToDate: !!lastPayment,
         nextPaymentDate,
-        nextPaymentAmount: 5500,
-        nextPaymentClass: 'Yoga + Pilates',
+        nextPaymentAmount: lastPayment ? parseFloat(lastPayment.amount) : null,
+        nextPaymentClass,
         totalPaid,
-        paymentHistory,
+        paymentHistory: paidPayments.map(p => ({
+            id: String(p.id),
+            date: p.payment_date,
+            amount: parseFloat(p.amount).toString(),
+            className: p.classSchedule?.id || 'Clase no disponible',
+            status: p.status.toLowerCase() === 'pagado' ? 'paid' : 'pendiente',
+            classSchedule: p.classSchedule || null,
+            classSchedule_id: p.classSchedule?.id || '',
+            student_id: p.student_id || '',
+            student: p.student || '',
+            expiration_date: p.expiration_date || '',
+            date_start: p.date_start || '', // Ensure date_start is always a string
+            payment_date: p.payment_date || '',
+            created_at: p.created_at || '',
+            updated_at: p.updated_at || '',
+        })),
     }
 }
 
@@ -126,42 +190,54 @@ export default function PaymentHistory() {
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
     const [paymentData, setPaymentData] = useState<PaymentSummary | null>(null)
+    // Removed unused 'payment' state variable
+    const [student, setStudent] = useState<Student>()
+    const { getPaymentStudent } = usePayments()
+    const { user } = useAuth()
+
+    const fetchStudentData = async () => {
+        if (!user?.dni) return
+        try {
+            const response = await axios.get('/api/student/search', {
+                params: {
+                    field: 'dni',
+                    search: user.dni,
+                },
+            })
+            const studentData = response.data.students[0]
+            setStudent(studentData)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+
+    const fetchPayments = async () => {
+        if (!student) return
+        try {
+            const response = await getPaymentStudent(student.id)
+            const payments = response.payment
+            const summary = await fetchPaymentData(payments)
+            setPaymentData(summary)
+        } catch (error) {
+            console.error(error)
+            setError('Error al obtener los pagos')
+        }
+    }
 
     // Fetch payment data on component mount
     useEffect(() => {
-        let isMounted = true
-
-        const getPaymentData = async () => {
-            if (!isMounted) return
-
-            setLoading(true)
-            setError(null)
-
-            try {
-                const data = await fetchPaymentData()
-
-                if (isMounted) {
-                    setPaymentData(data)
-                }
-            } catch (err) {
-                if (isMounted) {
-                    setError('Error al cargar los datos de pagos')
-                    console.error(err)
-                }
-            } finally {
-                if (isMounted) {
-                    setLoading(false)
-                }
-            }
+        setLoading(true)
+        if (user?.dni) {
+            fetchStudentData()
         }
-
-        getPaymentData()
-
-        // Cleanup function
-        return () => {
-            isMounted = false
+    }, [user])
+    useEffect(() => {
+        if (student) {
+            fetchPayments()
         }
-    }, [])
+        setLoading(false)
+    }, [student])
 
     // Get status details for next payment
     const getNextPaymentStatus = () => {
@@ -336,10 +412,15 @@ export default function PaymentHistory() {
                                             className="bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg">
                                             <div className="flex justify-between items-center mb-2">
                                                 <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium rounded-md">
-                                                    {payment.className}
+                                                    {
+                                                        payment.classSchedule
+                                                            ?.class?.id
+                                                    }
                                                 </span>
                                                 <span className="text-sm text-gray-500 font-medium">
-                                                    {formatDate(payment.date)}
+                                                    {formatDate(
+                                                        payment.payment_date,
+                                                    )}
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between">
@@ -351,7 +432,9 @@ export default function PaymentHistory() {
                                                 </div>
                                                 <span className="font-semibold text-gray-700">
                                                     {formatCurrency(
-                                                        payment.amount,
+                                                        parseFloat(
+                                                            payment.amount,
+                                                        ),
                                                     )}
                                                 </span>
                                             </div>

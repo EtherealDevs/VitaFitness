@@ -78,7 +78,6 @@ export default function CommitmentSection() {
         }, 8000)
         return () => clearInterval(interval)
     }, [fetchBranchs])
-    console.log(branchs)
     return (
         <section className="py-16 bg-black">
             <div className="container mx-auto px-4">

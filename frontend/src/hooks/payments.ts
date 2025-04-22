@@ -1,14 +1,25 @@
 import { Student } from '@/app/admin/students/columns'
 import { useCallback } from 'react'
 import axios from '@/lib/axios'
+import { Schedule } from './schedules'
+import { Class } from './classes'
 
+export interface ClassSchedule {
+    id: string
+    class: Class
+    start_time: string
+    end_time: string
+    schedule: Schedule
+    selectedDays: [string]
+}
 export interface Payment {
     id: string
+    classSchedule: ClassSchedule
     classSchedule_id: string
     student_id: string
     student: Student
     date_start: string
-    amount: number
+    amount: string
     status: string
     payment_date: string
     expiration_date: string
