@@ -4,7 +4,12 @@ import { Plan, usePlans } from '@/hooks/plans'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/app/admin/components/ui/card'
 import {
     Table,
     TableBody,
