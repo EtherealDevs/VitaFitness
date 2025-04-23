@@ -10,6 +10,8 @@ export interface Schedule {
     days: [string]
     timeslots: [TimeSlot]
     selectedDays?: [string]
+    time_start?: string
+    time_end?: string
 }
 export const useSchedules = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')

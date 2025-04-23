@@ -100,15 +100,26 @@ export default function ProfileCard() {
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                                         <Calendar className="h-4 w-4" />
-                                        {cls.schedules?.map(
-                                            (schedule, index) => (
-                                                <span key={index}>
-                                                    {schedule.selectedDays?.join(
-                                                        ', ',
-                                                    )}
-                                                </span>
-                                            ),
-                                        )}
+                                        <div className="">
+                                            {cls.schedules?.map(
+                                                (schedule, index) => (
+                                                    <div
+                                                        className="block"
+                                                        key={index}>
+                                                        {schedule.selectedDays?.join(
+                                                            ', ',
+                                                        )}{' '}
+                                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {
+                                                                schedule.time_start
+                                                            }{' '}
+                                                            -{' '}
+                                                            {schedule.time_end}
+                                                        </span>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}
