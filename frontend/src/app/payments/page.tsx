@@ -119,7 +119,23 @@ export default function PaymentHistory() {
     const { getPaymentStudent } = usePayments()
     const { user } = useAuth()
 
-    export const fetchPaymentData = async (
+    const fetchStudentData = async () => {
+        if (!user?.dni) return
+        try {
+            const response = await axios.get('/api/student/search', {
+                params: {
+                    field: 'dni',
+                    search: user.dni,
+                },
+            })
+            const studentData = response.data.students[0]
+            setStudent(studentData)
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+    const fetchPaymentData = async (
         payments: Payment[],
     ): Promise<PaymentSummary> => {
         await new Promise(resolve => setTimeout(resolve, 200))

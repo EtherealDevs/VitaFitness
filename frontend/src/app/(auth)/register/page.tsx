@@ -85,7 +85,7 @@ const Register = () => {
 
                             <form onSubmit={submitForm} className="space-y-6">
                                 {/* Name */}
-                                <div>
+                                {/* <div>
                                     <label
                                         htmlFor="name"
                                         className="title-font text-lg text-white block mb-2">
@@ -116,10 +116,10 @@ const Register = () => {
                                             {errors.name.join(', ')}
                                         </p>
                                     )}
-                                </div>
+                                </div> */}
 
                                 {/* Email Address */}
-                                <div>
+                                {/* <div>
                                     <label
                                         htmlFor="email"
                                         className="title-font text-lg text-white block mb-2">
@@ -149,7 +149,7 @@ const Register = () => {
                                             {errors.email.join(', ')}
                                         </p>
                                     )}
-                                </div>
+                                </div> */}
                                 <div>
                                     <label
                                         htmlFor="dni"

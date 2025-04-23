@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -21,15 +22,18 @@ class RegisteredUserController extends Controller
     public function store(Request $request): Response
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'dni' => ['required', 'string', 'max:255', 'unique:' . User::class],
+            // 'name' => ['required', 'string', 'max:255'],
+            // 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'dni' => ['required', 'string', 'max:255', 'unique:' . User::class, 'unique:' . Student::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
+        $student = Student::where('dni', $request->dni)->first();
+        $name = $student->name + " $student->last_name";
+        $email = $student->email;
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name' => $name,
+            'email' => $email,
             'password' => Hash::make($request->string('password')),
         ]);
 
