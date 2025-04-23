@@ -21,6 +21,10 @@ class Payment extends Model
     {
         return $this->belongsTo(ClassSchedule::class, 'classSchedule_id');
     }
+    public function comprobante()
+    {
+        return $this->hasOne(Image::class, 'imageable', 'id')->where('imageable_type', 'App\Models\Payment');
+    }
 
     public function student()
     {

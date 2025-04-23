@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
@@ -131,6 +132,35 @@ class PaymentController extends Controller
         try {
             $payment = Payment::where('student_id', $id)->first();
             $payment->update($request->all());
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+        $payment = new PaymentResource($payment);
+        $data = [
+            'payment' => $payment,
+            'message' => 'Payment updated successfully',
+            'status' => 'success (200)'
+        ];
+        return response()->json($data, 200);
+    }
+    /**
+     * Update the specified resource in storage.
+     */
+    public function storeComprobante(Request $request, string $id)
+    {
+        $request->validate([
+            'comprobante' => 'required',
+        ]);
+        try {
+            $payment = Payment::find($id);
+            $comprobante = $request->file('comprobante');
+            $name = $payment->student->name . '_' .
+                $payment->student->last_name . '_' .
+                $payment->student->dni . '_' . $payment->expiration_date;
+            $path = Storage::putFileAs('products', $comprobante, $name);
+            $payment->comprobante()->create([
+                'url' => $path,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
