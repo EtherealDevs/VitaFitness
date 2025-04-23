@@ -108,8 +108,8 @@ export default function Statistics() {
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={professorStudentData}>
-                            <XAxis dataKey="name" />
-                            <YAxis />
+                            <XAxis dataKey="name" stroke="#000" />
+                            <YAxis stroke="#000" />
                             <Tooltip />
                             <Bar
                                 dataKey="students"

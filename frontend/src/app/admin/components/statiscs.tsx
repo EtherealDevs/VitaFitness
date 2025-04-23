@@ -42,8 +42,8 @@ export function Statistics({ attendanceData, revenueData }: StatisticsProps) {
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={attendanceData}>
-                            <XAxis dataKey="name" />
-                            <YAxis />
+                            <XAxis dataKey="name" stroke="#000" />
+                            <YAxis stroke="#000" />
                             <Tooltip />
                             <Bar
                                 dataKey="total"
@@ -64,8 +64,8 @@ export function Statistics({ attendanceData, revenueData }: StatisticsProps) {
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={revenueData}>
-                            <XAxis dataKey="name" />
-                            <YAxis />
+                            <XAxis dataKey="name" stroke="#000" />
+                            <YAxis stroke="#000" />
                             <Tooltip />
                             <Line
                                 type="monotone"
