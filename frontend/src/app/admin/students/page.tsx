@@ -1,483 +1,847 @@
 'use client'
-import { useState, useEffect } from 'react'
-import type React from 'react'
 
-import { useStudents } from '@/hooks/students'
-import { Plus, Edit2, Trash2 } from 'lucide-react'
-import { Button } from '../components/ui/button'
+import { useState, useEffect, useCallback } from 'react'
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '../components/ui/table'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-
-// import { useBranches } from '@/hooks/branches'
+    Search,
+    ChevronDown,
+    ChevronUp,
+    DollarSign,
+    User,
+    Calendar,
+    Phone,
+    Mail,
+    Plus,
+    Edit2,
+    Trash2,
+    Eye,
+} from 'lucide-react'
 import Link from 'next/link'
-// import { h } from 'vue'
+import { Button } from '@/app/admin/components/ui/button'
 
-export default function StudentsPage() {
+// Types for our student data
+interface Student {
+    id: string
+    name: string
+    last_name: string
+    email: string
+    phone: string
+    dni: string
+    status: 'activo' | 'inactivo' | 'pendiente'
+    paymentDueDate: string
+    daysOverdue: number
+    remainingClasses: number
+    canAttend: boolean
+    branch: string
+    // Additional details for the expanded view
+    address?: string
+    birthDate?: string
+    memberSince?: string
+    lastPaymentAmount?: number
+    paymentHistory?: {
+        date: string
+        amount: number
+        concept: string
+    }[]
+    attendanceHistory?: {
+        date: string
+        className: string
+    }[]
+}
+
+interface AccountInfo {
+    balance: number
+    lastEntryDate: string
+    lastEntryTime: string
+    lastPaymentDate: string
+    lastPaymentPlan: string
+    lastPaymentAmount: number
+}
+
+// Helper function to format date
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+}
+
+// Helper function to determine row color based on payment status
+const getRowColor = (daysOverdue: number) => {
+    if (daysOverdue > 0) return 'bg-red-100 dark:bg-red-900/20'
+    if (daysOverdue === 0) return 'bg-yellow-100 dark:bg-yellow-900/20'
+    return ''
+}
+
+// Mock student data
+const mockStudents: Student[] = [
+    {
+        id: '1',
+        name: 'Eliana',
+        last_name: 'Aguirre',
+        email: 'eliana.aguirre@example.com',
+        phone: '+54 11 5555-1234',
+        dni: '32456789',
+        status: 'activo',
+        paymentDueDate: '2025-04-18',
+        daysOverdue: 4,
+        remainingClasses: 25,
+        canAttend: true,
+        branch: 'Principal',
+        address: 'Av. Corrientes 1234, CABA',
+        birthDate: '1990-05-15',
+        memberSince: '2023-01-10',
+        lastPaymentAmount: 25000,
+        paymentHistory: [
+            { date: '2025-03-18', amount: 25000, concept: 'FUNCIONAL 21hs' },
+            { date: '2025-02-18', amount: 25000, concept: 'FUNCIONAL 21hs' },
+            { date: '2025-01-18', amount: 23000, concept: 'FUNCIONAL 21hs' },
+        ],
+        attendanceHistory: [
+            { date: '2025-04-15', className: 'Funcional 21hs' },
+            { date: '2025-04-13', className: 'Funcional 21hs' },
+            { date: '2025-04-10', className: 'Funcional 21hs' },
+            { date: '2025-04-08', className: 'Funcional 21hs' },
+        ],
+    },
+    {
+        id: '10',
+        name: 'Gladys',
+        last_name: 'Kurylo',
+        email: 'gladys.kurylo@example.com',
+        phone: '+54 11 5555-5678',
+        dni: '28765432',
+        status: 'activo',
+        paymentDueDate: '2025-04-23',
+        daysOverdue: 0,
+        remainingClasses: 15,
+        canAttend: true,
+        branch: 'Principal',
+        address: 'Av. Santa Fe 4321, CABA',
+        birthDate: '1985-08-22',
+        memberSince: '2024-02-15',
+        lastPaymentAmount: 29000,
+        paymentHistory: [
+            { date: '2025-03-23', amount: 29000, concept: 'FUNCIONAL 21hs' },
+            { date: '2025-02-23', amount: 29000, concept: 'FUNCIONAL 21hs' },
+        ],
+        attendanceHistory: [
+            { date: '2025-04-20', className: 'Funcional 21hs' },
+            { date: '2025-04-18', className: 'Funcional 21hs' },
+            { date: '2025-04-16', className: 'Funcional 21hs' },
+        ],
+    },
+]
+
+export default function StudentManagement() {
     const [students, setStudents] = useState<Student[]>([])
-    // const [branches, setBranches] = useState<Branch[]>([])
-    // const [isOpen, setIsOpen] = useState(false)
-    // const [createStudentModalIsOpen, setCreateStudentModalIsOpen] =
-    //     useState(false)
-    // const [selectedStudent, setSelectedStudent] = useState<
-    //     Student | undefined
-    // >()
-    const [search, setSearch] = useState('')
+    const [loading, setLoading] = useState<boolean>(true)
+    const [error, setError] = useState<string | null>(null)
+    const [searchTerm, setSearchTerm] = useState<string>('')
+    const [sortConfig, setSortConfig] = useState<{
+        key: keyof Student
+        direction: 'asc' | 'desc'
+    } | null>(null)
+    const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+    const [showDetails, setShowDetails] = useState<boolean>(false)
+    const [accountInfo] = useState<AccountInfo>({
+        balance: 0,
+        lastEntryDate: '17/4/2025',
+        lastEntryTime: '12:42:20',
+        lastPaymentDate: '18/3/2025',
+        lastPaymentPlan: 'FUNCIONAL 21hs',
+        lastPaymentAmount: 29000,
+    })
 
-    const { getStudents, deleteStudent } = useStudents()
-    // const { getBranches } = useBranches()
-    const [showDetails, setShowDetails] = useState(false)
+    // Define these functions with useCallback to prevent recreation on each render
+    const getStudents = useCallback(async () => {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 800))
+        return { students: mockStudents }
+    }, [])
 
-    // function open(id: number) {
-    //     setIsOpen(true)
-    //     setSelectedStudent(students.find(student => student.id === id))
-    // }
+    const deleteStudent = useCallback(async (id: string) => {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        // Use id in a comment to avoid the unused parameter warning
+        console.log(`Deleting student with ID: ${id}`)
+        // Return success
+        return { success: true }
+    }, [])
+
+    // Toggle details view for mobile
     const toggleDetails = () => {
         setShowDetails(!showDetails)
     }
 
-    // interface Branch {
-    //     id: number
-    //     name: string
-    // }
+    // Fetch student data
+    useEffect(() => {
+        let isMounted = true
 
-    interface Student {
-        id: number
-        name: string
-        last_name: string
-        email: string
-        phone: string
-        dni: string
-        status: string
-    }
+        const fetchStudents = async () => {
+            setLoading(true)
+            setError(null)
 
-    // function close() {
-    //     setIsOpen(false)
-    // }
-
-    // function openCreateStudentModal() {
-    //     setCreateStudentModalIsOpen(true)
-    // }
-
-    // function closeCreateStudentModal() {
-    //     setCreateStudentModalIsOpen(false)
-    // }
-
-    const fetchData = async () => {
-        try {
-            const response = await getStudents()
-            setStudents(response.students)
-        } catch (error) {
-            console.error(error)
-            throw error
+            try {
+                const response = await getStudents()
+                if (isMounted) {
+                    setStudents(response.students)
+                    setLoading(false)
+                }
+            } catch (err) {
+                if (isMounted) {
+                    setError('Error al cargar los datos de estudiantes')
+                    console.error(err)
+                    setLoading(false)
+                }
+            }
         }
-        // try {
-        //     const response = await getBranches()
-        //     setBranches(response.branches)
-        // } catch (error) {
-        //     console.error(error)
-        //     throw error
-        // }
+
+        fetchStudents()
+
+        // Cleanup function to prevent state updates after unmount
+        return () => {
+            isMounted = false
+        }
+    }, [getStudents])
+
+    // Handle sorting
+    const handleSort = (key: keyof Student) => {
+        let direction: 'asc' | 'desc' = 'asc'
+
+        if (
+            sortConfig &&
+            sortConfig.key === key &&
+            sortConfig.direction === 'asc'
+        ) {
+            direction = 'desc'
+        }
+
+        setSortConfig({ key, direction })
     }
 
-    // async function handleCreateStudentForm(
-    //     e: React.FormEvent<HTMLFormElement>,
-    // ) {
-    //     e.preventDefault()
-    //     const formData = new FormData(e.currentTarget)
-    //     await createStudent(formData)
-    //     closeCreateStudentModal()
-    //     fetchData()
-    // }
+    // Handle student selection
+    const handleStudentClick = (student: Student) => {
+        if (selectedStudent?.id === student.id) {
+            setSelectedStudent(null) // Deselect if clicking the same student
+        } else {
+            setSelectedStudent(student) // Select the clicked student
+        }
+    }
 
-    // async function handleUpdateStudentForm(
-    //     e: React.FormEvent<HTMLFormElement>,
-    // ) {
-    //     e.preventDefault()
-    //     const formData = new FormData(e.currentTarget)
-    //     await updateStudent(formData.get('id') as string, formData)
-    //     close()
-    //     fetchData()
-    // }
-
-    async function handleDeleteStudent(id: number) {
+    // Handle student deletion
+    const handleDeleteStudent = async (id: string) => {
         const confirmDelete = confirm(
             '¿Estás seguro de que deseas eliminar este alumno?',
         )
         if (!confirmDelete) return
 
         try {
-            await deleteStudent(String(id))
+            await deleteStudent(id)
             alert('Alumno eliminado correctamente')
-            fetchData()
-            setStudents((prevStudents: Student[]) =>
+            setStudents(prevStudents =>
                 prevStudents.filter(student => student.id !== id),
             )
+            if (selectedStudent?.id === id) {
+                setSelectedStudent(null)
+            }
         } catch (error) {
             console.error('Error al eliminar el alumno:', error)
             alert('No se pudo eliminar el alumno')
         }
     }
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getStudents()
-                setStudents(response.students)
-            } catch (error) {
-                console.error(error)
-            }
-        }
+    // Apply sorting and filtering
+    const filteredAndSortedStudents = [...students]
+        .filter(
+            student =>
+                student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                student.last_name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                student.email
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                (student.dni &&
+                    student.dni
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())),
+        )
+        .sort((a, b) => {
+            if (!sortConfig) return 0
 
-        fetchData()
-    }, [getStudents])
+            const { key, direction } = sortConfig
 
-    // Filtrar estudiantes según la búsqueda
-    const filteredStudents = students?.filter(
-        (student: Student) =>
-            student.name?.toLowerCase().includes(search.toLowerCase()) ||
-            student.last_name?.toLowerCase().includes(search.toLowerCase()) ||
-            student.email?.toLowerCase().includes(search.toLowerCase()),
-    )
+            // Use type assertion to tell TypeScript that these properties exist
+            const aValue = a[key] as string | number | boolean
+            const bValue = b[key] as string | number | boolean
+
+            if (aValue < bValue) return direction === 'asc' ? -1 : 1
+            if (aValue > bValue) return direction === 'asc' ? 1 : -1
+            return 0
+        })
+
+    // Format currency
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0,
+        }).format(amount)
+    }
 
     return (
-        <div className="space-y-6 p-6 max-w-full">
-            <div className="flex flex-wrap items-center justify-between">
-                <h1 className="text-2xl md:text-3xl font-bold">Alumnos</h1>
-                <div className="flex sm:hidden justify-center mt-2">
-                    <Button
-                        onClick={toggleDetails}
-                        variant="outline"
-                        className="w-full sm:w-auto">
-                        Mostrar más detalles
-                    </Button>
+        <div className="min-h-screen w-full p-4 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+            {/* Blurred background effect */}
+            <div className="absolute inset-0 backdrop-blur-sm z-0"></div>
+
+            {/* Main container */}
+            <div className="w-full max-w-6xl mx-auto relative z-10">
+                {/* Header with title and actions */}
+                <div className="flex flex-wrap items-center justify-between mb-6">
+                    <h1 className="text-2xl md:text-3xl font-bold">Alumnos</h1>
+                    <div className="flex sm:hidden justify-center mt-2">
+                        <Button
+                            onClick={toggleDetails}
+                            variant="outline"
+                            className="w-full sm:w-auto">
+                            {showDetails
+                                ? 'Ocultar detalles'
+                                : 'Mostrar más detalles'}
+                        </Button>
+                    </div>
+                    <div className="hidden sm:flex justify-end gap-2">
+                        <Link href="/admin/students/create">
+                            <Button className="">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Nuevo Alumno
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
-                <div className="hidden sm:flex justify-end gap-2">
-                    <Link href="/admin/students/create">
-                        <Button>
+
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur shadow-lg rounded-lg border border-opacity-50 overflow-hidden">
+                    {/* Search */}
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="relative w-full md:w-64">
+                            <input
+                                type="text"
+                                placeholder="Buscar estudiantes..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-slate-800/50 dark:border-slate-700"
+                            />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        </div>
+                    </div>
+
+                    {/* Students table */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-gray-50/80 dark:bg-slate-800/50 text-xs uppercase">
+                                <tr>
+                                    <th className="px-4 py-3 text-left">
+                                        <button
+                                            onClick={() => handleSort('dni')}
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            DNI
+                                            {sortConfig?.key === 'dni' &&
+                                                (sortConfig.direction ===
+                                                'asc' ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                ))}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left">
+                                        <button
+                                            onClick={() => handleSort('name')}
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            Nombre
+                                            {sortConfig?.key === 'name' &&
+                                                (sortConfig.direction ===
+                                                'asc' ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                ))}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left">
+                                        <button
+                                            onClick={() =>
+                                                handleSort('last_name')
+                                            }
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            Apellido
+                                            {sortConfig?.key === 'last_name' &&
+                                                (sortConfig.direction ===
+                                                'asc' ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                ))}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left">
+                                        <button
+                                            onClick={() => handleSort('phone')}
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            Teléfono
+                                            {sortConfig?.key === 'phone' &&
+                                                (sortConfig.direction ===
+                                                'asc' ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                ))}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left">
+                                        <button
+                                            onClick={() => handleSort('email')}
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            Email
+                                            {sortConfig?.key === 'email' &&
+                                                (sortConfig.direction ===
+                                                'asc' ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                ))}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left">
+                                        <button
+                                            onClick={() => handleSort('status')}
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            Estado
+                                            {sortConfig?.key === 'status' &&
+                                                (sortConfig.direction ===
+                                                'asc' ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                ))}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left">
+                                        <button
+                                            onClick={() =>
+                                                handleSort('paymentDueDate')
+                                            }
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            Vencimiento
+                                            {sortConfig?.key ===
+                                                'paymentDueDate' &&
+                                                (sortConfig.direction ===
+                                                'asc' ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                ))}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-center">
+                                        <button
+                                            onClick={() =>
+                                                handleSort('daysOverdue')
+                                            }
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            Días venc
+                                            {sortConfig?.key ===
+                                                'daysOverdue' &&
+                                                (sortConfig.direction ===
+                                                'asc' ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                ))}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-right">
+                                        Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                {loading ? (
+                                    <tr>
+                                        <td
+                                            colSpan={9}
+                                            className="px-4 py-8 text-center">
+                                            <div className="flex justify-center">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : error ? (
+                                    <tr>
+                                        <td
+                                            colSpan={9}
+                                            className="px-4 py-8 text-center text-red-500">
+                                            {error}
+                                        </td>
+                                    </tr>
+                                ) : filteredAndSortedStudents.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={9}
+                                            className="px-4 py-8 text-center text-gray-500">
+                                            No se encontraron estudiantes
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredAndSortedStudents.map(student => (
+                                        <tr
+                                            key={student.id}
+                                            className={`${getRowColor(
+                                                student.daysOverdue,
+                                            )} hover:bg-gray-50/50 dark:hover:bg-slate-800/50 ${
+                                                selectedStudent?.id ===
+                                                student.id
+                                                    ? 'ring-2 ring-inset ring-purple-500'
+                                                    : ''
+                                            }`}>
+                                            <td className="px-4 py-3">
+                                                {student.dni}
+                                            </td>
+                                            <td className="px-4 py-3 font-medium">
+                                                {student.name}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {student.last_name}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {student.phone}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {student.email}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span
+                                                    className={`px-2 py-1 text-xs rounded-full ${
+                                                        student.status ===
+                                                        'activo'
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                            : student.status ===
+                                                              'inactivo'
+                                                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                                    }`}>
+                                                    {student.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {formatDate(
+                                                    student.paymentDueDate,
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {student.daysOverdue}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            handleStudentClick(
+                                                                student,
+                                                            )
+                                                        }
+                                                        className="h-8 w-8 p-0">
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                    <Link
+                                                        href={`/admin/students/edit/${student.id}`}>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 w-8 p-0">
+                                                            <Edit2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            handleDeleteStudent(
+                                                                student.id,
+                                                            )
+                                                        }
+                                                        className="h-8 w-8 p-0">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile toggle details button */}
+                    <div className="sm:hidden flex justify-center p-4 border-t border-gray-200 dark:border-gray-700">
+                        <Button
+                            variant="outline"
+                            onClick={toggleDetails}
+                            className="w-full">
+                            {showDetails
+                                ? 'Ocultar detalles'
+                                : 'Mostrar más detalles'}
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Student details section - only visible when a student is selected */}
+                {selectedStudent && (
+                    <div className="mt-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur shadow-lg rounded-lg border border-opacity-50 overflow-hidden">
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                                <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                Detalles del Estudiante: {selectedStudent.name}{' '}
+                                {selectedStudent.last_name}
+                            </h3>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedStudent(null)}
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                Cerrar
+                            </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                            {/* Personal Information */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                    Información Personal
+                                </h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-start gap-2">
+                                        <Mail className="h-4 w-4 text-gray-500 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                Email
+                                            </p>
+                                            <p>{selectedStudent.email}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                        <Phone className="h-4 w-4 text-gray-500 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                Teléfono
+                                            </p>
+                                            <p>{selectedStudent.phone}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                        <Calendar className="h-4 w-4 text-gray-500 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                Fecha de Nacimiento
+                                            </p>
+                                            <p>
+                                                {selectedStudent.birthDate
+                                                    ? formatDate(
+                                                          selectedStudent.birthDate,
+                                                      )
+                                                    : 'No disponible'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                        <Calendar className="h-4 w-4 text-gray-500 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                Miembro desde
+                                            </p>
+                                            <p>
+                                                {selectedStudent.memberSince
+                                                    ? formatDate(
+                                                          selectedStudent.memberSince,
+                                                      )
+                                                    : 'No disponible'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Payment History */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                    Historial de Pagos
+                                </h4>
+                                <div className="space-y-2">
+                                    {selectedStudent.paymentHistory &&
+                                    selectedStudent.paymentHistory.length >
+                                        0 ? (
+                                        selectedStudent.paymentHistory.map(
+                                            (payment, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-700/50 rounded-md">
+                                                    <div>
+                                                        <p className="text-sm font-medium">
+                                                            {formatDate(
+                                                                payment.date,
+                                                            )}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {payment.concept}
+                                                        </p>
+                                                    </div>
+                                                    <span className="font-medium">
+                                                        {formatCurrency(
+                                                            payment.amount,
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            ),
+                                        )
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400 italic">
+                                            No hay historial de pagos disponible
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Attendance History */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                    Historial de Asistencias
+                                </h4>
+                                <div className="space-y-2">
+                                    {selectedStudent.attendanceHistory &&
+                                    selectedStudent.attendanceHistory.length >
+                                        0 ? (
+                                        selectedStudent.attendanceHistory.map(
+                                            (attendance, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-700/50 rounded-md">
+                                                    <p className="text-sm font-medium">
+                                                        {formatDate(
+                                                            attendance.date,
+                                                        )}
+                                                    </p>
+                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                                                        {attendance.className}
+                                                    </span>
+                                                </div>
+                                            ),
+                                        )
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400 italic">
+                                            No hay historial de asistencias
+                                            disponible
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Account info and actions */}
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-slate-800/50 backdrop-blur">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {/* Account balance */}
+                                <div className="flex flex-col">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                                            Saldo Cta Cte:
+                                        </span>
+                                        <span className="font-semibold">
+                                            {formatCurrency(
+                                                accountInfo.balance,
+                                            )}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                            Ver Detalle Saldo
+                                        </button>
+                                    </div>
+                                    <div className="mt-2">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                                            Promoción Principal:
+                                        </span>
+                                        <span className="ml-2 font-medium">
+                                            FUNCIONAL 21hs
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Last entry */}
+                                <div className="flex flex-col">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="font-medium">
+                                            Último Ingreso
+                                        </span>
+                                        <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                            Ver Historial
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span>{accountInfo.lastEntryDate}</span>
+                                        <span>{accountInfo.lastEntryTime}</span>
+                                    </div>
+                                </div>
+
+                                {/* Last payment */}
+                                <div className="flex flex-col">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="font-medium">
+                                            Último Pago Cuota
+                                        </span>
+                                        <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                            Ver Historial
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span>
+                                            {accountInfo.lastPaymentDate}
+                                        </span>
+                                        <span>
+                                            {accountInfo.lastPaymentPlan}
+                                        </span>
+                                        <span className="font-semibold">
+                                            {formatCurrency(
+                                                accountInfo.lastPaymentAmount,
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action buttons */}
+                            <div className="flex justify-end mt-4 gap-2">
+                                <Link href={'/admin/payments/create'}>
+                                    <Button className="bg-green-600 hover:bg-green-700 flex items-center gap-2">
+                                        <DollarSign className="h-5 w-5" />
+                                        Cobrar Cuota
+                                    </Button>
+                                </Link>
+                                <Button className="bg-purple-600 hover:bg-purple-700">
+                                    Otros Abonos
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Mobile new student button */}
+                <div className="sm:hidden flex justify-center mt-6">
+                    <Link href="/admin/students/create" className="w-full">
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700">
                             <Plus className="mr-2 h-4 w-4" />
                             Nuevo Alumno
                         </Button>
                     </Link>
                 </div>
             </div>
-
-            {/* Barra de Busqueda */}
-            <div className="flex sm:justify-start w-full">
-                <input
-                    type="text"
-                    placeholder="Buscar alumno..."
-                    className="w-full max-w-xs dark:bg-gray-200 sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl px-4 py-2 border rounded-md text-sm md:text-base"
-                    onChange={e => setSearch(e.target.value)}
-                />
-            </div>
-
-            {/* Tabla de Alumnos */}
-            <Card className="w-full ">
-                <CardHeader className="flex flex-wrap flex-row items-center justify-between gap-2">
-                    <CardTitle>Lista de Alumnos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="rounded-md border overflow-scroll max-w-full">
-                        <Table className="min-w-full overflow-scroll">
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead
-                                        className={`sm:table-cell ${
-                                            showDetails
-                                                ? 'table-cell'
-                                                : 'hidden'
-                                        }`}>
-                                        ID
-                                    </TableHead>
-                                    <TableHead>DNI</TableHead>
-                                    <TableHead>Nombre</TableHead>
-                                    <TableHead>Apellido</TableHead>
-                                    <TableHead
-                                        className={`sm:table-cell ${
-                                            showDetails
-                                                ? 'table-cell'
-                                                : 'hidden'
-                                        }`}>
-                                        Teléfono
-                                    </TableHead>
-                                    <TableHead
-                                        className={`sm:table-cell ${
-                                            showDetails
-                                                ? 'table-cell'
-                                                : 'hidden'
-                                        }`}>
-                                        Email
-                                    </TableHead>
-                                    <TableHead>Estado</TableHead>
-                                    <TableHead className="text-right">
-                                        Acciones
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredStudents?.map((student: Student) => (
-                                    <TableRow key={student.id}>
-                                        <TableCell>{student.id}</TableCell>
-                                        <TableCell className="hidden sm:table-cell">
-                                            {student.dni}
-                                        </TableCell>
-                                        <TableCell>{student.name}</TableCell>
-                                        <TableCell>
-                                            {student.last_name}
-                                        </TableCell>
-                                        <TableCell>{student.phone}</TableCell>
-                                        <TableCell>{student.email}</TableCell>
-                                        {/* <TableCell
-                                            className={`sm:table-cell ${
-                                                showDetails
-                                                    ? 'table-cell'
-                                                    : 'hidden'
-                                            }`}>
-                                            {student.branch.name}
-                                        </TableCell> */}
-                                        <TableCell
-                                            className={`sm:table-cell ${
-                                                showDetails
-                                                    ? 'table-cell'
-                                                    : 'hidden'
-                                            }`}>
-                                            {student.status}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Link
-                                                    href={`/admin/students/edit/${student.id}`}>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm">
-                                                        <Edit2 className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        handleDeleteStudent(
-                                                            student.id,
-                                                        )
-                                                    }>
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                    {/* Botón visible solo en pantallas pequeñas */}
-                    <div className="sm:hidden flex justify-center mt-2">
-                        <Button variant="outline" onClick={toggleDetails}>
-                            {showDetails
-                                ? 'Ocultar detalles'
-                                : 'Mostrar más detalles'}
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
         </div>
     )
 }
-
-//     {/* Modal para agregar alumno
-//     <Dialog
-//         open={createStudentModalIsOpen}
-//         onOpenChange={setCreateStudentModalIsOpen}>
-//         <DialogContent className="w-full max-w-[425px]">
-//             <DialogHeader>
-//                 <DialogTitle>Agregar Alumno</DialogTitle>
-//             </DialogHeader>
-//             <form
-//                 id="createStudentForm"
-//                 onSubmit={handleCreateStudentForm}
-//                 className="space-y-4">
-//                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2">
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="name">Nombre</Label>
-//                         <Input
-//                             id="name"
-//                             name="name"
-//                             placeholder="Nombre"
-//                         />
-//                     </div>
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="last_name">Apellido</Label>
-//                         <Input
-//                             id="last_name"
-//                             name="last_name"
-//                             placeholder="Apellido"
-//                         />
-//                     </div>
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="email">Email</Label>
-//                         <Input
-//                             id="email"
-//                             name="email"
-//                             type="email"
-//                             placeholder="Email"
-//                         />
-//                     </div>
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="phone">Teléfono</Label>
-//                         <Input
-//                             id="phone"
-//                             name="phone"
-//                             placeholder="Teléfono"
-//                         />
-//                     </div>
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="dni">DNI</Label>
-//                         <Input id="dni" name="dni" placeholder="DNI" />
-//                     </div>
-//                     {/* <div className="grid gap-2">
-//                         <Label htmlFor="branch_id">Sucursal</Label>
-//                         <select name="branch_id" id="branch_id">
-//                             <option value="">Seleccionar...</option>
-//                             {branches?.map((branch: Branch) => (
-//                                 <option
-//                                     key={branch.id}
-//                                     value={branch.id}>
-//                                     {branch.name}
-//                                 </option>
-//                             ))}
-//                         </select>
-//                     </div> */}
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="status">Estado</Label>
-//                         <select name="status" id="status">
-//                             <option value="">Seleccionar...</option>
-//                             <option value="activo">Activo</option>
-//                             <option value="inactivo">Inactivo</option>
-//                             <option value="pendiente">Pendiente</option>
-//                         </select>
-//                     </div>
-//                 </div>
-//                 <DialogFooter>
-//                     <Button
-//                         type="button"
-//                         variant="outline"
-//                         onClick={closeCreateStudentModal}>
-//                         Cancelar
-//                     </Button>
-//                     <Button type="submit">Guardar</Button>
-//                 </DialogFooter>
-//             </form>
-//         </DialogContent>
-//     </Dialog>
-
-//     {/* Modal para editar alumno */}
-//     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-//         <DialogContent className="w-2/3    sm:max-w-[425px]">
-//             <DialogHeader>
-//                 <DialogTitle>Editar Alumno</DialogTitle>
-//             </DialogHeader>
-//             <form
-//                 id="updateStudentForm"
-//                 onSubmit={handleUpdateStudentForm}
-//                 className="space-y-4">
-//                 <input
-//                     type="hidden"
-//                     name="id"
-//                     value={selectedStudent?.id}
-//                 />
-//                 <div className="grid gap-4">
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="name">Nombre</Label>
-//                         <Input
-//                             id="name"
-//                             name="name"
-//                             placeholder="Nombre"
-//                             defaultValue={selectedStudent?.name}
-//                         />
-//                     </div>
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="last_name">Apellido</Label>
-//                         <Input
-//                             id="last_name"
-//                             name="last_name"
-//                             placeholder="Apellido"
-//                             defaultValue={selectedStudent?.last_name}
-//                         />
-//                     </div>
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="email">Email</Label>
-//                         <Input
-//                             id="email"
-//                             name="email"
-//                             type="email"
-//                             placeholder="Email"
-//                             defaultValue={selectedStudent?.email}
-//                         />
-//                     </div>
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="phone">Teléfono</Label>
-//                         <Input
-//                             id="phone"
-//                             name="phone"
-//                             placeholder="Teléfono"
-//                             defaultValue={selectedStudent?.phone}
-//                         />
-//                     </div>
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="dni">DNI</Label>
-//                         <Input
-//                             id="dni"
-//                             name="dni"
-//                             placeholder="DNI"
-//                             defaultValue={selectedStudent?.dni}
-//                         />
-//                     </div>
-//                     {/* <div className="grid gap-2">
-//                         <Label htmlFor="branch_id">Sucursal</Label>
-//                         <select
-//                             name="branch_id"
-//                             id="branch_id"
-//                             defaultValue={selectedStudent?.branch.id}>
-//                             <option value="">Seleccionar...</option>
-//                             {branches?.map((branch: Branch) => (
-//                                 <option
-//                                     key={branch.id}
-//                                     value={branch.id}>
-//                                     {branch.name}
-//                                 </option>
-//                             ))}
-//                         </select>
-//                     </div> */}
-//                     <div className="grid gap-2">
-//                         <Label htmlFor="status">Estado</Label>
-//                         <select
-//                             name="status"
-//                             id="status"
-//                             defaultValue={selectedStudent?.status}>
-//                             <option value="">Seleccionar...</option>
-//                             <option value="activo">Activo</option>
-//                             <option value="inactivo">Inactivo</option>
-//                             <option value="pendiente">Pendiente</option>
-//                         </select>
-//                     </div>
-//                 </div>
-//                 <DialogFooter>
-//                     <Button
-//                         type="button"
-//                         variant="outline"
-//                         onClick={close}>
-//                         Cancelar
-//                     </Button>
-//                     <Button type="submit">Guardar Cambios</Button>
-//                 </DialogFooter>
-//             </form>
-//         </DialogContent>
-//     </Dialog>
-// </div> */}
