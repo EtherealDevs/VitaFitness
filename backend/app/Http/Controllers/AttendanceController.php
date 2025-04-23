@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\AttendanceResource;
 use App\Models\Attendance;
+use App\Models\ClassSchedule;
+use App\Models\ClassScheduleTimeslotStudent;
+use App\Models\Student;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 
 class AttendanceController extends Controller
 {
@@ -15,6 +20,34 @@ class AttendanceController extends Controller
     {
         try {
             $attendances = Attendance::with('student', 'classe')->get();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        $attendances = AttendanceResource::collection($attendances);
+        $data = [
+            'attendances' => $attendances,
+            'message' => 'Attendances retrieved successfully',
+            'status' => 'success (200)'
+        ];
+        return response()->json($data, 200);
+    }
+    public function getAllAttendancesForCurrentStudent() 
+    {
+        // Obtener el estudiante actual
+        // $user = FacadesAuth::user();
+        $testStudent = Student::where('dni', '87654321')->first();
+        $student = $testStudent;
+        // $student = Student::where('dni', $user->dni)->first();
+
+
+        $classStudents = $student->timeslotStudents;
+        $ids = [];
+        foreach ($classStudents as $classStudent) {
+            $ids[] = $classStudent->id;
+        }
+        // Obtener todas las asistencias para este estudiante
+        try {
+            $attendances = Attendance::with(['student', 'timeslotStudent.scheduleTimeslot.classSchedule'])->whereIn('c_sch_ts_student_id', $ids)->get();
         } catch (\Throwable $th) {
             throw $th;
         }

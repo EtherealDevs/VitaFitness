@@ -24,7 +24,7 @@ class PaymentSeeder extends Seeder
                 'amount' => 10000,
                 'payment_date' => now(),
                 'status' => 'pagado',
-                'expiration_date' => now()->addDays(30),
+                'expiration_date' => now()->addMonth(),
                 'date_start' => now(),
                 'student_id' => 1,
             ]);

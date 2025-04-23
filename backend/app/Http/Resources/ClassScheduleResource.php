@@ -26,7 +26,10 @@ class ClassScheduleResource extends JsonResource
         }
         return [
             'id' => $this->id,
-            'class' => new ClasseResource($this->whenLoaded('class')),
+            'class' => [
+                'id' => $this->class->id,
+                'name' => $this->class->plan->name,
+            ],
             'schedule' => new ScheduleResource($this->whenLoaded('schedule')),
             'selectedDays' => $selectedDays,
             'time_start' => $timeslotStartTime,

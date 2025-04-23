@@ -18,8 +18,8 @@ class ClasseResource extends JsonResource
             'id' => $this->id,
             'max_students' => $this->max_students,
             'precio' => $this->precio,
-            'branch' => new BranchResource($this->whenLoaded('branch')),
-            'plan' => new PlanResource($this->whenLoaded('plan')),
+            'branch' => new BranchResource($this->branch),
+            'plan' => new PlanResource($this->plan),
             'schedules' => ClassScheduleResource::collection($this->whenLoaded('classSchedules')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at

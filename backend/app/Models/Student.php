@@ -77,8 +77,10 @@ class Student extends Model
     {
         return $this->hasMany(Payment::class);
     }
-
-
+    public function timeslotStudents()
+    {
+        return $this->hasMany(ClassScheduleTimeslotStudent::class, 'student_id');
+    }
     public function branch()
     {
         return $this->belongsTo(Branch::class);

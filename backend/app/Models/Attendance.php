@@ -13,7 +13,6 @@ class Attendance extends Model
     {
         return $this->belongsTo(ClassScheduleTimeslotStudent::class, 'c_sch_ts_student_id');
     }
-
     public function student()
     {
         return $this->hasOneThrough(

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ClasseController;
 use App\Http\Controllers\ClassScheduleController;
@@ -25,6 +26,8 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     // User::find($user->id);
     return $user;
 });
+Route::get('/attendances/getAllForCurrent', [AttendanceController::class, 'getAllAttendancesForCurrentStudent']);
+Route::apiResource('attendances', AttendanceController::class);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('students', StudentController::class);
     Route::apiResource('branches', BranchController::class)->except(['index', 'show']);

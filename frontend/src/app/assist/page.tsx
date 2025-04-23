@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import {
     ChevronLeft,
     ChevronRight,
@@ -9,8 +9,50 @@ import {
     Loader2,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useAttendances } from '@/hooks/attendances'
 
 // Types for our attendance data
+
+interface Class {
+    id: string
+    name: string
+}
+interface Branch {
+    id: string
+    name: string
+    address: string
+}
+interface Plan {
+    id: string
+    name: string
+    description: string
+    status: string
+}
+interface ClassSchedule {
+    id: string
+    class: Class
+    timeStart: string
+    timeEnd: string
+    selectedDays: string[]
+}
+interface Student {
+    id: string
+    name: string
+    last_name: string
+    email: string
+    phone: string
+    dni: string
+}
+interface Attendance {
+    id: string
+    classSchedule: ClassSchedule
+    student: Student
+    status: string
+    date: string
+    created_at: string
+    updated_at: string
+}
+
 interface ClassAttendance {
     name: string
     time: string
@@ -26,6 +68,8 @@ interface MonthAttendance {
     year: number
     days: DayAttendance[]
 }
+
+
 
 // Helper functions for calendar
 const getDaysInMonth = (year: number, month: number) => {
@@ -143,7 +187,25 @@ const fetchAttendanceData = async (
     }
 }
 
+
 export default function Assists() {
+    const { getAttendancesForCurrentStudent } = useAttendances()
+    const [attendances, setAttendances] = useState<Attendance[]>([])
+    const fetchAttendances = async () => {
+        try {
+            const response = await getAttendancesForCurrentStudent()
+            setAttendances(response.attendances)
+            return response.data
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }
+    useEffect(() => {
+        fetchAttendances()
+    }, [])
+    console.log(attendances)
+    
     // Get current date
     const today = new Date()
 
@@ -154,8 +216,8 @@ export default function Assists() {
     const [error, setError] = useState<string | null>(null)
     const [attendanceData, setAttendanceData] =
         useState<MonthAttendance | null>(null)
-    const [selectedDay, setSelectedDay] = useState<DayAttendance | null>(null)
-
+    const [selectedDay, setSelectedDay] = useState<DayAttendance | null | Attendance>(null)
+    console.log(selectedDay)
     // Fetch attendance data when month/year changes
     useEffect(() => {
         let isMounted = true
@@ -167,10 +229,7 @@ export default function Assists() {
             setError(null)
 
             try {
-                const data = await fetchAttendanceData(
-                    currentYear,
-                    currentMonth,
-                )
+                const data = await fetchAttendances()
 
                 if (isMounted) {
                     setAttendanceData(data)
@@ -216,7 +275,7 @@ export default function Assists() {
 
     // Function to check if a day has attendance
     const getDayAttendance = (day: number) => {
-        return attendanceData?.days.find(d => d.date === day) || null
+        return attendances?.find(a => new Date(a.date).getDate() === day && new Date(a.date).getFullYear() === currentYear && new Date(a.date).getMonth() === currentMonth) || null
     }
 
     // Function to navigate between months
@@ -357,27 +416,23 @@ export default function Assists() {
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                     <h3 className="font-semibold text-gray-900 text-lg mb-3">
                         {selectedDay
-                            ? `Clases asistidas el día ${selectedDay.date}`
+                            ? `Clases asistidas el día ${ new Date(selectedDay.date).getDate()}` 
                             : 'Selecciona un día para ver detalles'}
                     </h3>
-
                     {selectedDay ? (
                         <div className="space-y-3">
-                            {selectedDay.classes.map((cls, index) => (
                                 <div
-                                    key={index}
                                     className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-lg">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium rounded-md">
-                                            {cls.name}
+                                            {selectedDay.classSchedule.class.name}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                                         <Calendar className="h-4 w-4" />
-                                        <span>{cls.time}</span>
+                                        <span>{selectedDay.classSchedule.time_start}</span> - <span>{selectedDay.classSchedule.time_end}</span>
                                     </div>
                                 </div>
-                            ))}
                         </div>
                     ) : (
                         <div className="text-center text-gray-500 dark:text-gray-400 py-4">
