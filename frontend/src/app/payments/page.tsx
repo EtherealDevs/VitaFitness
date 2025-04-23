@@ -8,15 +8,6 @@ import axios from '@/lib/axios'
 import { Student } from '../admin/students/columns'
 import { Payment, usePayments } from '@/hooks/payments'
 
-// Types for our payment data
-// interface Payment {
-//     id: string
-//     date: string // ISO date string
-//     amount: number
-//     className: string
-//     status: 'paid' | 'pending' | 'overdue'
-// }
-
 interface PaymentSummary {
     isUpToDate: boolean
     nextPaymentDate: string | null
@@ -57,73 +48,6 @@ const getDaysRemaining = (dateString: string): number => {
     return diffDays
 }
 
-// Mock API function to simulate fetching payment data
-// const fetchPaymentData = async (): Promise<PaymentSummary> => {
-//     // Simulate API delay
-//     await new Promise(resolve => setTimeout(resolve, 800))
-
-//     // Current date for generating relative dates
-//     const today = new Date()
-
-//     // Generate some sample payment history
-//     const paymentHistory: Payment[] = [
-//         {
-//             id: 'pay_1',
-//             date: new Date(
-//                 today.getFullYear(),
-//                 today.getMonth() - 2,
-//                 15,
-//             ).toISOString(),
-//             amount: 5000,
-//             className: 'Yoga',
-//             status: 'paid',
-//         },
-//         {
-//             id: 'pay_2',
-//             date: new Date(
-//                 today.getFullYear(),
-//                 today.getMonth() - 1,
-//                 15,
-//             ).toISOString(),
-//             amount: 5000,
-//             className: 'Yoga',
-//             status: 'paid',
-//         },
-//         {
-//             id: 'pay_3',
-//             date: new Date(
-//                 today.getFullYear(),
-//                 today.getMonth(),
-//                 15,
-//             ).toISOString(),
-//             amount: 5500,
-//             className: 'Yoga + Pilates',
-//             status: 'paid',
-//         },
-//     ]
-
-//     // Calculate total paid
-//     const totalPaid = paymentHistory.reduce((sum, payment) => {
-//         return payment.status === 'paid' ? sum + payment.amount : sum
-//     }, 0)
-
-//     // Determine next payment
-//     const nextPaymentDate = new Date(
-//         today.getFullYear(),
-//         today.getMonth() + 1,
-//         15,
-//     ).toISOString()
-//     const isUpToDate = true // In a real app, this would be calculated based on business rules
-
-//     return {
-//         isUpToDate,
-//         nextPaymentDate,
-//         nextPaymentAmount: 5500,
-//         nextPaymentClass: 'Yoga + Pilates',
-//         totalPaid,
-//         paymentHistory,
-//     }
-// }
 export const fetchPaymentData = async (
     payments: Payment[],
 ): Promise<PaymentSummary> => {
@@ -195,20 +119,70 @@ export default function PaymentHistory() {
     const { getPaymentStudent } = usePayments()
     const { user } = useAuth()
 
-    const fetchStudentData = async () => {
-        if (!user?.dni) return
-        try {
-            const response = await axios.get('/api/student/search', {
-                params: {
-                    field: 'dni',
-                    search: user.dni,
-                },
-            })
-            const studentData = response.data.students[0]
-            setStudent(studentData)
-        } catch (error) {
-            console.error(error)
-            throw error
+    export const fetchPaymentData = async (
+        payments: Payment[],
+    ): Promise<PaymentSummary> => {
+        await new Promise(resolve => setTimeout(resolve, 200))
+
+        const paidPayments = payments.filter(
+            p => p.status.toLowerCase() === 'pagado',
+        )
+
+        const totalPaid = paidPayments.reduce(
+            (sum, p) => sum + parseFloat(p.amount),
+            0,
+        )
+
+        const sortedPayments = [...paidPayments].sort(
+            (a, b) =>
+                new Date(b.payment_date).getTime() -
+                new Date(a.payment_date).getTime(),
+        )
+
+        const lastPayment = sortedPayments[0]
+
+        const upcomingPayments = payments.filter(p => {
+            if (!p.expiration_date) return false
+            const daysRemaining = getDaysRemaining(p.expiration_date)
+            return daysRemaining >= 0
+        })
+
+        const nextPayment = upcomingPayments.sort(
+            (a, b) =>
+                new Date(a.expiration_date).getTime() -
+                new Date(b.expiration_date).getTime(),
+        )[0]
+
+        return {
+            isUpToDate: !payments.some(p => {
+                if (!p.expiration_date || p.status.toLowerCase() === 'pagado')
+                    return false
+                return getDaysRemaining(p.expiration_date) < 0
+            }),
+            nextPaymentDate: nextPayment?.expiration_date || null,
+            nextPaymentAmount: nextPayment
+                ? parseFloat(nextPayment.amount)
+                : null,
+            nextPaymentClass:
+                nextPayment?.classSchedule?.id || 'Sin clase asignada',
+            totalPaid,
+            paymentHistory: paidPayments.map(p => ({
+                id: String(p.id),
+                date: p.payment_date,
+                amount: parseFloat(p.amount).toString(),
+                className: p.classSchedule?.id || 'Clase no disponible',
+                status:
+                    p.status.toLowerCase() === 'pagado' ? 'paid' : 'pendiente',
+                classSchedule: p.classSchedule || null,
+                classSchedule_id: p.classSchedule?.id || '',
+                student_id: p.student_id || '',
+                student: p.student || '',
+                expiration_date: p.expiration_date || '',
+                date_start: p.date_start || '',
+                payment_date: p.payment_date || '',
+                created_at: p.created_at || '',
+                updated_at: p.updated_at || '',
+            })),
         }
     }
 
@@ -302,7 +276,7 @@ export default function PaymentHistory() {
                 <div className="flex flex-col items-center p-6 pb-2">
                     <div className="flex items-center justify-center gap-2 mb-4">
                         <CreditCard className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                        <h2 className="text-2xl font-bold text-gray-900 text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center">
                             Estado de Pagos
                         </h2>
                     </div>
@@ -354,46 +328,54 @@ export default function PaymentHistory() {
                             </div>
                         </div>
 
-                        {/* Next Payment */}
-                        {paymentData.nextPaymentDate && nextPaymentStatus && (
+                        {nextPaymentStatus && paymentData.nextPaymentDate && (
                             <div
-                                className={`rounded-lg p-4 ${nextPaymentStatus.bgClass}`}>
-                                <div className="flex justify-between items-center mb-3">
-                                    <div className="flex items-center gap-2">
-                                        {nextPaymentStatus.icon}
-                                        <h3
-                                            className={`font-semibold ${nextPaymentStatus.colorClass}`}>
-                                            {nextPaymentStatus.label}
-                                        </h3>
-                                    </div>
-                                    <span
-                                        className={`text-sm font-medium ${nextPaymentStatus.colorClass}`}>
-                                        {nextPaymentStatus.daysText}
-                                    </span>
+                                className={`rounded-lg p-4 space-y-2 ${nextPaymentStatus.bgClass}`}>
+                                <div className="flex items-center gap-2">
+                                    {nextPaymentStatus.icon}
+                                    <h4
+                                        className={`font-semibold ${nextPaymentStatus.colorClass}`}>
+                                        {nextPaymentStatus.label}
+                                    </h4>
                                 </div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                    {nextPaymentStatus.daysText}
+                                </p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    Fecha de vencimiento:{' '}
+                                    <span className="font-medium">
+                                        {formatDate(
+                                            paymentData.nextPaymentDate,
+                                        )}
+                                    </span>
+                                </p>
 
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <p className="text-sm text-gray-500 dark:text-gray-300">
-                                            Monto
-                                        </p>
-                                        <p className="font-semibold text-gray-700">
-                                            {formatCurrency(
-                                                paymentData.nextPaymentAmount ||
-                                                    0,
-                                            )}
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm text-gray-500 dark:text-gray-300">
-                                            Fecha
-                                        </p>
-                                        <p className="font-medium text-gray-700">
-                                            {formatDate(
-                                                paymentData.nextPaymentDate,
-                                            )}
-                                        </p>
-                                    </div>
+                                {/* Pregunta al usuario */}
+                                <div className="pt-2 space-y-2">
+                                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                                        ¿Ya realizaste el pago?
+                                    </p>
+                                    <label
+                                        htmlFor="comprobante"
+                                        className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 cursor-pointer transition">
+                                        Cargar comprobante
+                                    </label>
+                                    <input
+                                        id="comprobante"
+                                        type="file"
+                                        accept="image/*,.pdf"
+                                        className="hidden"
+                                        onChange={e => {
+                                            const file = e.target.files?.[0]
+                                            if (file) {
+                                                console.log(
+                                                    'Archivo cargado:',
+                                                    file,
+                                                )
+                                                // Aquí podrías enviar el archivo a tu backend
+                                            }
+                                        }}
+                                    />
                                 </div>
                             </div>
                         )}
