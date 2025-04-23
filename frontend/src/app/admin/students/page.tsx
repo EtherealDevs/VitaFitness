@@ -65,9 +65,11 @@ const formatDate = (dateString: string) => {
 
 // Helper function to determine row color based on payment status
 const getRowColor = (daysOverdue: number) => {
-    if (daysOverdue > 0) return 'bg-red-100 dark:bg-red-900/20'
-    if (daysOverdue === 0) return 'bg-yellow-100 dark:bg-yellow-900/20'
-    return ''
+    if (daysOverdue > 0)
+        return 'bg-red-100/70 dark:bg-red-900/30 text-red-900 dark:text-red-100'
+    if (daysOverdue === 0)
+        return 'bg-yellow-100/70 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100'
+    return 'dark:text-gray-100'
 }
 
 // Mock student data
@@ -288,20 +290,19 @@ export default function StudentManagement() {
     }
 
     return (
-        <div className="min-h-screen w-full p-4 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-            {/* Blurred background effect */}
-            <div className="absolute inset-0 backdrop-blur-sm z-0"></div>
-
+        <div className="min-h-screen w-full p-4">
             {/* Main container */}
             <div className="w-full max-w-6xl mx-auto relative z-10">
                 {/* Header with title and actions */}
                 <div className="flex flex-wrap items-center justify-between mb-6">
-                    <h1 className="text-2xl md:text-3xl font-bold">Alumnos</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                        Alumnos
+                    </h1>
                     <div className="flex sm:hidden justify-center mt-2">
                         <Button
                             onClick={toggleDetails}
                             variant="outline"
-                            className="w-full sm:w-auto">
+                            className="w-full sm:w-auto dark:text-white dark:border-gray-600">
                             {showDetails
                                 ? 'Ocultar detalles'
                                 : 'Mostrar más detalles'}
@@ -309,7 +310,7 @@ export default function StudentManagement() {
                     </div>
                     <div className="hidden sm:flex justify-end gap-2">
                         <Link href="/admin/students/create">
-                            <Button className="">
+                            <Button className=" text-white">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Nuevo Alumno
                             </Button>
@@ -317,7 +318,7 @@ export default function StudentManagement() {
                     </div>
                 </div>
 
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur shadow-lg rounded-lg border border-opacity-50 overflow-hidden">
+                <div className="bg-white/80 dark:bg-[#1f2122] backdrop-blur shadow-lg rounded-lg border border-opacity-50 dark:border-gray-700 overflow-hidden">
                     {/* Search */}
                     <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                         <div className="relative w-full md:w-64">
@@ -326,7 +327,7 @@ export default function StudentManagement() {
                                 placeholder="Buscar estudiantes..."
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-slate-800/50 dark:border-slate-700"
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
                             />
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                         </div>
@@ -335,7 +336,7 @@ export default function StudentManagement() {
                     {/* Students table */}
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50/80 dark:bg-slate-800/50 text-xs uppercase">
+                            <thead className="bg-gray-50/80 dark:bg-[#272b2b] text-xs uppercase">
                                 <tr>
                                     <th className="px-4 py-3 text-left">
                                         <button
@@ -457,7 +458,7 @@ export default function StudentManagement() {
                                                 ))}
                                         </button>
                                     </th>
-                                    <th className="px-4 py-3 text-right">
+                                    <th className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">
                                         Acciones
                                     </th>
                                 </tr>
@@ -469,7 +470,7 @@ export default function StudentManagement() {
                                             colSpan={9}
                                             className="px-4 py-8 text-center">
                                             <div className="flex justify-center">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 dark:border-purple-400"></div>
                                             </div>
                                         </td>
                                     </tr>
@@ -477,7 +478,7 @@ export default function StudentManagement() {
                                     <tr>
                                         <td
                                             colSpan={9}
-                                            className="px-4 py-8 text-center text-red-500">
+                                            className="px-4 py-8 text-center text-red-500 dark:text-red-400">
                                             {error}
                                         </td>
                                     </tr>
@@ -485,7 +486,7 @@ export default function StudentManagement() {
                                     <tr>
                                         <td
                                             colSpan={9}
-                                            className="px-4 py-8 text-center text-gray-500">
+                                            className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                             No se encontraron estudiantes
                                         </td>
                                     </tr>
@@ -495,12 +496,15 @@ export default function StudentManagement() {
                                             key={student.id}
                                             className={`${getRowColor(
                                                 student.daysOverdue,
-                                            )} hover:bg-gray-50/50 dark:hover:bg-slate-800/50 ${
+                                            )} hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
                                                 selectedStudent?.id ===
                                                 student.id
                                                     ? 'ring-2 ring-inset ring-purple-500'
                                                     : ''
-                                            }`}>
+                                            }`}
+                                            onClick={() =>
+                                                handleStudentClick(student)
+                                            }>
                                             <td className="px-4 py-3">
                                                 {student.dni}
                                             </td>
@@ -521,11 +525,11 @@ export default function StudentManagement() {
                                                     className={`px-2 py-1 text-xs rounded-full ${
                                                         student.status ===
                                                         'activo'
-                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
                                                             : student.status ===
                                                               'inactivo'
-                                                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                                            ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
                                                     }`}>
                                                     {student.status}
                                                 </span>
@@ -543,31 +547,36 @@ export default function StudentManagement() {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() =>
+                                                        onClick={e => {
+                                                            e.stopPropagation()
                                                             handleStudentClick(
                                                                 student,
                                                             )
-                                                        }
-                                                        className="h-8 w-8 p-0">
+                                                        }}
+                                                        className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                                                         <Eye className="h-4 w-4" />
                                                     </Button>
                                                     <Link
-                                                        href={`/admin/students/edit/${student.id}`}>
+                                                        href={`/admin/students/edit/${student.id}`}
+                                                        onClick={e =>
+                                                            e.stopPropagation()
+                                                        }>
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="h-8 w-8 p-0">
+                                                            className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                                                             <Edit2 className="h-4 w-4" />
                                                         </Button>
                                                     </Link>
                                                     <Button
                                                         variant="destructive"
                                                         size="sm"
-                                                        onClick={() =>
+                                                        onClick={e => {
+                                                            e.stopPropagation()
                                                             handleDeleteStudent(
                                                                 student.id,
                                                             )
-                                                        }
+                                                        }}
                                                         className="h-8 w-8 p-0">
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -585,7 +594,7 @@ export default function StudentManagement() {
                         <Button
                             variant="outline"
                             onClick={toggleDetails}
-                            className="w-full">
+                            className="w-full dark:text-white dark:border-gray-600">
                             {showDetails
                                 ? 'Ocultar detalles'
                                 : 'Mostrar más detalles'}
@@ -595,9 +604,9 @@ export default function StudentManagement() {
 
                 {/* Student details section - only visible when a student is selected */}
                 {selectedStudent && (
-                    <div className="mt-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur shadow-lg rounded-lg border border-opacity-50 overflow-hidden">
+                    <div className="mt-6 bg-white/80 dark:bg-[#1f2122] backdrop-blur shadow-lg rounded-lg border border-opacity-50 dark:border-gray-700 overflow-hidden">
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                                 <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                 Detalles del Estudiante: {selectedStudent.name}{' '}
                                 {selectedStudent.last_name}
@@ -619,30 +628,34 @@ export default function StudentManagement() {
                                 </h4>
                                 <div className="space-y-2">
                                     <div className="flex items-start gap-2">
-                                        <Mail className="h-4 w-4 text-gray-500 mt-0.5" />
+                                        <Mail className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
                                         <div>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                                 Email
                                             </p>
-                                            <p>{selectedStudent.email}</p>
+                                            <p className="dark:text-white">
+                                                {selectedStudent.email}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-2">
-                                        <Phone className="h-4 w-4 text-gray-500 mt-0.5" />
+                                        <Phone className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
                                         <div>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                                 Teléfono
                                             </p>
-                                            <p>{selectedStudent.phone}</p>
+                                            <p className="dark:text-white">
+                                                {selectedStudent.phone}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-500 mt-0.5" />
+                                        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
                                         <div>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                                 Fecha de Nacimiento
                                             </p>
-                                            <p>
+                                            <p className="dark:text-white">
                                                 {selectedStudent.birthDate
                                                     ? formatDate(
                                                           selectedStudent.birthDate,
@@ -652,12 +665,12 @@ export default function StudentManagement() {
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-500 mt-0.5" />
+                                        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
                                         <div>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                                 Miembro desde
                                             </p>
-                                            <p>
+                                            <p className="dark:text-white">
                                                 {selectedStudent.memberSince
                                                     ? formatDate(
                                                           selectedStudent.memberSince,
@@ -682,9 +695,9 @@ export default function StudentManagement() {
                                             (payment, index) => (
                                                 <div
                                                     key={index}
-                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-700/50 rounded-md">
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
                                                     <div>
-                                                        <p className="text-sm font-medium">
+                                                        <p className="text-sm font-medium dark:text-white">
                                                             {formatDate(
                                                                 payment.date,
                                                             )}
@@ -693,7 +706,7 @@ export default function StudentManagement() {
                                                             {payment.concept}
                                                         </p>
                                                     </div>
-                                                    <span className="font-medium">
+                                                    <span className="font-medium dark:text-white">
                                                         {formatCurrency(
                                                             payment.amount,
                                                         )}
@@ -722,13 +735,13 @@ export default function StudentManagement() {
                                             (attendance, index) => (
                                                 <div
                                                     key={index}
-                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-700/50 rounded-md">
-                                                    <p className="text-sm font-medium">
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                                                    <p className="text-sm font-medium dark:text-white">
                                                         {formatDate(
                                                             attendance.date,
                                                         )}
                                                     </p>
-                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
                                                         {attendance.className}
                                                     </span>
                                                 </div>
@@ -745,7 +758,7 @@ export default function StudentManagement() {
                         </div>
 
                         {/* Account info and actions */}
-                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-slate-800/50 backdrop-blur">
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Account balance */}
                                 <div className="flex flex-col">
@@ -753,7 +766,7 @@ export default function StudentManagement() {
                                         <span className="text-sm text-gray-600 dark:text-gray-400">
                                             Saldo Cta Cte:
                                         </span>
-                                        <span className="font-semibold">
+                                        <span className="font-semibold dark:text-white">
                                             {formatCurrency(
                                                 accountInfo.balance,
                                             )}
@@ -768,7 +781,7 @@ export default function StudentManagement() {
                                         <span className="text-sm text-gray-600 dark:text-gray-400">
                                             Promoción Principal:
                                         </span>
-                                        <span className="ml-2 font-medium">
+                                        <span className="ml-2 font-medium dark:text-white">
                                             FUNCIONAL 21hs
                                         </span>
                                     </div>
@@ -777,14 +790,14 @@ export default function StudentManagement() {
                                 {/* Last entry */}
                                 <div className="flex flex-col">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="font-medium">
+                                        <span className="font-medium dark:text-white">
                                             Último Ingreso
                                         </span>
                                         <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
                                             Ver Historial
                                         </button>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 dark:text-white">
                                         <span>{accountInfo.lastEntryDate}</span>
                                         <span>{accountInfo.lastEntryTime}</span>
                                     </div>
@@ -793,14 +806,14 @@ export default function StudentManagement() {
                                 {/* Last payment */}
                                 <div className="flex flex-col">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="font-medium">
+                                        <span className="font-medium dark:text-white">
                                             Último Pago Cuota
                                         </span>
                                         <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
                                             Ver Historial
                                         </button>
                                     </div>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between dark:text-white">
                                         <span>
                                             {accountInfo.lastPaymentDate}
                                         </span>
@@ -818,13 +831,11 @@ export default function StudentManagement() {
 
                             {/* Action buttons */}
                             <div className="flex justify-end mt-4 gap-2">
-                                <Link href={'/admin/payments/create'}>
-                                    <Button className="bg-green-600 hover:bg-green-700 flex items-center gap-2">
-                                        <DollarSign className="h-5 w-5" />
-                                        Cobrar Cuota
-                                    </Button>
-                                </Link>
-                                <Button className="bg-purple-600 hover:bg-purple-700">
+                                <Button className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
+                                    <DollarSign className="h-5 w-5" />
+                                    Cobrar Cuota
+                                </Button>
+                                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                                     Otros Abonos
                                 </Button>
                             </div>
@@ -835,7 +846,7 @@ export default function StudentManagement() {
                 {/* Mobile new student button */}
                 <div className="sm:hidden flex justify-center mt-6">
                     <Link href="/admin/students/create" className="w-full">
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                             <Plus className="mr-2 h-4 w-4" />
                             Nuevo Alumno
                         </Button>
