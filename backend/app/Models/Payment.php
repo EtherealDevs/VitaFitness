@@ -23,7 +23,7 @@ class Payment extends Model
     }
     public function comprobante()
     {
-        return $this->hasOne(Image::class, 'imageable', 'id')->where('imageable_type', 'App\Models\Payment');
+        return $this->hasOne(Image::class, 'imageable_id', 'id')->where('imageable_type', 'App\Models\Payment');
     }
 
     public function student()

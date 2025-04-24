@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,7 +43,41 @@ class PaymentController extends Controller
             'expiration_date' => 'required|date',
         ]);
         try {
-            $payment = Payment::create($request->all());
+            // Check if payment already exists. If it does, create new payment taking into account the expiration date of previous payment, adding the leftover days to the new payment
+            // $previousPayment = Payment::where('student_id', $request->student_id)
+            //     ->where('classSchedule_id', $request->classSchedule_id)
+            //     ->where('expiration_date', '>=', now())
+            //     ->latest('expiration_date')
+            //     ->first();
+            //     if ($previousPayment) {
+            //         $oldExpiration = Carbon::parse($previousPayment->expiration_date);
+                    
+            //         // New expiration = old expiration + 1 month
+            //         $newExpiration = $oldExpiration->copy()->addMonth();
+                    
+            //         $newPayment = Payment::create([
+            //             'student_id' => $request->student_id,
+            //             'class_schedule_id' => $request->classSchedule_id,
+            //             'date_start' => $request->date_start,
+            //             'amount' => $request->amount,
+            //             'status' => $request->status,
+            //             'payment_date' => $request->payment_date,
+            //             'expiration_date' => $newExpiration->toDateString(),
+            //         ]);
+            //     } else {
+            //         // No previous payment, use the requested expiration_date as-is
+            //         $newPayment = Payment::create([
+            //             'student_id' => $request->student_id,
+            //             'class_schedule_id' => $request->classSchedule_id,
+            //             'date_start' => $request->date_start,
+            //             'amount' => $request->amount,
+            //             'status' => $request->status,
+            //             'payment_date' => $request->payment_date,
+            //             'expiration_date' => $request->expiration_date,
+            //         ]);
+            //     }
+            $newPayment = Payment::create($request->all());
+            $payment = $newPayment;
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -146,13 +181,14 @@ class PaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function storeComprobante(Request $request, string $id)
+    public function storeComprobante(Request $request)
     {
         $request->validate([
             'comprobante' => 'required',
+            'payment_id' => 'required|exists:payments,id',
         ]);
         try {
-            $payment = Payment::find($id);
+            $payment = Payment::find($request->payment_id);
             $comprobante = $request->file('comprobante');
             $name = $payment->student->name . '_' .
                 $payment->student->last_name . '_' .
@@ -160,6 +196,8 @@ class PaymentController extends Controller
             $path = Storage::putFileAs('products', $comprobante, $name);
             $payment->comprobante()->create([
                 'url' => $path,
+                'imageable_id' => $payment->id,
+                'imageable_type' => 'App\Models\Payment',
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -167,7 +205,7 @@ class PaymentController extends Controller
         $payment = new PaymentResource($payment);
         $data = [
             'payment' => $payment,
-            'message' => 'Payment updated successfully',
+            'message' => 'Comprobante subido correctamente',
             'status' => 'success (200)'
         ];
         return response()->json($data, 200);

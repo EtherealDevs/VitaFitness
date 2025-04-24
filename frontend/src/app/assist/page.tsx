@@ -318,6 +318,7 @@ export default function Assists() {
 
         const attendance = getDayAttendance(day)
         const hasAttendance = !!attendance
+        const scheduledDays = attendance?.classSchedule.selectedDays
         const dayIsToday = isToday(day)
         const isSelected = selectedDay?.date === day
 

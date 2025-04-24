@@ -37,6 +37,16 @@ export const usePayments = () => {
             throw error
         }
     }, [])
+    const uploadComprobante = async (data: FormData) => {
+        await csrf() // Obtener CSRF antes de la creación
+        try {
+            const response = await axios.post('/api/upload/comprobante', data)
+            return response.data
+        } catch (error) {
+            console.error('Error al subir el comprobante', error)
+            throw error
+        }
+    }
 
     // Obtener todos los pagos
     const getPayments = useCallback(async () => {
@@ -136,5 +146,6 @@ export const usePayments = () => {
         getPaymentStudent,
         updatePaymentStudent,
         deletePayment,
+        uploadComprobante
     }
 }

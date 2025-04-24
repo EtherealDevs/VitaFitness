@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Home, CreditCard, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { Home, CreditCard, CheckCircle, AlertCircle, Clock, XCircle, ClockAlert } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/auth'
 import axios from '@/lib/axios'
@@ -9,14 +9,17 @@ import { Student } from '../admin/students/columns'
 import { Payment, usePayments } from '@/hooks/payments'
 
 interface PaymentSummary {
+    paidPayments: Payment[]
     isUpToDate: boolean
-    nextPaymentDate: string | null
-    nextPaymentAmount: number | null
-    nextPaymentClass: string | null
+    nextPayments: Payment[]
     totalPaid: number
     paymentHistory: Payment[]
 }
-
+// interface nextPayment {
+//     nextPaymentDate: string | null
+//     nextPaymentAmount: number | null
+//     nextPaymentClass: string | null
+// }
 // Format currency helper
 const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('es-AR', {
@@ -48,66 +51,6 @@ const getDaysRemaining = (dateString: string): number => {
     return diffDays
 }
 
-export const fetchPaymentData = async (
-    payments: Payment[],
-): Promise<PaymentSummary> => {
-    // Simula delay
-    await new Promise(resolve => setTimeout(resolve, 200))
-
-    // Filtra pagos con estado "pagado"
-    const paidPayments = payments.filter(
-        p => p.status.toLowerCase() === 'pagado',
-    )
-
-    // Total pagado
-    const totalPaid = paidPayments.reduce(
-        (sum, p) => sum + parseFloat(p.amount),
-        0,
-    )
-
-    // Ordenar por fecha de pago descendente
-    const sortedPayments = [...paidPayments].sort(
-        (a, b) =>
-            new Date(b.payment_date).getTime() -
-            new Date(a.payment_date).getTime(),
-    )
-
-    // Último pago realizado
-    const lastPayment = sortedPayments[0]
-
-    // Calcular próxima fecha de pago (usamos expiration_date como referencia)
-    const nextPaymentDate = lastPayment
-        ? new Date(new Date(lastPayment.expiration_date)).toISOString()
-        : null
-
-    // Información de la clase (si existe relación cargada)
-    const nextPaymentClass =
-        lastPayment?.classSchedule?.id || 'Sin clase asignada'
-
-    return {
-        isUpToDate: !!lastPayment,
-        nextPaymentDate,
-        nextPaymentAmount: lastPayment ? parseFloat(lastPayment.amount) : null,
-        nextPaymentClass,
-        totalPaid,
-        paymentHistory: paidPayments.map(p => ({
-            id: String(p.id),
-            date: p.payment_date,
-            amount: parseFloat(p.amount).toString(),
-            className: p.classSchedule?.id || 'Clase no disponible',
-            status: p.status.toLowerCase() === 'pagado' ? 'paid' : 'pendiente',
-            classSchedule: p.classSchedule || null,
-            classSchedule_id: p.classSchedule?.id || '',
-            student_id: p.student_id || '',
-            student: p.student || '',
-            expiration_date: p.expiration_date || '',
-            date_start: p.date_start || '', // Ensure date_start is always a string
-            payment_date: p.payment_date || '',
-            created_at: p.created_at || '',
-            updated_at: p.updated_at || '',
-        })),
-    }
-}
 
 export default function PaymentHistory() {
     // State variables
@@ -116,7 +59,7 @@ export default function PaymentHistory() {
     const [paymentData, setPaymentData] = useState<PaymentSummary | null>(null)
     // Removed unused 'payment' state variable
     const [student, setStudent] = useState<Student>()
-    const { getPaymentStudent } = usePayments()
+    const { getPaymentStudent, uploadComprobante } = usePayments()
     const { user } = useAuth()
 
     const fetchStudentData = async () => {
@@ -138,8 +81,6 @@ export default function PaymentHistory() {
     const fetchPaymentData = async (
         payments: Payment[],
     ): Promise<PaymentSummary> => {
-        await new Promise(resolve => setTimeout(resolve, 200))
-
         const paidPayments = payments.filter(
             p => p.status.toLowerCase() === 'pagado',
         )
@@ -162,33 +103,38 @@ export default function PaymentHistory() {
             const daysRemaining = getDaysRemaining(p.expiration_date)
             return daysRemaining >= 0
         })
+        console.log("upcoming payments")
+        console.log(upcomingPayments)
 
-        const nextPayment = upcomingPayments.sort(
+        // const nextPayment = upcomingPayments.sort(
+        //     (a, b) =>
+        //         new Date(a.expiration_date).getTime() -
+        //         new Date(b.expiration_date).getTime(),
+        // )[0]
+        const nextPayments = upcomingPayments.sort(
             (a, b) =>
                 new Date(a.expiration_date).getTime() -
                 new Date(b.expiration_date).getTime(),
-        )[0]
+        )
 
+        console.log("next payments")
+        console.log(nextPayments)
+        
         return {
+            paidPayments,
             isUpToDate: !payments.some(p => {
                 if (!p.expiration_date || p.status.toLowerCase() === 'pagado')
                     return false
                 return getDaysRemaining(p.expiration_date) < 0
             }),
-            nextPaymentDate: nextPayment?.expiration_date || null,
-            nextPaymentAmount: nextPayment
-                ? parseFloat(nextPayment.amount)
-                : null,
-            nextPaymentClass:
-                nextPayment?.classSchedule?.id || 'Sin clase asignada',
+            nextPayments: nextPayments,
             totalPaid,
-            paymentHistory: paidPayments.map(p => ({
+            paymentHistory: payments.map(p => ({
                 id: String(p.id),
                 date: p.payment_date,
                 amount: parseFloat(p.amount).toString(),
-                className: p.classSchedule?.id || 'Clase no disponible',
-                status:
-                    p.status.toLowerCase() === 'pagado' ? 'paid' : 'pendiente',
+                className: p.classSchedule?.class?.name || 'Clase no disponible',
+                status: p.status.toLowerCase(),
                 classSchedule: p.classSchedule || null,
                 classSchedule_id: p.classSchedule?.id || '',
                 student_id: p.student_id || '',
@@ -230,56 +176,164 @@ export default function PaymentHistory() {
     }, [student])
 
     // Get status details for next payment
-    const getNextPaymentStatus = () => {
-        if (!paymentData?.nextPaymentDate) return null
+    const getNextPaymentStatus = (payment: Payment) => {
+        if (!payment.expiration_date) return null
+            const daysRemaining = getDaysRemaining(payment.expiration_date)
 
-        const daysRemaining = getDaysRemaining(paymentData.nextPaymentDate)
-
-        if (daysRemaining < 0) {
-            return {
-                label: 'Pago vencido',
-                daysText: `Vencido hace ${Math.abs(daysRemaining)} días`,
-                colorClass: 'text-red-600 dark:text-red-400',
-                bgClass: 'bg-red-100 dark:bg-red-900/30',
-                icon: (
-                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                ),
+            if (payment.status === 'pendiente') {
+                return {
+                    label: 'Pago pendiente',
+                    daysText: `Pago pendiente a confirmación.`,
+                    colorClass: 'text-red-600 dark:text-red-400',
+                    bgClass: 'bg-red-100 dark:bg-red-900/30',
+                    icon: (
+                        <ClockAlert className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    ),
+                    nextPaymentDate: "---",
+                }
+            } else if (daysRemaining < 0) {
+                return {
+                    label: 'Pago vencido',
+                    daysText: `Vencido hace ${Math.abs(daysRemaining)} días`,
+                    colorClass: 'text-red-600 dark:text-red-400',
+                    bgClass: 'bg-red-100 dark:bg-red-900/30',
+                    icon: (
+                        <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    ),
+                    nextPaymentDate: payment.expiration_date,
+                }
+            } else if (daysRemaining === 0) {
+                return {
+                    label: 'Pago hoy',
+                    daysText: 'Vence hoy',
+                    colorClass: 'text-amber-600 dark:text-amber-400',
+                    bgClass: 'bg-amber-100 dark:bg-amber-900/30',
+                    icon: (
+                        <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    ),
+                    nextPaymentDate: payment.expiration_date,
+                }
+            } else if (daysRemaining <= 7) {
+                return {
+                    label: 'Próximo pago',
+                    daysText: `Vence en ${daysRemaining} días`,
+                    colorClass: 'text-amber-600 dark:text-amber-400',
+                    bgClass: 'bg-amber-100 dark:bg-amber-900/30',
+                    icon: (
+                        <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    ),
+                }
+            } else {
+                return {
+                    label: 'Próximo pago',
+                    daysText: `Vence en ${daysRemaining} días`,
+                    colorClass: 'text-green-600 dark:text-green-400',
+                    bgClass: 'bg-green-100 dark:bg-green-900/30',
+                    icon: (
+                        <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    ),
+                    nextPaymentDate: payment.expiration_date,
+                }
             }
-        } else if (daysRemaining === 0) {
-            return {
-                label: 'Pago hoy',
-                daysText: 'Vence hoy',
-                colorClass: 'text-amber-600 dark:text-amber-400',
-                bgClass: 'bg-amber-100 dark:bg-amber-900/30',
-                icon: (
-                    <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                ),
-            }
-        } else if (daysRemaining <= 7) {
-            return {
-                label: 'Próximo pago',
-                daysText: `Vence en ${daysRemaining} días`,
-                colorClass: 'text-amber-600 dark:text-amber-400',
-                bgClass: 'bg-amber-100 dark:bg-amber-900/30',
-                icon: (
-                    <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                ),
-            }
-        } else {
-            return {
-                label: 'Próximo pago',
-                daysText: `Vence en ${daysRemaining} días`,
-                colorClass: 'text-green-600 dark:text-green-400',
-                bgClass: 'bg-green-100 dark:bg-green-900/30',
-                icon: (
-                    <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
-                ),
-            }
-        }
     }
+    const calculateAvailableClasses = (paidPayments: Payment[]) => {
+        const availableClasses: Payment[] = []
+        const seenClassNames = new Set()
+    
+        paidPayments.forEach(payment => {
+            if (payment.status === 'pagado') {
+                const className = payment.classSchedule?.class?.name
+                if (className && !seenClassNames.has(className)) {
+                    seenClassNames.add(className)
+                    availableClasses.push(payment)
+                }
+            }
+        })
+    
+        return availableClasses
+    }
+    const renderNextPaymentStatus = (paymentData: any) => {
+        if (!paymentData?.nextPayments || paymentData.nextPayments.length === 0) {
+            return null;
+        }
+    
+        return paymentData.nextPayments
+            .filter(p => p.expiration_date)
+            .map((payment: Payment, index: number) => {
+                const nextPaymentStatus = getNextPaymentStatus(payment);
+                if (!nextPaymentStatus) return null;
 
-    const nextPaymentStatus = paymentData ? getNextPaymentStatus() : null
+                const renderUploadButton = () => {
+                if (payment.status === 'pendiente' || payment.status === 'rechazado') {
+                    return (
+                        <div className="pt-2 space-y-2">
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                                ¿Ya realizaste el pago?
+                            </p>
+                            <label
+                                htmlFor={`comprobante-${index}`}
+                                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 cursor-pointer transition">
+                                Cargar comprobante
+                            </label>
+                            <input
+                                id={`comprobante-${index}`}
+                                type="file"
+                                accept="image/*,.pdf"
+                                className="hidden"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        console.log('Archivo cargado:', file);
+                                        const formData = new FormData();
+                                        formData.append("comprobante", file);
+                                        formData.append("payment_id", payment.id);
+    
+                                        try {
+                                            const response = await uploadComprobante(formData);
+                                            const data = await response.json();
+                                            console.log("Archivo subido con éxito:", data);
+                                        } catch (err) {
+                                            console.error("Fallo en la carga:", err);
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                        )
+                    }
+                }
+    
+                return (
+                    <div
+                        key={index}
+                        className={`rounded-lg p-4 space-y-2 ${nextPaymentStatus.bgClass}`}>
+                        <div className="flex items-center gap-2">
+                            {nextPaymentStatus.icon}
+                            <h4 className={`font-semibold ${nextPaymentStatus.colorClass}`}>
+                                {nextPaymentStatus.label}
+                            </h4>
+                        </div>
+    
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                            {nextPaymentStatus.daysText}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Fecha de vencimiento:{' '}
+                            <span className="font-medium">
+                                {nextPaymentStatus.nextPaymentDate === "---" ? "No disponible" : formatDate(nextPaymentStatus.nextPaymentDate)}
+                            </span>
+                        </p>
+                        {renderUploadButton()}
+                        
+                    </div>
+                );
+            })
+            .filter(Boolean); // Remove any nulls from invalid statuses
+    };
 
+    
+    console.log(paymentData)
+    // console.log(nextPaymentStatus)
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 px-10 bg-black">
             {/* Blurred background effect */}
@@ -338,63 +392,13 @@ export default function PaymentHistory() {
                                         Clases activas
                                     </p>
                                     <p className="font-medium text-purple-600">
-                                        {paymentData.nextPaymentClass}
+                                        {calculateAvailableClasses(paymentData.paidPayments).map(payment => payment.classSchedule?.class?.name).join(', ')}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        {nextPaymentStatus && paymentData.nextPaymentDate && (
-                            <div
-                                className={`rounded-lg p-4 space-y-2 ${nextPaymentStatus.bgClass}`}>
-                                <div className="flex items-center gap-2">
-                                    {nextPaymentStatus.icon}
-                                    <h4
-                                        className={`font-semibold ${nextPaymentStatus.colorClass}`}>
-                                        {nextPaymentStatus.label}
-                                    </h4>
-                                </div>
-                                <p className="text-sm text-gray-700 dark:text-gray-300">
-                                    {nextPaymentStatus.daysText}
-                                </p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Fecha de vencimiento:{' '}
-                                    <span className="font-medium">
-                                        {formatDate(
-                                            paymentData.nextPaymentDate,
-                                        )}
-                                    </span>
-                                </p>
-
-                                {/* Pregunta al usuario */}
-                                <div className="pt-2 space-y-2">
-                                    <p className="text-sm text-gray-700 dark:text-gray-300">
-                                        ¿Ya realizaste el pago?
-                                    </p>
-                                    <label
-                                        htmlFor="comprobante"
-                                        className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 cursor-pointer transition">
-                                        Cargar comprobante
-                                    </label>
-                                    <input
-                                        id="comprobante"
-                                        type="file"
-                                        accept="image/*,.pdf"
-                                        className="hidden"
-                                        onChange={e => {
-                                            const file = e.target.files?.[0]
-                                            if (file) {
-                                                console.log(
-                                                    'Archivo cargado:',
-                                                    file,
-                                                )
-                                                // Aquí podrías enviar el archivo a tu backend
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        )}
+                        {renderNextPaymentStatus(paymentData)}
 
                         {/* Payment History */}
                         <div className="space-y-3">
@@ -409,12 +413,20 @@ export default function PaymentHistory() {
                                             key={payment.id}
                                             className="bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg">
                                             <div className="flex justify-between items-center mb-2">
-                                                <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium rounded-md">
-                                                    {
-                                                        payment.classSchedule
-                                                            ?.class?.id
-                                                    }
-                                                </span>
+                                            <span
+                                                className={`px-2 py-1 text-sm font-medium rounded-md
+                                                    ${
+                                                        payment.status === 'pagado'
+                                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                                            : payment.status === 'pendiente'
+                                                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                                                            : payment.status === 'rechazado'
+                                                            ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                                                    }`}
+                                            >
+                                                {payment.classSchedule?.class?.name}
+                                            </span>
                                                 <span className="text-sm text-gray-500 font-medium">
                                                     {formatDate(
                                                         payment.payment_date,
@@ -423,9 +435,17 @@ export default function PaymentHistory() {
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+
+                                                    {payment.status === 'pagado' ? (
+                                                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                    ) : payment.status === 'pendiente' ? (
+                                                        <ClockAlert className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                                    ) : payment.status === 'rechazado' ? (
+                                                        <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                                    ) : null}
+
                                                     <span className="text-sm text-gray-600 dark:text-gray-300">
-                                                        Pagado
+                                                        {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
                                                     </span>
                                                 </div>
                                                 <span className="font-semibold text-gray-700">

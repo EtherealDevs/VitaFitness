@@ -26,9 +26,10 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     // User::find($user->id);
     return $user;
 });
-Route::get('/attendances/getAllForCurrent', [AttendanceController::class, 'getAllAttendancesForCurrentStudent']);
-Route::apiResource('attendances', AttendanceController::class);
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/upload/comprobante', [PaymentController::class, 'storeComprobante']);
+    Route::get('/attendances/getAllForCurrent', [AttendanceController::class, 'getAllAttendancesForCurrentStudent']);
+    Route::apiResource('attendances', AttendanceController::class);
     Route::apiResource('students', StudentController::class);
     Route::apiResource('branches', BranchController::class)->except(['index', 'show']);
     Route::apiResource('teachers', TeacherController::class);
