@@ -100,6 +100,7 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+        $payment->load('comprobante');
         $payment = new PaymentResource($payment);
         $data = [
             'payment' => $payment,
@@ -192,7 +193,7 @@ class PaymentController extends Controller
             $comprobante = $request->file('comprobante');
             $name = $payment->student->name . '_' .
                 $payment->student->last_name . '_' .
-                $payment->student->dni . '_' . $payment->expiration_date;
+                $payment->student->dni . '_' . $payment->expiration_date . '.' . $comprobante->getClientOriginalExtension();
             $path = Storage::putFileAs('comprobantes', $comprobante, $name);
             $payment->comprobante()->create([
                 'url' => $path,
@@ -209,6 +210,16 @@ class PaymentController extends Controller
             'status' => 'success (200)'
         ];
         return response()->json($data, 200);
+    }
+    public function downloadComprobante($filename)
+    {
+
+
+        if (!Storage::disk('public')->exists($filename)) {
+            abort(404);
+        }
+
+        return response()->download(storage_path("app/public/{$filename}"));
     }
 
     /**

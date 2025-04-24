@@ -177,7 +177,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                                     value={form.student_id}
                                     onChange={handleChange}
                                     required
-                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-zinc-950 text-black dark:text-white">
+                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-[#393d40] text-black dark:text-white">
                                     <option value="">Seleccionar alumno</option>
                                     {students.map(student => (
                                         <option
@@ -195,7 +195,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                                     value={form.classSchedule_id}
                                     onChange={handleChange}
                                     required
-                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-zinc-950 text-black dark:text-white">
+                                    className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-300 bg-white dark:bg-[#393d40] text-black dark:text-white">
                                     <option value="">Seleccionar clase</option>
 
                                     {/* Si aún no se ha cargado el schedule completo, mostrar esta opción temporal */}
@@ -226,7 +226,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Monto</Label>
                                 <Input
-                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-transparent"
+                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-[#393d40]"
                                     name="amount"
                                     type="number"
                                     value={form.amount}
@@ -237,7 +237,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Estado</Label>
                                 <Input
-                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-transparent"
+                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-[#393d40]"
                                     name="status"
                                     value={form.status}
                                     onChange={handleChange}
@@ -247,7 +247,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Fecha de inicio</Label>
                                 <Input
-                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-transparent"
+                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-[#393d40]"
                                     name="date_start"
                                     type="date"
                                     value={form.date_start}
@@ -258,7 +258,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Fecha de pago</Label>
                                 <Input
-                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-transparent"
+                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-[#393d40]"
                                     name="payment_date"
                                     type="date"
                                     value={form.payment_date}
@@ -269,7 +269,7 @@ export default function EditPayment({ params }: EditPaymentProps) {
                             <div>
                                 <Label>Fecha de expiración</Label>
                                 <Input
-                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-transparent"
+                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-[#393d40]"
                                     name="expiration_date"
                                     type="date"
                                     value={form.expiration_date}

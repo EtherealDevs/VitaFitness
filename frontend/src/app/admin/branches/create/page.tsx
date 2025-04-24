@@ -100,7 +100,7 @@ export default function CreateBranchPage() {
                                             </span>
                                         </Label>
                                         <Input
-                                            className=" p-2 border rounded-lg dark:border-gray-400 dark:bg-gray-300"
+                                            className=" p-2 border rounded-lg dark:border-gray-400 dark:bg-[#393d40]"
                                             type="text"
                                             name="name"
                                             id="name"
@@ -130,7 +130,7 @@ export default function CreateBranchPage() {
                                                 setAddress(e.target.value)
                                             }
                                             placeholder="Dirección completa de la sucursal"
-                                            className="min-h-[80px]"
+                                            className="min-h-[80px] dark:bg-[#393d40]"
                                             required
                                         />
                                     </div>

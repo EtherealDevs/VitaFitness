@@ -7,6 +7,7 @@ import { Schedule } from './schedules'
 export interface Class {
     id: string
     max_students: number
+    name?: string
     precio: number
     branch_id?: string
     plan_id?: string

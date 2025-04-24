@@ -131,7 +131,7 @@ export default function EditPlanPage() {
                                 name="status"
                                 value={formData.status}
                                 onChange={handleChange}
-                                className="mt-1 block w-full border rounded-md shadow-sm p-2 text-sm dark:bg-gray-300 ">
+                                className="mt-1 block w-full border rounded-md shadow-sm p-2 text-sm dark:dark:bg-[#393d40]">
                                 <option value="activo">Activo</option>
                                 <option value="inactivo">Inactivo</option>
                             </select>
@@ -196,7 +196,7 @@ const TextareaField = ({
             name={name}
             value={value}
             onChange={onChange}
-            className="resize-none"
+            className="resize-none dark:bg-[#393d40]"
         />
         {error && <p className="text-sm text-red-500">{error[0]}</p>}
     </div>

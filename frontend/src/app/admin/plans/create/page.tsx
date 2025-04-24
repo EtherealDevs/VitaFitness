@@ -71,6 +71,7 @@ export default function CreatePlan() {
                             <Textarea
                                 id="description"
                                 name="description"
+                                className="dark:bg-[#393d40]"
                                 value={plan.description}
                                 onChange={handleTextareaChange}
                             />
@@ -82,7 +83,7 @@ export default function CreatePlan() {
                                 name="status"
                                 value={plan.status}
                                 onChange={handleChange}
-                                className="mt-1 block w-full dark:bg-gray-200 border rounded-md shadow-sm p-2 text-sm ">
+                                className="mt-1 block w-full dark:bg-[#393d40] border rounded-md shadow-sm p-2 text-sm ">
                                 <option value="activo">Activo</option>
                                 <option value="inactivo">Inactivo</option>
                             </select>

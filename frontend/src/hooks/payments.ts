@@ -7,8 +7,8 @@ import { Class } from './classes'
 export interface ClassSchedule {
     id: string
     class: Class
-    start_time: string
-    end_time: string
+    time_start: string
+    time_end: string
     schedule: Schedule
     selectedDays: [string]
 }
@@ -146,6 +146,6 @@ export const usePayments = () => {
         getPaymentStudent,
         updatePaymentStudent,
         deletePayment,
-        uploadComprobante
+        uploadComprobante,
     }
 }
