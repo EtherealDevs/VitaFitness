@@ -51,10 +51,10 @@ class PaymentController extends Controller
             //     ->first();
             //     if ($previousPayment) {
             //         $oldExpiration = Carbon::parse($previousPayment->expiration_date);
-                    
+
             //         // New expiration = old expiration + 1 month
             //         $newExpiration = $oldExpiration->copy()->addMonth();
-                    
+
             //         $newPayment = Payment::create([
             //             'student_id' => $request->student_id,
             //             'class_schedule_id' => $request->classSchedule_id,
@@ -193,7 +193,7 @@ class PaymentController extends Controller
             $name = $payment->student->name . '_' .
                 $payment->student->last_name . '_' .
                 $payment->student->dni . '_' . $payment->expiration_date;
-            $path = Storage::putFileAs('products', $comprobante, $name);
+            $path = Storage::putFileAs('comprobantes', $comprobante, $name);
             $payment->comprobante()->create([
                 'url' => $path,
                 'imageable_id' => $payment->id,
