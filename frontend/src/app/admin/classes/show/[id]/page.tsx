@@ -1,14 +1,15 @@
 'use client'
 
-import { ChevronRight, ChevronDown } from 'lucide-react'
-import { useBranches } from '@/hooks/branches'
-import { useClasses } from '@/hooks/classes'
-import { usePlans } from '@/hooks/plans'
-import { useClassStudents } from '@/hooks/classStudents'
-import { useClassTeachers } from '@/hooks/classTeachers'
-import { useRouter } from 'next/navigation'
+import {
+    ChevronRight,
+    ChevronDown,
+    Plus,
+    Trash2,
+    UserPlus,
+    Clock,
+    UserX,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { use } from 'react'
 
 interface Timeslot {
     id: number
@@ -74,236 +75,6 @@ interface Teacher {
     phone: string
     dni: string
 }
-
-// export default function ShowClassPage({
-//     params,
-// }: {
-//     params: Promise<{ id: string }>
-// }) {
-//     const { id } = use(params)
-
-//     const { getClass, deleteClass, updateClass } = useClasses()
-//     const { getBranches } = useBranches()
-//     const { getPlans } = usePlans()
-//     const { updateClassStudent, deleteClassStudent, createClassStudent } =
-//         useClassStudents()
-//     const { updateClassTeacher, deleteClassTeacher, createClassTeacher } =
-//         useClassTeachers()
-
-//     const [classData, setClassData] = useState<Class>()
-//     const [branches, setBranches] = useState<Branch[]>([])
-//     const [plans, setPlans] = useState<Plan[]>([])
-//     const [students, setStudents] = useState<Student[]>([])
-
-//     const [selectedAddableStudent, setSelectedAddableStudent] = useState<string>("");
-//     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-//         setSelectedAddableStudent(event.target.value);
-//     };
-
-//     const fetchClasses = async () => {
-//         try {
-//             const response = await getClass(id as string)
-//             setClassData(response.classe)
-//         } catch (error) {
-//             console.error(error)
-//         }
-//     }
-//     useEffect(() => {
-//         fetchClasses()
-//     }, [getClass])
-
-//     const fetchBranches = async () => {
-//         try {
-//             const response = await getBranches()
-//             setBranches(response.branches)
-//         } catch (error) {
-//             console.error(error)
-//         }
-//     }
-//     useEffect(() => {
-//         fetchBranches()
-//     }, [getBranches])
-//     const fetchPlans = async () => {
-//         try {
-//             const response = await getPlans()
-//             setPlans(response.plans)
-//         } catch (error) {
-//             console.error(error)
-//         }
-//     }
-//     useEffect(() => {
-//         fetchPlans()
-//     }, [getPlans])
-//     // const fetchStudents = async () => {
-//     //     try {
-//     //         const response = await getStudents()
-//     //         setStudents(response.students)
-//     //     } catch (error) {
-//     //         console.error(error)
-//     //     }
-//     // }
-//     // useEffect(() => {
-//     //     fetchStudents()
-//     // }, [getStudents])
-//     const fetchAllData = async () => {
-//         await fetchClasses()
-//         await fetchBranches()
-//         await fetchPlans()
-//         // await fetchStudents()
-//     }
-//     const handleSubmit = (e: React.FormEvent) => {
-//         e.preventDefault()
-//         console.log(classData)
-//     }
-//     const removeStudent = async (classStudent: ClassStudent) => {
-//         try {
-//             const res = await deleteClassStudent(classStudent.id)
-//             console.log(classStudent)
-//             console.log(res)
-//         } catch (error) {
-//             console.error(error)
-//         }
-//         fetchAllData()
-//     }
-//     // const addStudent = async (timeslot: Timeslot) => {
-//     //     let student_id = selectedAddableStudent
-//     //     let classTimeslot = timeslot
-//     //     const formData = new FormData()
-//     //     formData.append('students[]', student_id)
-//     //     formData.append('c_sch_ts_id', String(classTimeslot.id))
-//     //     try {
-//     //         const res = await createClassStudent(formData)
-//     //         console.log(res)
-//     //     } catch (error) {
-//     //         console.error(error)
-//     //     }
-//     //     fetchAllData();
-//     // }
-
-//     return (
-//         <div>
-//             <h1>Show Class Page</h1>
-//             <form onSubmit={handleSubmit}>
-//                 <div>
-//                     <h2>Clase</h2>
-//                     <label htmlFor="max_students">
-//                         Máximo de estudiantes:
-//                         <input type="text" value={classData?.max_students} />
-//                     </label>
-//                     <label htmlFor="plan_id">
-//                         Plan:
-//                         <select name="plan_id" id="plan_id">
-//                             <option value="">Seleccionar plan</option>
-//                             {plans.map((plan, index) => {
-//                                 var selected = false
-//                                 if (plan.name == classData?.plan.name) {
-//                                     selected = true
-//                                 }
-//                                 return (
-//                                     <option
-//                                         selected={selected}
-//                                         key={index}
-//                                         value={plan.id}>
-//                                         {plan.name}
-//                                     </option>
-//                                 )
-//                             })}
-//                         </select>
-//                     </label>
-//                     <label htmlFor="branch_id">
-//                         Sucursal:
-//                         <select name="branch_id" id="branch_id">
-//                             <option value="">Seleccionar sucursal</option>
-//                             {branches.map((branch, index) => {
-//                                 var selected = false
-//                                 if (branch.name == classData?.branch.name) {
-//                                     selected = true
-//                                 }
-//                                 return (
-//                                     <option
-//                                         selected={selected}
-//                                         key={index}
-//                                         value={branch.id}>
-//                                         {branch.name}
-//                                     </option>
-//                                 )
-//                             })}
-//                         </select>
-//                     </label>
-//                     <label htmlFor="precio">
-//                         Precio:
-//                         <input
-//                             type="number"
-//                             step={1}
-//                             defaultValue={classData?.precio}
-//                         />
-//                     </label>
-//                 </div>
-//                 <div>
-//                     <h2>Horarios</h2>
-//                     {classData?.schedules.map((schedule, index) => {
-//                         return (
-//                             <div key={index}>
-//                                 <p>{schedule.selectedDays?.join(', ')}</p>
-//                                 {schedule.timeslots?.map((timeslot, index) => {
-//                                     return (
-//                                         <p key={index}>
-//                                             {timeslot.hour} - Estudiantes:{' '}
-//                                             {timeslot.classStudents.map(
-//                                                 (classStudent, index) => {
-//                                                     return (
-//                                                         <span key={index}>
-//                                                             {
-//                                                                 classStudent
-//                                                                     .student
-//                                                                     ?.name
-//                                                             }
-//                                                             <button
-//                                                                 onClick={() =>
-//                                                                     removeStudent(
-//                                                                         classStudent,
-//                                                                     )
-//                                                                 }>
-//                                                                 Eliminar
-//                                                             </button>
-//                                                         </span>
-//                                                     )
-//                                                 },
-//                                             )}{' '}
-//                                             - Profesores:{' '}
-//                                             {timeslot.classTeachers.map(
-//                                                 (classTeacher, index) => {
-//                                                     return (
-//                                                         <span key={index}>
-//                                                             {
-//                                                                 classTeacher
-//                                                                     .teacher
-//                                                                     ?.name
-//                                                             }
-//                                                         </span>
-//                                                     )
-//                                                 },
-//                                             )}
-//                                         </p>
-//                                     )
-//                                 })}
-//                             </div>
-//                         )
-//                     })}
-//                     {/* <button onClick={addTeacher}>Agregar profesor</button>
-//                     <button onClick={() => removeTeacher(teacher)}>Eliminar</button> */}
-//                 </div>
-//             </form>
-//         </div>
-//     )
-// }
-
-// 'use client'
-
-// import { useState, useEffect } from 'react'
-// import { ChevronRight, ChevronDown } from 'lucide-react'
-
-// Types for our schedule data
 interface TimeSlot {
     time: string
     students: string[]
@@ -423,6 +194,10 @@ export default function AdminSchedulePanel() {
     const [error, setError] = useState<string | null>(null)
     const [selectedDay, setSelectedDay] = useState<string | null>(null)
     const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false)
+    const [expandedTimeSlots, setExpandedTimeSlots] = useState<
+        Record<string, boolean>
+    >({})
+    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
 
     // Fetch schedule data
     useEffect(() => {
@@ -477,8 +252,67 @@ export default function AdminSchedulePanel() {
         return scheduleData.find(schedule => schedule.day === selectedDay)
     }
 
+    // Toggle time slot expansion
+    const toggleTimeSlot = (timeSlotId: string) => {
+        setExpandedTimeSlots(prev => ({
+            ...prev,
+            [timeSlotId]: !prev[timeSlotId],
+        }))
+    }
+
+    // Handle deletion of items
+    const handleDelete = (
+        type: 'timeslot' | 'student' | 'professor',
+        dayIndex: number,
+        slotIndex: number,
+        itemIndex?: number,
+    ) => {
+        // Create a deep copy of the schedule data
+        const newScheduleData = JSON.parse(JSON.stringify(scheduleData))
+
+        if (type === 'timeslot') {
+            // Remove the entire timeslot
+            newScheduleData[dayIndex].timeSlots.splice(slotIndex, 1)
+        } else if (type === 'student' && itemIndex !== undefined) {
+            // Remove a specific student
+            newScheduleData[dayIndex].timeSlots[slotIndex].students.splice(
+                itemIndex,
+                1,
+            )
+        } else if (type === 'professor' && itemIndex !== undefined) {
+            // Remove a specific professor
+            newScheduleData[dayIndex].timeSlots[slotIndex].professors.splice(
+                itemIndex,
+                1,
+            )
+        }
+
+        setScheduleData(newScheduleData)
+
+        // Show confirmation message
+        alert(`Elemento eliminado correctamente`)
+    }
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement
+            if (isMenuOpen && !target.closest('.admin-menu-container')) {
+                setIsMenuOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [isMenuOpen])
+
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4">
+        <div className="min-h-screen w-full flex flex-col items-center justify-start p-4">
+            <h2 className="text-2xl font-bold text-center mb-6 text-purple-700 dark:text-purple-400">
+                Ver Clases y Horarios
+            </h2>
             {/* Main container with responsive behavior */}
             <div
                 className={`relative z-10 flex flex-col md:flex-row w-full max-w-4xl transition-all duration-300 ease-in-out
@@ -532,81 +366,250 @@ export default function AdminSchedulePanel() {
                             <h2 className="text-xl font-semibold mb-4">
                                 Horarios
                             </h2>
+                            <div className="flex justify-end mb-4">
+                                <div className="relative inline-block admin-menu-container">
+                                    <button
+                                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                                        onClick={() =>
+                                            setIsMenuOpen(!isMenuOpen)
+                                        }>
+                                        <span>Administrar</span>
+                                        <ChevronDown className="h-4 w-4" />
+                                    </button>
+
+                                    {isMenuOpen && (
+                                        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 border border-gray-200 dark:border-gray-700">
+                                            <div className="py-1">
+                                                <button
+                                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                    onClick={() => {
+                                                        setIsMenuOpen(false)
+                                                        alert(
+                                                            'Agregar horario - Funcionalidad a implementar',
+                                                        )
+                                                    }}>
+                                                    <Clock className="h-4 w-4" />
+                                                    <span>Agregar horario</span>
+                                                </button>
+                                                <button
+                                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                    onClick={() => {
+                                                        setIsMenuOpen(false)
+                                                        alert(
+                                                            'Agregar estudiante - Funcionalidad a implementar',
+                                                        )
+                                                    }}>
+                                                    <UserPlus className="h-4 w-4" />
+                                                    <span>
+                                                        Agregar estudiante
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                    onClick={() => {
+                                                        setIsMenuOpen(false)
+                                                        alert(
+                                                            'Agregar profesor - Funcionalidad a implementar',
+                                                        )
+                                                    }}>
+                                                    <Plus className="h-4 w-4" />
+                                                    <span>
+                                                        Agregar profesor
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
                             {selectedDay && getSelectedDaySchedule() ? (
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                     {getSelectedDaySchedule()?.timeSlots.map(
-                                        (slot, index) => (
-                                            <div
-                                                key={index}
-                                                className="space-y-2">
-                                                <h3 className="font-medium text-purple-700 dark:text-purple-400">
-                                                    {slot.time}
-                                                </h3>
+                                        (slot, index) => {
+                                            const timeSlotId = `${selectedDay}-${slot.time}-${index}`
+                                            const isExpanded =
+                                                expandedTimeSlots[timeSlotId] ||
+                                                false
+                                            const dayIndex =
+                                                scheduleData.findIndex(
+                                                    day =>
+                                                        day.day === selectedDay,
+                                                )
 
-                                                <div>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                        Estudiantes:
-                                                    </p>
-                                                    {slot.students.length >
-                                                    0 ? (
-                                                        <ul className="pl-4">
-                                                            {slot.students.map(
-                                                                (
-                                                                    student,
-                                                                    idx,
-                                                                ) => (
-                                                                    <li
-                                                                        key={
-                                                                            idx
-                                                                        }
-                                                                        className="text-gray-800 dark:text-gray-200">
-                                                                        {
-                                                                            student
-                                                                        }
-                                                                    </li>
-                                                                ),
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                                                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                                                        <div
+                                                            className="flex-1"
+                                                            onClick={() =>
+                                                                toggleTimeSlot(
+                                                                    timeSlotId,
+                                                                )
+                                                            }>
+                                                            <h3 className="font-medium text-purple-700 dark:text-purple-400">
+                                                                {slot.time}
+                                                            </h3>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                                                onClick={() => {
+                                                                    if (
+                                                                        confirm(
+                                                                            '¿Estás seguro de que deseas eliminar este horario?',
+                                                                        )
+                                                                    ) {
+                                                                        handleDelete(
+                                                                            'timeslot',
+                                                                            dayIndex,
+                                                                            index,
+                                                                        )
+                                                                    }
+                                                                }}
+                                                                title="Eliminar horario">
+                                                                <Trash2 className="h-4 w-4" />
+                                                                <span className="sr-only">
+                                                                    Eliminar
+                                                                    horario
+                                                                </span>
+                                                            </button>
+                                                            {isExpanded ? (
+                                                                <ChevronDown
+                                                                    className="h-5 w-5 text-purple-600 dark:text-purple-400"
+                                                                    onClick={() =>
+                                                                        toggleTimeSlot(
+                                                                            timeSlotId,
+                                                                        )
+                                                                    }
+                                                                />
+                                                            ) : (
+                                                                <ChevronRight
+                                                                    className="h-5 w-5 text-purple-600 dark:text-purple-400"
+                                                                    onClick={() =>
+                                                                        toggleTimeSlot(
+                                                                            timeSlotId,
+                                                                        )
+                                                                    }
+                                                                />
                                                             )}
-                                                        </ul>
-                                                    ) : (
-                                                        <p className="text-gray-500 dark:text-gray-400 italic">
-                                                            - Sin estudiantes -
-                                                        </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {isExpanded && (
+                                                        <div className="p-4 space-y-3">
+                                                            <div>
+                                                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                                    Estudiantes:
+                                                                </p>
+                                                                {slot.students
+                                                                    .length >
+                                                                0 ? (
+                                                                    <ul className="pl-4">
+                                                                        {slot.students.map(
+                                                                            (
+                                                                                student,
+                                                                                idx,
+                                                                            ) => (
+                                                                                <li
+                                                                                    key={
+                                                                                        idx
+                                                                                    }
+                                                                                    className="text-gray-800 dark:text-gray-200 flex items-center justify-between group">
+                                                                                    <span>
+                                                                                        {
+                                                                                            student
+                                                                                        }
+                                                                                    </span>
+                                                                                    <button
+                                                                                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors opacity-0 group-hover:opacity-100"
+                                                                                        onClick={() =>
+                                                                                            handleDelete(
+                                                                                                'student',
+                                                                                                dayIndex,
+                                                                                                index,
+                                                                                                idx,
+                                                                                            )
+                                                                                        }
+                                                                                        title="Eliminar estudiante">
+                                                                                        <UserX className="h-3.5 w-3.5" />
+                                                                                        <span className="sr-only">
+                                                                                            Eliminar
+                                                                                            estudiante
+                                                                                        </span>
+                                                                                    </button>
+                                                                                </li>
+                                                                            ),
+                                                                        )}
+                                                                    </ul>
+                                                                ) : (
+                                                                    <p className="text-gray-500 dark:text-gray-400 italic">
+                                                                        - Sin
+                                                                        estudiantes
+                                                                        -
+                                                                    </p>
+                                                                )}
+                                                            </div>
+
+                                                            <div>
+                                                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                                    Profesores:
+                                                                </p>
+                                                                {slot.professors
+                                                                    .length >
+                                                                0 ? (
+                                                                    <ul className="pl-4">
+                                                                        {slot.professors.map(
+                                                                            (
+                                                                                professor,
+                                                                                idx,
+                                                                            ) => (
+                                                                                <li
+                                                                                    key={
+                                                                                        idx
+                                                                                    }
+                                                                                    className="text-gray-800 dark:text-gray-200 flex items-center justify-between group">
+                                                                                    <span>
+                                                                                        {
+                                                                                            professor
+                                                                                        }
+                                                                                    </span>
+                                                                                    <button
+                                                                                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors opacity-0 group-hover:opacity-100"
+                                                                                        onClick={() =>
+                                                                                            handleDelete(
+                                                                                                'professor',
+                                                                                                dayIndex,
+                                                                                                index,
+                                                                                                idx,
+                                                                                            )
+                                                                                        }
+                                                                                        title="Eliminar profesor">
+                                                                                        <UserX className="h-3.5 w-3.5" />
+                                                                                        <span className="sr-only">
+                                                                                            Eliminar
+                                                                                            profesor
+                                                                                        </span>
+                                                                                    </button>
+                                                                                </li>
+                                                                            ),
+                                                                        )}
+                                                                    </ul>
+                                                                ) : (
+                                                                    <p className="text-gray-500 dark:text-gray-400 italic">
+                                                                        - Sin
+                                                                        profesores
+                                                                        -
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
                                                     )}
                                                 </div>
-
-                                                <div>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                        Profesores:
-                                                    </p>
-                                                    {slot.professors.length >
-                                                    0 ? (
-                                                        <ul className="pl-4">
-                                                            {slot.professors.map(
-                                                                (
-                                                                    professor,
-                                                                    idx,
-                                                                ) => (
-                                                                    <li
-                                                                        key={
-                                                                            idx
-                                                                        }
-                                                                        className="text-gray-800 dark:text-gray-200">
-                                                                        {
-                                                                            professor
-                                                                        }
-                                                                    </li>
-                                                                ),
-                                                            )}
-                                                        </ul>
-                                                    ) : (
-                                                        <p className="text-gray-500 dark:text-gray-400 italic">
-                                                            - Sin profesores -
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ),
+                                            )
+                                        },
                                     )}
                                 </div>
                             ) : (
