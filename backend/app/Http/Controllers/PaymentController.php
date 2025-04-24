@@ -16,7 +16,7 @@ class PaymentController extends Controller
     public function index()
     {
         try {
-            $payments = Payment::with(['student', 'classSchedule'])->get();
+            $payments = Payment::with(['student', 'classSchedule', 'comprobante'])->get();
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -96,7 +96,7 @@ class PaymentController extends Controller
     public function show(string $id)
     {
         try {
-            $payment = Payment::with(['student', 'classSchedule'])->find($id);
+            $payment = Payment::with(['student', 'classSchedule', 'comprobante'])->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -191,9 +191,7 @@ class PaymentController extends Controller
         try {
             $payment = Payment::find($request->payment_id);
             $comprobante = $request->file('comprobante');
-            $name = $payment->student->name . '_' .
-                $payment->student->last_name . '_' .
-                $payment->student->dni . '_' . $payment->expiration_date . '.' . $comprobante->getClientOriginalExtension();
+            $name = $payment->student->id . '_' . $payment->expiration_date . '.' . $comprobante->getClientOriginalExtension();
             $path = Storage::putFileAs('comprobantes', $comprobante, $name);
             $payment->comprobante()->create([
                 'url' => $path,

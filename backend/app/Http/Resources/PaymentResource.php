@@ -14,13 +14,17 @@ class PaymentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $comprobante = null;
+        if ($this->whenLoaded('comprobante')) {
+            $comprobante = asset('storage/' . $this->comprobante->url);
+        }
         return [
             'id' => $this->id,
             'student_id' => $this->student_id,
             'student' => new StudentResource($this->whenLoaded('student')),
             'classSchedule_id' => $this->classSchedule_id,
             'classSchedule' => new ClassScheduleResource($this->whenLoaded('classSchedule')),
-            'comprobante' => asset('storage/' . $this->whenLoaded('comprobante')->url),
+            'comprobante' => $comprobante,
             'date_start' => $this->date_start,
             'amount' => $this->amount,
             'status' => $this->status,

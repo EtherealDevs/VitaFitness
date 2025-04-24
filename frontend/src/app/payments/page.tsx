@@ -150,6 +150,7 @@ export default function PaymentHistory() {
                 expiration_date: p.expiration_date || '',
                 date_start: p.date_start || '',
                 payment_date: p.payment_date || '',
+                comprobante: p.comprobante || '',
                 created_at: p.created_at || '',
                 updated_at: p.updated_at || '',
             })),
@@ -351,7 +352,7 @@ export default function PaymentHistory() {
                             Fecha de vencimiento:{' '}
                             <span className="font-medium">
                                 {nextPaymentStatus.nextPaymentDate === '---'
-                                    ? 'No disponible'
+                                    ? 'Se define al aprobarse el pago'
                                     : formatDate(
                                           nextPaymentStatus.nextPaymentDate,
                                       )}

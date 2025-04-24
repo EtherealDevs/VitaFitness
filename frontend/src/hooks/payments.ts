@@ -23,6 +23,7 @@ export interface Payment {
     status: string
     payment_date: string
     expiration_date: string
+    comprobante: string
     created_at: string
     updated_at: string
 }
