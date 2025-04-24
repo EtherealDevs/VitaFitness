@@ -39,7 +39,7 @@ export default function BranchesPage() {
     const router = useRouter()
     const [searchTerm, setSearchTerm] = useState('')
     const [branches, setBranches] = useState<Branch[]>([])
-    const { getBranches } = useBranches()
+    const { getBranches, deleteBranch } = useBranches()
 
     useEffect(() => {
         async function fetchBranches() {
@@ -56,12 +56,28 @@ export default function BranchesPage() {
     )
 
     const handleDelete = (id: string) => {
-        setBranches(branches.filter(branch => branch.id !== id))
-        toast({
-            title: 'Sucursal eliminada',
-            description: 'La sucursal ha sido eliminada exitosamente',
-            variant: 'success',
-        })
+        const confirmDelete = confirm(
+            '¿Estás seguro de que deseas eliminar este sucursal?',
+        )
+        if (!confirmDelete) return
+        try {
+            deleteBranch(id)
+
+            setBranches(branches.filter(branch => branch.id !== id))
+            toast({
+                title: 'Sucursal eliminada',
+                description: 'La sucursal ha sido eliminada exitosamente',
+                variant: 'success',
+            })
+        } catch (error) {
+            console.error(error)
+            toast({
+                title: 'Error al eliminar la sucursal',
+                description: 'No se ha podido eliminar la sucursal',
+                variant: 'destructive',
+            })
+            throw error
+        }
     }
 
     return (
