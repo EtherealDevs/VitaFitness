@@ -14,8 +14,16 @@ class BranchSeeder extends Seeder
     public function run(): void
     {
         Branch::create([
-            'name' => 'Branch A',
-            'address' => 'Av. Independencia 1234'
+            'name' => 'Sede Principal',
+            'address' => 'Belgrano 2014'
+        ]);
+        Branch::create([
+            'name' => 'Pilates 1',
+            'address' => 'Av. Ferré 2067'
+        ]);
+        Branch::create([
+            'name' => 'Pilates 2',
+            'address' => 'Salta 1413'
         ]);
     }
 }

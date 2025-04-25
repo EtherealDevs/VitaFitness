@@ -2,10 +2,9 @@
 
 import Image from 'next/image'
 import { Card } from '@/components/ui/card'
-import { useState, useEffect } from 'react'
-// import { Payment } from '@/hooks/payments'
-// import { Student } from '../admin/students/columns'
-// import axios from '@/lib/axios'
+import { useState, useEffect, useCallback } from 'react'
+import { Student } from '../admin/students/columns'
+import axios from '@/lib/axios'
 
 // Estados posibles
 type AccessStatus = 'authorized' | 'unauthorized' | 'pending' | 'error'
@@ -130,7 +129,7 @@ function AccessCard({
                             {status === 'authorized'
                                 ? 'ACCESO PERMITIDO'
                                 : status === 'unauthorized'
-                                ? 'ACCESO DENEGADO'
+                                ? `ACCESO DENEGADO ${errorMessage}`
                                 : errorMessage}
                         </p>
                     )}
@@ -156,58 +155,83 @@ function AccessCard({
         </div>
     )
 }
-
+interface access {
+    student_id: string
+    has_class_now?: boolean
+    is_payment_valid: boolean
+    payment_date: string
+    expiration_date: string
+    access_granted: boolean
+}
 // Componente principal
 export default function AccessPage() {
     const [documentNumber, setDocumentNumber] = useState<string>('')
     const [status, setStatus] = useState<AccessStatus>('pending')
     const [errorMessage, setErrorMessage] = useState<string>('')
-    // const [payment, setPayment] = useState<Payment | null>(null)
-    // const [student, setStudent] = useState<Student>()
-    //funtion search student for dni
-
-    // const fetchStudent = async (dni: string) => {
-    //     try {
-    //         const res = await axios.get('/api/student/search', {
-    //             params: {
-    //                 key: 'dni',
-    //                 value: dni,
-    //             },
-    //         })
-    //         console.log(res)
-    //         setStudent(res.data.student)
-    //     } catch (error) {
-    //         console.error(error)
-    //         throw error
-    //     }
-    // }
-
-    // const fetchPayment = async (id: string) => {
-    //     try {
-    //         const res = await axios.get(`payments/student/${id}`)
-    //         setPayment(res.data.payment)
-    //     } catch (error) {
-    //         console.error(error)
-    //         throw error
-    //     }
-    // }
-
-    // const isValidPayment = (payment: Payment): boolean => {
-    //     const today = new Date()
-    //     const paymentDate = new Date(payment.payment_date)
-    //     const expirationDate = new Date(payment.expiration_date)
-
-    //     return (
-    //         paymentDate > today &&
-    //         payment.status === 'pagado' &&
-    //         expirationDate > today
-    //     )
-    // }
-
-    const today = new Date()
-    const lastPaymentDate = new Date('2025-03-20') // Ejemplo de fecha de pago
+    const [student, setStudent] = useState<Student>()
+    const [access, setAccess] = useState<access>({
+        student_id: '',
+        has_class_now: false,
+        is_payment_valid: false,
+        payment_date: '',
+        expiration_date: '',
+        access_granted: false,
+    })
 
     // Validación del documento (debe tener 8 dígitos)
+    const handleValidation = useCallback(async (dni: string) => {
+        if (!validateDocument(dni)) {
+            setStatus('error')
+            setErrorMessage(
+                'Número de documento inválido. Debe tener 8 dígitos.',
+            )
+            resetAfterDelay()
+            return
+        }
+
+        try {
+            const studentRes = await axios.get('/api/student/search', {
+                params: {
+                    field: 'dni',
+                    search: dni,
+                },
+            })
+
+            const studentData = studentRes.data.students[0]
+            if (!studentData) {
+                setStatus('error')
+                setErrorMessage('Estudiante no encontrado.')
+                resetAfterDelay()
+                return
+            }
+
+            setStudent(studentData)
+
+            const accessRes = await axios.get(
+                `/api/student/${studentData.id}/class-status`,
+            )
+            const accessData = accessRes.data
+            setAccess(accessData)
+
+            if (accessData.access_granted) {
+                setStatus('authorized')
+            } else {
+                setStatus('unauthorized')
+
+                if (!accessData.is_payment_valid) {
+                    setErrorMessage('El pago está vencido o no es válido.')
+                }
+            }
+
+            resetAfterDelay()
+        } catch (error) {
+            console.error(error)
+            setStatus('error')
+            setErrorMessage('Error al buscar el estudiante o su acceso.')
+            resetAfterDelay()
+        }
+    }, []) // <---- Poné dependencias si usás variables externas
+
     const validateDocument = (docNumber: string): boolean =>
         /^\d{8}$/.test(docNumber)
 
@@ -217,55 +241,28 @@ export default function AccessPage() {
             return
         }
 
-        // Espera 1 segundo antes de validar
         const timeout = setTimeout(() => {
-            if (!validateDocument(documentNumber)) {
-                setStatus('error')
-                setErrorMessage(
-                    'Número de documento inválido. Debe tener 8 dígitos.',
-                )
+            handleValidation(documentNumber)
+        }, 1000)
 
-                // Después de 2 segundos, volver al estado pendiente
-                setTimeout(() => {
-                    setDocumentNumber('')
-                    setStatus('pending')
-                    setErrorMessage('')
-                }, 2000)
-            } else {
-                if (lastPaymentDate <= today) {
-                    setStatus('authorized')
+        return () => clearTimeout(timeout)
+    }, [documentNumber, handleValidation])
 
-                    // Si el estado cambia a autorizado, limpiar el input después de 2 segundos
-                    setTimeout(() => {
-                        setDocumentNumber('')
-                        setStatus('pending')
-                    }, 2000)
-                } else {
-                    setStatus('unauthorized')
-                    setErrorMessage('El pago está vencido. No tienes acceso.')
-                }
-            }
-        }, 1000) // 1 segundo de espera
-
-        return () => clearTimeout(timeout) // Evita validaciones innecesarias
-    }, [documentNumber])
-
+    const resetAfterDelay = () => {
+        setTimeout(() => {
+            setDocumentNumber('')
+            setStatus('pending')
+            setErrorMessage('')
+        }, 2000)
+    }
     return (
         <AccessCard
-            name="SOFIA ALARCON"
-            paymentDate="22 DE ABRIL"
+            name={student ? `${student.name} ${student.last_name}` : ''}
+            paymentDate={access.expiration_date}
             status={status}
             errorMessage={errorMessage}
             documentNumber={documentNumber}
             setDocumentNumber={setDocumentNumber}
         />
-        // <AccessCard
-        //     name={`${student.name} ${student.lastname}`}
-        //     paymentDate={payment.payment_date}
-        //     status={status}
-        //     errorMessage={errorMessage}
-        //     documentNumber={documentNumber}
-        //     setDocumentNumber={setDocumentNumber}
-        // />
     )
 }

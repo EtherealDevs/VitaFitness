@@ -1,101 +1,148 @@
-"use client"
+'use client'
 
-import { DataTable } from "../components/ui/data-table"
-import { Button } from "../components/ui/button"
-import { Plus } from "lucide-react"
-import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "../components/ui/badge"
+import { useEffect, useState } from 'react'
+import { Plus } from 'lucide-react'
+import Link from 'next/link'
 
-// Definimos el tipo Permission
-type Permission = {
-  id: string
-  name: string
-  role: string
-  status: "active" | "inactive"
-  lastUpdated: string
-}
+import { Roles, Users, useUser } from '@/hooks/users'
+import { toast } from '@/hooks/use-toast'
+import { ToastAction } from '@/components/ui/toast'
 
-// Definimos las columnas con el tipo correcto
-const columns: ColumnDef<Permission>[] = [
-  {
-    accessorKey: "name",
-    header: "Nombre",
-  },
-  {
-    accessorKey: "role",
-    header: "Rol",
-  },
-  {
-    accessorKey: "status",
-    header: "Estado",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string
-      return (
-        <Badge variant={status === "active" ? "success" : "destructive"}>
-          {status === "active" ? "Activo" : "Inactivo"}
-        </Badge>
-      )
-    },
-  },
-  {
-    accessorKey: "lastUpdated",
-    header: "Última Actualización",
-  },
-]
+import { Button } from '../components/ui/button'
+import { Checkbox } from '@/app/admin/components/ui/checkbox'
+import { DataTable } from '../components/ui/data-table'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Table } from '../components/ui/table'
 
-// Asegúrate de que los datos coincidan con el tipo Permission
-const data: Permission[] = [
-  {
-    id: "1",
-    name: "Crear usuarios",
-    role: "Administrador",
-    status: "active",
-    lastUpdated: "2023-01-01",
-  },
-  {
-    id: "2",
-    name: "Editar usuarios",
-    role: "Administrador",
-    status: "inactive",
-    lastUpdated: "2023-01-01",
-  },
-  {
-    id: "3",
-    name: "Eliminar usuarios",
-    role: "Administrador",
-    status: "active",
-    lastUpdated: "2023-01-01",
-  },
-  {
-    id: "4",
-    name: "Ver reportes",
-    role: "Supervisor",
-    status: "active",
-    lastUpdated: "2023-02-15",
-  },
-  {
-    id: "5",
-    name: "Gestionar clases",
-    role: "Instructor",
-    status: "active",
-    lastUpdated: "2023-03-10",
-  },
-]
+import type { ColumnDef } from '@tanstack/react-table'
 
 export default function PermissionsPage() {
-  return (
-    <div className="py-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Permisos</h1>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Permiso
-        </Button>
-      </div>
-      <div className="mt-6">
-        <DataTable columns={columns} data={data} filterColumn="name" filterPlaceholder="Filtrar permisos..." />
-      </div>
-    </div>
-  )
-}
+    const [users, setUsers] = useState<Users[]>([])
+    const [roles, setRoles] = useState<Roles[]>([])
+    const { getUsers, getRoles, update } = useUser()
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getUsers()
+                const roles = await getRoles()
+                setRoles(roles.roles)
+                setUsers(response.users)
+            } catch (error) {
+                console.error('Error al obtener los usuarios:', error)
+            }
+        }
+
+        fetchData()
+    }, [getUsers, getRoles])
+
+    const columns: ColumnDef<Users>[] = [
+        {
+            accessorKey: 'name',
+            header: 'Nombre',
+            cell: ({ row }) => row.original.name,
+        },
+        {
+            accessorKey: 'email',
+            header: 'Email',
+            cell: ({ row }) => row.original.email,
+        },
+        {
+            accessorKey: 'roles',
+            header: 'Roles',
+            cell: ({ row }) => {
+                const user = row.original
+
+                return (
+                    <div className="flex flex-col gap-1">
+                        {roles.map(role => {
+                            const hasRole = user.roles.some(
+                                r => r.id === role.id,
+                            )
+                            return (
+                                <label
+                                    key={role.id}
+                                    className="flex items-center gap-2">
+                                    <Checkbox
+                                        checked={hasRole}
+                                        onCheckedChange={async checked => {
+                                            const newRoles = checked
+                                                ? [...user.roles, role]
+                                                : user.roles.filter(
+                                                      r => r.id !== role.id,
+                                                  )
+
+                                            const formdata = new FormData()
+                                            newRoles.forEach(r => {
+                                                formdata.append(
+                                                    'roles[]',
+                                                    String(r.id),
+                                                )
+                                            })
+
+                                            await update(user.id, formdata)
+
+                                            setUsers(prev =>
+                                                prev.map(u =>
+                                                    u.id === user.id
+                                                        ? {
+                                                              ...u,
+                                                              roles: newRoles,
+                                                          }
+                                                        : u,
+                                                ),
+                                            )
+
+                                            toast({
+                                                title: 'Roles actualizados',
+                                                description: `Se actualizaron los roles de ${user.name}.`,
+                                                action: (
+                                                    <ToastAction altText="Cerrar">
+                                                        Cerrar
+                                                    </ToastAction>
+                                                ),
+                                            })
+                                        }}
+                                    />
+                                    <span>{role.name}</span>
+                                </label>
+                            )
+                        })}
+                    </div>
+                )
+            },
+        },
+    ]
+
+    if (!roles.length) return null
+
+    return (
+        <div className="space-y-6 p-6 max-w-full">
+            <div className="flex flex-wrap items-center justify-between">
+                <h1 className="text-2xl md:text-3xl font-bold">Permisos</h1>
+                <Link href="/admin/permissions/create">
+                    <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Permiso
+                    </Button>
+                </Link>
+            </div>
+
+            <Card className="w-full">
+                <CardHeader className="flex flex-wrap flex-row items-center justify-between gap-2">
+                    <CardTitle>Gestión de Permisos</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <Table>
+                        <DataTable
+                            columns={columns}
+                            data={users}
+                            filterColumn="name"
+                            filterPlaceholder="Filtrar permisos..."
+                        />
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}

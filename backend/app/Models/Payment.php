@@ -8,22 +8,26 @@ class Payment extends Model
 {
 
     protected $fillable = [
-        'student_id',
-        'plan_id',
-        'date_start',
+        'classSchedule_id',
+        'payment_date',
         'amount',
         'status',
-        'payment_date',
+        'date_start',
         'expiration_date',
+        'student_id',
     ];
+
+    public function classSchedule()
+    {
+        return $this->belongsTo(ClassSchedule::class, 'classSchedule_id');
+    }
+    public function comprobante()
+    {
+        return $this->hasOne(Image::class, 'imageable_id', 'id')->where('imageable_type', 'App\Models\Payment');
+    }
 
     public function student()
     {
         return $this->belongsTo(Student::class);
-    }
-
-    public function plan()
-    {
-        return $this->belongsTo(Plan::class);
     }
 }

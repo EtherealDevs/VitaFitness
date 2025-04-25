@@ -1,11 +1,16 @@
-/* import useSWR from 'swr' */
+import { useCallback } from 'react'
 import axios from '@/lib/axios'
-/* import { useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation' */
+
+export interface Branch {
+    id: string
+    name: string
+    address: string
+}
 
 export const useBranches = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')
-    const getBranches = async () => {
+
+    const getBranches = useCallback(async () => {
         await csrf()
         try {
             const response = await axios.get('/api/branches')
@@ -14,8 +19,9 @@ export const useBranches = () => {
             console.error(error)
             throw error
         }
-    }
-    const getBranch = async (id: string) => {
+    }, [])
+
+    const getBranch = useCallback(async (id: string) => {
         try {
             const response = await axios.get(`/api/branches/${id}`)
             return response.data
@@ -23,8 +29,9 @@ export const useBranches = () => {
             console.error(error)
             throw error
         }
-    }
-    const createBranch = async (formData: FormData) => {
+    }, [])
+
+    const createBranch = useCallback(async (formData: FormData) => {
         await csrf()
         try {
             const response = await axios.post('/api/branches', formData)
@@ -33,9 +40,9 @@ export const useBranches = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
 
-    const updateBranch = async (id: string, formData: FormData) => {
+    const updateBranch = useCallback(async (id: string, formData: FormData) => {
         await csrf()
         try {
             const response = await axios.post(
@@ -47,9 +54,9 @@ export const useBranches = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
 
-    const deleteBranch = async (id: string) => {
+    const deleteBranch = useCallback(async (id: string) => {
         await csrf()
         try {
             const response = await axios.delete(`/api/branches/${id}`)
@@ -58,7 +65,8 @@ export const useBranches = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
+
     return {
         getBranch,
         getBranches,

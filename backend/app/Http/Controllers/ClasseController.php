@@ -11,11 +11,13 @@ class ClasseController extends Controller
     public function index()
     {
         try {
-            $classes = Classe::with(['teacherSchedule', 'branches'])->all();
+            $classes = Classe::all();
+            $classes->load('classSchedules.classScheduleTimeslots.classStudents', 'classSchedules.classScheduleTimeslots.classTeachers');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
         $classes = ClasseResource::collection($classes);
+        // dd($classes);
         $data = [
             'classes' => $classes,
             'message' => 'Classes retrieved successfully',
@@ -28,7 +30,7 @@ class ClasseController extends Controller
     public function show(string $id)
     {
         try {
-            $classe = Classe::with(['teacherSchedule', 'branch'])->find($id);
+            $classe = Classe::with(['classSchedules.classScheduleTimeslots.classStudents', 'classSchedules.classScheduleTimeslots.classTeachers'])->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -45,10 +47,9 @@ class ClasseController extends Controller
     {
         $request->validate([
             'max_students' => 'required|integer',
-            'teacher_schedules_id' => 'required|integer',
-            'branch_id' => 'required|integer',
-            'time' => 'required|string',
-            'day' => 'required|string',
+            'plan_id' => 'required|exists:plans,id',
+            'branch_id' => 'required|exists:branches,id',
+            'precio' => 'required|integer',
         ]);
         try {
             $classe = Classe::create($request->all());
@@ -68,10 +69,9 @@ class ClasseController extends Controller
     {
         $request->validate([
             'max_students' => 'integer',
-            'teacher_schedules_id' => 'exists:teacher_schedules,id',
+            'plan_id' => 'exists:plans,id',
             'branch_id' => 'exists:branches,id',
-            'time' => 'string',
-            'day' => 'string',
+            'price' => 'integer',
         ]);
         try {
             $classe = Classe::find($id);

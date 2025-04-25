@@ -19,7 +19,7 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $teachers->load('branch', 'plans', 'schedules');
+        $teachers->load('schedules');
         $teachers = TeacherResource::collection($teachers);
 
         $data = [
@@ -38,12 +38,12 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $teacher->load('branch', 'plans', 'schedules');
+        $teacher->load('schedules');
         $teacher = new TeacherResource($teacher);
 
         $data = [
             'teacher' => $teacher,
-            'message' => 'Teacher of ID ' . $id. ' retrieved successfully',
+            'message' => 'Teacher of ID ' . $id . ' retrieved successfully',
             'status' => 'success (200)'
         ];
         return response()->json($data, 200);
@@ -53,19 +53,18 @@ class TeacherController extends Controller
         // Create a new teacher in the database
         // Return the created teacher as a JSON response
         $request->validate([
-            'name' =>'required|string',
-            'last_name' =>'required|string',
+            'name' => 'required|string',
+            'last_name' => 'required|string',
             'email' => 'email|unique:teachers,email|nullable',
-            'phone' =>'required|string|max:12',
-            'dni' =>'required|string|unique:teachers,dni',
-            'branch_id' =>'required|integer',
+            'phone' => 'required|string|max:12',
+            'dni' => 'required|string|unique:teachers,dni',
         ]);
         try {
             $teacher = Teacher::create($request->all());
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $teacher->load('branch', 'plans', 'schedules');
+        $teacher->load('schedules');
         $teacher = new TeacherResource($teacher);
 
         $data = [
@@ -81,12 +80,11 @@ class TeacherController extends Controller
         // Return the updated teacher as a JSON response
         Log::alert("request and shit", ['id' => $id, 'all' => $request->all()]);
         $validator = Validator::make($request->all(), [
-            'name' =>'required|string',
-            'last_name' =>'required|string',
+            'name' => 'required|string',
+            'last_name' => 'required|string',
             'email' => 'email|nullable|unique:teachers,email,' . $id,
-            'phone' =>'required|string|max:12',
-            'dni' =>'required|string|unique:teachers,dni,' . $id,
-            'branch_id' =>'required|integer',
+            'phone' => 'required|string|max:12',
+            'dni' => 'required|string|unique:teachers,dni,' . $id,
         ]);
         if ($validator->fails()) {
             $data = [
@@ -109,7 +107,7 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $teacher->load('branch', 'plans', 'schedules');
+        $teacher->load('schedules');
         $teacher = new TeacherResource($teacher);
 
         $data = [
@@ -130,8 +128,8 @@ class TeacherController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
         $data = [
-           'message' => 'Teacher deleted successfully',
-           'status' => 'success, resource deleted (204)'
+            'message' => 'Teacher deleted successfully',
+            'status' => 'success, resource deleted (204)'
         ];
         return response()->json($data, 204);
     }

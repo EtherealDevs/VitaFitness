@@ -6,8 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Plan extends Model
 {
-    protected $fillable = ['name', 'price', 'description'];
+    protected $fillable = ['name',  'description', 'status'];
 
+    public function classes()
+    {
+        return $this->hasMany(Classe::class);
+    }
     public function teachers()
     {
         return $this->belongsToMany(Teacher::class);

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
-import { AtSign, Lock, Eye, EyeOff } from 'lucide-react'
+import { IdCard, Lock, Eye, EyeOff } from 'lucide-react'
 
 const Login = () => {
     const [resetParam, setResetParam] = useState<string | null>(null)
@@ -22,12 +22,13 @@ const Login = () => {
         redirectIfAuthenticated: '/',
     })
 
-    const [email, setEmail] = useState('')
+    const [dni, setDni] = useState('')
     const [password, setPassword] = useState('')
     const [shouldRemember, setShouldRemember] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [errors, setErrors] = useState<{
         email?: string[]
+        dni?: string[]
         password?: string[]
     }>({})
     const [status, setStatus] = useState<string | null>(null)
@@ -41,9 +42,10 @@ const Login = () => {
     }, [resetParam, errors])
 
     const submitForm = async (event: React.FormEvent) => {
+        console.log('submitForm', { dni, password, shouldRemember })
         event.preventDefault()
         login({
-            email,
+            dni: dni,
             password,
             remember: shouldRemember,
             setErrors,
@@ -69,31 +71,31 @@ const Login = () => {
                         {/* Email */}
                         <div>
                             <label
-                                htmlFor="email"
+                                htmlFor="dni"
                                 className="title-font text-lg text-white block mb-2">
-                                Email
+                                Dni
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <AtSign className="h-5 w-5 text-gray-400" />
+                                    <IdCard className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    value={email}
+                                    id="dni"
+                                    name="text"
+                                    type="dni"
+                                    value={dni}
                                     className="block w-full pl-10 pr-3 py-3 bg-zinc-800 border-b border-gray-600 focus:border-teal-400 outline-none transition-colors rounded-md text-white"
                                     onChange={event =>
-                                        setEmail(event.target.value)
+                                        setDni(event.target.value)
                                     }
                                     required
                                     autoFocus
-                                    placeholder="tu@email.com"
+                                    placeholder="12345678"
                                 />
                             </div>
-                            {errors.email && (
+                            {errors.dni && (
                                 <p className="mt-2 text-sm text-red-500">
-                                    {errors.email.join(', ')}
+                                    {errors.dni.join(', ')}
                                 </p>
                             )}
                         </div>

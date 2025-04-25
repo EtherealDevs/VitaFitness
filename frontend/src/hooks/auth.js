@@ -1,3 +1,4 @@
+'use client'
 import useSWR from 'swr'
 import axios from '@/lib/axios'
 import { useEffect, useCallback } from 'react'
@@ -40,6 +41,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const login = async ({ setErrors, setStatus, ...props }) => {
+        console.log('login', props)
         await csrf()
 
         setErrors([])

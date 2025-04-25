@@ -1,11 +1,17 @@
 import axios from '@/lib/axios'
 import { useCallback } from 'react'
 
+export interface TimeSlot {
+    id: string
+    hour: [string]
+}
 export interface Schedule {
     id: string
-    day: string
-    start_time: string
-    end_time: string
+    days: [string]
+    timeslots?: [TimeSlot]
+    selectedDays?: [string]
+    time_start?: string
+    time_end?: string
 }
 export const useSchedules = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')

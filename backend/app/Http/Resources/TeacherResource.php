@@ -21,9 +21,6 @@ class TeacherResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'dni' => $this->dni,
-            'branch' => new BranchResource($this->whenLoaded('branch')),
-            'schedules' => TeacherSchedulesResource::collection($this->whenLoaded('schedules')),
-            'plans' => PlanResource::collection($this->whenLoaded('plans')),
         ];
     }
 }

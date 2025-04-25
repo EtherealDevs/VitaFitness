@@ -22,8 +22,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Schedule, useSchedules } from '@/hooks/schedules'
+import { TimeSlot, useSchedules } from '@/hooks/schedules'
 import { useParams, useRouter } from 'next/navigation'
+interface Schedule {
+    id: string
+    days: [string]
+    timeslots?: [TimeSlot]
+    selectedDays?: [string]
+    start_time?: string
+    end_time?: string
+}
 
 export default function EditSchedulePage() {
     const formatTime = (time: string) => time?.substring(0, 5)
@@ -31,25 +39,24 @@ export default function EditSchedulePage() {
     const { updateSchedule, getSchedule } = useSchedules()
     const [schedule, setSchedule] = useState<Schedule>({
         id: '',
-        day: '',
+        days: [''],
         start_time: '',
         end_time: '',
     })
     const router = useRouter()
-    const fetchData = async () => {
-        try {
-            const response = await getSchedule(id as string)
-            console.log(response)
-            setSchedule(response.schedule)
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
-
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getSchedule(id as string)
+                console.log(response)
+                setSchedule(response.schedule)
+            } catch (error) {
+                console.error(error)
+                throw error
+            }
+        }
         fetchData()
-    }, [])
+    }, [getSchedule, id])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -60,9 +67,9 @@ export default function EditSchedulePage() {
         e.preventDefault()
         // Handle form submission
         const formData = new FormData()
-        formData.append('day', String(schedule?.day))
-        formData.append('start_time', formatTime(schedule?.start_time))
-        formData.append('end_time', formatTime(schedule?.end_time))
+        formData.append('day', String(schedule?.days))
+        formData.append('start_time', formatTime(schedule?.start_time || ''))
+        formData.append('end_time', formatTime(schedule?.end_time || ''))
         try {
             updateSchedule(id as string, formData)
             router.push('/admin/schedules')
@@ -80,7 +87,7 @@ export default function EditSchedulePage() {
                     Crear Nuevo Horario
                 </h1>
 
-                <Card className="bg-white rounded shadow-md dark:bg-zinc-950 dark:text-white">
+                <Card className="bg-white rounded shadow-md">
                     <CardHeader>
                         <CardTitle>Información del Horario</CardTitle>
                     </CardHeader>
@@ -96,11 +103,11 @@ export default function EditSchedulePage() {
                                         Día de la semana
                                     </Label>
                                     <Select
-                                        value={schedule.day}
+                                        value={schedule.days[0] || ''}
                                         onValueChange={value =>
                                             setSchedule(prevSchedule => ({
                                                 ...prevSchedule,
-                                                day: value,
+                                                days: [value],
                                             }))
                                         }>
                                         <SelectTrigger
@@ -148,7 +155,7 @@ export default function EditSchedulePage() {
                                             name="start_time"
                                             value={schedule.start_time}
                                             onChange={handleInputChange}
-                                            className="p-1 rounded-md"
+                                            className="p-1 px-3 rounded-md bg-gray-200"
                                             required
                                         />
                                     </div>
@@ -168,7 +175,7 @@ export default function EditSchedulePage() {
                                             name="end_time"
                                             value={schedule.end_time}
                                             onChange={handleInputChange}
-                                            className="p-1 rounded-md"
+                                            className="p-1 px-3 rounded-md bg-gray-200"
                                             required
                                         />
                                     </div>
@@ -181,10 +188,10 @@ export default function EditSchedulePage() {
                                     Vista previa
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
-                                    {schedule.day ? (
+                                    {schedule.days ? (
                                         <>
                                             <span className="font-medium capitalize">
-                                                {schedule.day}
+                                                {schedule.days}
                                             </span>
                                             {schedule.start_time &&
                                             schedule.end_time ? (

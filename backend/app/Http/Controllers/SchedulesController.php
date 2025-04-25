@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ScheduleResource;
 use App\Http\Resources\SchedulesResource;
-use App\Models\Schedules;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SchedulesController extends Controller
 {
@@ -13,7 +15,7 @@ class SchedulesController extends Controller
     {
         try {
 
-            $schedules = Schedules::all();
+            $schedules = Schedule::all();
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al obtener los horarios',
@@ -31,13 +33,40 @@ class SchedulesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'day' => 'required|in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i'
+            'days' => 'required|array',
+            'days.*' => 'required|string|in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
         ]);
         try {
-            $schedule = Schedules::create($request->all());
-            $schedule = new SchedulesResource($schedule);
+            $schedule = new Schedule();
+            $orderedDays = [];
+            foreach ($request->days as $day) {
+                switch ($day) {
+                    case 'lunes':
+                        $orderedDays[0] = $day;
+                        break;
+                    case 'martes':
+                        $orderedDays[1] = $day;
+                        break;
+                    case 'miercoles':
+                        $orderedDays[2] = $day;
+                        break;
+                    case 'jueves':
+                        $orderedDays[3] = $day;
+                        break;
+                    case 'viernes':
+                        $orderedDays[4] = $day;
+                        break;
+                    case 'sabado':
+                        $orderedDays[5] = $day;
+                        break;
+                    case 'domingo':
+                        $orderedDays[6] = $day;
+                        break;
+                }
+            }
+            $schedule->days = $orderedDays;
+            $schedule->save();
+            $schedule = new ScheduleResource($schedule);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al crear el horario',
@@ -55,8 +84,8 @@ class SchedulesController extends Controller
     public function show(string $id)
     {
         try {
-            $schedule = Schedules::find($id);
-            $schedule = new SchedulesResource($schedule);
+            $schedule = Schedule::find($id);
+            $schedule = new ScheduleResource($schedule);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al obtener el horario',
@@ -74,13 +103,12 @@ class SchedulesController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'day' => 'in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
-            'start_time' => 'date_format:H:i',
-            'end_time' => 'date_format:H:i'
+            'days' => 'array',
+            'days.*' => 'required|string|in:lunes,martes,miercoles,jueves,viernes,sabado,domingo',
         ]);
         try {
-            $schedule = Schedules::find($id);
-            $schedule->update($request->all());
+            $schedule = Schedule::find($id);
+            $schedule->days = $request->days;
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al actualizar el horario',
@@ -98,7 +126,7 @@ class SchedulesController extends Controller
     public function destroy(string $id)
     {
         try {
-            $schedule = Schedules::find($id);
+            $schedule = Schedule::find($id);
             $schedule->delete();
         } catch (\Exception $e) {
             return response()->json([
