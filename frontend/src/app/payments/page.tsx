@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
     Home,
     CreditCard,
@@ -64,7 +64,7 @@ export default function PaymentHistory() {
     const { getPaymentStudent, uploadComprobante } = usePayments()
     const { user } = useAuth()
 
-    const fetchStudentData = async () => {
+    const fetchStudentData = useCallback(async () => {
         if (!user?.dni) return
         try {
             const response = await axios.get('/api/student/search', {
@@ -79,67 +79,65 @@ export default function PaymentHistory() {
             console.error(error)
             throw error
         }
-    }
-    const fetchPaymentData = async (
-        payments: Payment[],
-    ): Promise<PaymentSummary> => {
-        const paidPayments = payments.filter(
-            p => p.status.toLowerCase() === 'pagado',
-        )
+    }, [user?.dni])
+    const fetchPaymentData = useCallback(
+        async (payments: Payment[]): Promise<PaymentSummary> => {
+            const paidPayments = payments.filter(
+                p => p.status.toLowerCase() === 'pagado',
+            )
 
-        const totalPaid = paidPayments.reduce(
-            (sum, p) => sum + parseFloat(p.amount),
-            0,
-        )
+            const totalPaid = paidPayments.reduce(
+                (sum, p) => sum + parseFloat(p.amount),
+                0,
+            )
 
-        const upcomingPayments = payments.filter(p => {
-            if (!p.expiration_date) return false
-            const daysRemaining = getDaysRemaining(p.expiration_date)
-            return daysRemaining >= 0
-        })
-        console.log('upcoming payments')
-        console.log(upcomingPayments)
+            const upcomingPayments = payments.filter(p => {
+                if (!p.expiration_date) return false
+                const daysRemaining = getDaysRemaining(p.expiration_date)
+                return daysRemaining >= 0
+            })
+            const nextPayments = upcomingPayments.sort(
+                (a, b) =>
+                    new Date(a.expiration_date).getTime() -
+                    new Date(b.expiration_date).getTime(),
+            )
 
-        const nextPayments = upcomingPayments.sort(
-            (a, b) =>
-                new Date(a.expiration_date).getTime() -
-                new Date(b.expiration_date).getTime(),
-        )
+            return {
+                paidPayments,
+                isUpToDate: !payments.some(p => {
+                    if (
+                        !p.expiration_date ||
+                        p.status.toLowerCase() === 'pagado'
+                    )
+                        return false
+                    return getDaysRemaining(p.expiration_date) < 0
+                }),
+                nextPayments: nextPayments,
+                totalPaid,
+                paymentHistory: payments.map(p => ({
+                    id: String(p.id),
+                    date: p.payment_date,
+                    amount: parseFloat(p.amount).toString(),
+                    className:
+                        p.classSchedule?.class?.name || 'Clase no disponible',
+                    status: p.status.toLowerCase(),
+                    classSchedule: p.classSchedule || null,
+                    classSchedule_id: p.classSchedule?.id || '',
+                    student_id: p.student_id || '',
+                    student: p.student || '',
+                    expiration_date: p.expiration_date || '',
+                    date_start: p.date_start || '',
+                    payment_date: p.payment_date || '',
+                    comprobante: p.comprobante || '',
+                    created_at: p.created_at || '',
+                    updated_at: p.updated_at || '',
+                })),
+            }
+        },
+        [],
+    )
 
-        console.log('next payments')
-        console.log(nextPayments)
-
-        return {
-            paidPayments,
-            isUpToDate: !payments.some(p => {
-                if (!p.expiration_date || p.status.toLowerCase() === 'pagado')
-                    return false
-                return getDaysRemaining(p.expiration_date) < 0
-            }),
-            nextPayments: nextPayments,
-            totalPaid,
-            paymentHistory: payments.map(p => ({
-                id: String(p.id),
-                date: p.payment_date,
-                amount: parseFloat(p.amount).toString(),
-                className:
-                    p.classSchedule?.class?.name || 'Clase no disponible',
-                status: p.status.toLowerCase(),
-                classSchedule: p.classSchedule || null,
-                classSchedule_id: p.classSchedule?.id || '',
-                student_id: p.student_id || '',
-                student: p.student || '',
-                expiration_date: p.expiration_date || '',
-                date_start: p.date_start || '',
-                payment_date: p.payment_date || '',
-                comprobante: p.comprobante || '',
-                created_at: p.created_at || '',
-                updated_at: p.updated_at || '',
-            })),
-        }
-    }
-
-    const fetchPayments = async () => {
+    const fetchPayments = useCallback(async () => {
         if (!student) return
         try {
             const response = await getPaymentStudent(student.id)
@@ -150,7 +148,7 @@ export default function PaymentHistory() {
             console.error(error)
             setError('Error al obtener los pagos')
         }
-    }
+    }, [student, getPaymentStudent, fetchPaymentData])
 
     // Fetch payment data on component mount
     useEffect(() => {
@@ -158,13 +156,13 @@ export default function PaymentHistory() {
         if (user?.dni) {
             fetchStudentData()
         }
-    }, [user])
+    }, [user, fetchStudentData])
     useEffect(() => {
         if (student) {
             fetchPayments()
         }
         setLoading(false)
-    }, [student])
+    }, [student, fetchPayments])
 
     // Get status details for next payment
     const getNextPaymentStatus = (payment: Payment) => {
