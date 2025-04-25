@@ -32,7 +32,7 @@ const navigation = [
     { name: 'Alumnos', href: '/admin/students', icon: Users },
     { name: 'Profesores', href: '/admin/teachers', icon: UserRoundPen },
     { name: 'Clases', href: '/admin/classes', icon: BookOpen },
-    { name: 'Horarios', href: '/admin/schedules', icon: CalendarCheck2 },
+    { name: 'Horarios', href: '/admin/schedules/create', icon: CalendarCheck2 },
     { name: 'Pagos', href: '/admin/payments', icon: CreditCard },
     { name: 'Productos', href: '/admin/products', icon: ShoppingBag },
     { name: 'Planes', href: '/admin/plans', icon: NotepadText },

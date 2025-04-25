@@ -5,8 +5,7 @@ import type React from 'react'
 import { useAuth } from '@/hooks/auth'
 import { useState } from 'react'
 import Link from 'next/link'
-/* import Logo from "@/components/Logo" */
-import { AtSign, Lock, Eye, EyeOff, User } from 'lucide-react'
+import { AtSign, Lock, Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 
 const Register = () => {
@@ -84,72 +83,6 @@ const Register = () => {
                             </h2>
 
                             <form onSubmit={submitForm} className="space-y-6">
-                                {/* Name */}
-                                {/* <div>
-                                    <label
-                                        htmlFor="name"
-                                        className="title-font text-lg text-white block mb-2">
-                                        Nombre
-                                    </label>
-
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <User className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            id="name"
-                                            name="name"
-                                            type="text"
-                                            value={name}
-                                            className="block w-full pl-10 pr-3 py-3 bg-zinc-800 border-b border-gray-600 focus:border-teal-400 outline-none transition-colors rounded-md text-white"
-                                            onChange={event =>
-                                                setName(event.target.value)
-                                            }
-                                            required
-                                            autoFocus
-                                            placeholder="Tu nombre completo"
-                                        />
-                                    </div>
-
-                                    {errors.name && (
-                                        <p className="mt-2 text-sm text-red-500">
-                                            {errors.name.join(', ')}
-                                        </p>
-                                    )}
-                                </div> */}
-
-                                {/* Email Address */}
-                                {/* <div>
-                                    <label
-                                        htmlFor="email"
-                                        className="title-font text-lg text-white block mb-2">
-                                        Email
-                                    </label>
-
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <AtSign className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            id="email"
-                                            name="email"
-                                            type="email"
-                                            value={email}
-                                            className="block w-full pl-10 pr-3 py-3 bg-zinc-800 border-b border-gray-600 focus:border-teal-400 outline-none transition-colors rounded-md text-white"
-                                            onChange={event =>
-                                                setEmail(event.target.value)
-                                            }
-                                            required
-                                            placeholder="tu@email.com"
-                                        />
-                                    </div>
-
-                                    {errors.email && (
-                                        <p className="mt-2 text-sm text-red-500">
-                                            {errors.email.join(', ')}
-                                        </p>
-                                    )}
-                                </div> */}
                                 <div>
                                     <label
                                         htmlFor="dni"
