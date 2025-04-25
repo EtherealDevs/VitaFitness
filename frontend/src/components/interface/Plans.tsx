@@ -12,6 +12,7 @@ import Button from '@/components/ui/Button'
 import { Product, useProducts } from '@/hooks/products'
 import { Plan, usePlans } from '@/hooks/plans'
 import { getWhatsAppLink } from '@/utils/whatsapp'
+import Link from 'next/link'
 
 export default function Services() {
     const { getProducts } = useProducts()
@@ -219,14 +220,14 @@ export default function Services() {
                         </div>
 
                         <div className="mt-8 text-center">
-                            <a
+                            <Link
                                 href={getWhatsAppLink(plansInfo)}
                                 target="_blank"
                                 rel="noopener noreferrer">
                                 <Button className="bg-transparent rounded-xl border">
                                     SOLICITAR INFO
                                 </Button>
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -277,7 +278,6 @@ export default function Services() {
                                                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-
                                                 {/* Etiquetas y badges */}
                                             </div>
 
@@ -327,11 +327,16 @@ export default function Services() {
                         </div>
 
                         <div className="mt-8 text-center">
-                            <Button
-                                className="bg-transparent border rounded-xl hover:opacity-90"
-                                onClick={() => setIsCatalogOpen(true)}>
-                                VER CATÁLOGO
-                            </Button>
+                            <Link
+                                href={getWhatsAppLink(
+                                    'Hola, vi tu pagina y quiero más información sobre los productos',
+                                )}
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                <Button className="bg-transparent rounded-xl border">
+                                    VER CATALOGO
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>

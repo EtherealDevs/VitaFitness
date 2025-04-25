@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { ArrowRight, Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Branch, useBranches } from '@/hooks/branches'
+import Link from 'next/link'
 // Datos para la sección de transformaciones
 const transformations = [
     {
@@ -235,10 +236,6 @@ export default function CommitmentSection() {
                                         alcanzar sus objetivos de bienestar y
                                         salud.
                                     </p>
-                                    <button className="text-green-400 text-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        Conoce más{' '}
-                                        <ArrowRight className="w-3 h-3" />
-                                    </button>
                                 </div>
                             </div>
                         </Card>
@@ -364,10 +361,16 @@ export default function CommitmentSection() {
                                                             objetivos alcanzados
                                                         </p>
                                                     </div>
-                                                    <Button className="mt-6 bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90">
-                                                        COMIENZA TU
-                                                        TRANSFORMACIÓN
-                                                    </Button>
+                                                    <Link
+                                                        href={
+                                                            'https://wa.me/3794558125?text=Hola%2C+quiero+empezar+a+entrenar+con+ustedes'
+                                                        }
+                                                        target="_blank">
+                                                        <Button className="mt-6 bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90">
+                                                            COMIENZA TU
+                                                            TRANSFORMACIÓN
+                                                        </Button>
+                                                    </Link>
                                                 </div>
                                             </div>
                                         </div>
