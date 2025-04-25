@@ -94,10 +94,10 @@ export default function Schedules() {
                                                 {schedule.days}
                                             </TableCell>
                                             <TableCell>
-                                                {schedule.start_time}
+                                                {schedule.time_start}
                                             </TableCell>
                                             <TableCell>
-                                                {schedule.end_time}
+                                                {schedule.time_end}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex justify-end gap-2">

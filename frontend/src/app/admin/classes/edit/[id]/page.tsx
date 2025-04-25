@@ -34,12 +34,13 @@ import { toast } from '@/hooks/use-toast'
 import { useClasses } from '@/hooks/classes'
 import { type Plan, usePlans } from '@/hooks/plans'
 import { type Branch, useBranches } from '@/hooks/branches'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Skeleton } from '@/app/admin/components/ui/skeleton'
 
-export default function EditClassPage({ params }: { params: { id: string } }) {
+export default function EditClassPage() {
     // Acceder directamente a params.id ya que es un objeto simple
-    const classId = params.id
+    const { id } = useParams()
+    const classId = id as string
 
     const [selectedPlan, setSelectedPlan] = useState('')
     const [selectedBranch, setSelectedBranch] = useState('')

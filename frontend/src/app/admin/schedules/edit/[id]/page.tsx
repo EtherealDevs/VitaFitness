@@ -22,8 +22,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Schedule, useSchedules } from '@/hooks/schedules'
+import { TimeSlot, useSchedules } from '@/hooks/schedules'
 import { useParams, useRouter } from 'next/navigation'
+interface Schedule {
+    id: string
+    days: [string]
+    timeslots?: [TimeSlot]
+    selectedDays?: [string]
+    start_time?: string
+    end_time?: string
+}
 
 export default function EditSchedulePage() {
     const formatTime = (time: string) => time?.substring(0, 5)
@@ -31,7 +39,7 @@ export default function EditSchedulePage() {
     const { updateSchedule, getSchedule } = useSchedules()
     const [schedule, setSchedule] = useState<Schedule>({
         id: '',
-        days: [],
+        days: [''],
         start_time: '',
         end_time: '',
     })
@@ -60,8 +68,8 @@ export default function EditSchedulePage() {
         // Handle form submission
         const formData = new FormData()
         formData.append('day', String(schedule?.days))
-        formData.append('start_time', formatTime(schedule?.start_time))
-        formData.append('end_time', formatTime(schedule?.end_time))
+        formData.append('start_time', formatTime(schedule?.start_time || ''))
+        formData.append('end_time', formatTime(schedule?.end_time || ''))
         try {
             updateSchedule(id as string, formData)
             router.push('/admin/schedules')

@@ -8,7 +8,7 @@ export interface TimeSlot {
 export interface Schedule {
     id: string
     days: [string]
-    timeslots: [TimeSlot]
+    timeslots?: [TimeSlot]
     selectedDays?: [string]
     time_start?: string
     time_end?: string

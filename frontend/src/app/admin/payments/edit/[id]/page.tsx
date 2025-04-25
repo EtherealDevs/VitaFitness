@@ -12,11 +12,7 @@ import axios from '@/lib/axios'
 import { Student } from '@/app/admin/students/columns'
 import { Class } from '@/hooks/classes'
 import { Schedule } from '@/hooks/schedules'
-interface EditPaymentProps {
-    params: {
-        id?: string
-    }
-}
+
 interface ClassSchedules {
     id: string
     class: Class
@@ -25,7 +21,7 @@ interface ClassSchedules {
     students: string[]
 }
 
-export default function EditPayment({ params }: EditPaymentProps) {
+export default function EditPayment() {
     const router = useRouter()
     const { getPayment, updatePayment } = usePayments()
     const [students, setStudents] = useState<Student[]>([])
@@ -135,8 +131,8 @@ export default function EditPayment({ params }: EditPaymentProps) {
         formData.append('expiration_date', form.expiration_date)
 
         try {
-            if (!params.id) throw new Error('ID inválido')
-            await updatePayment(params.id, formData)
+            if (!id) throw new Error('ID inválido')
+            await updatePayment(id, formData)
             router.push('/admin/payments')
         } catch (err: unknown) {
             if (err instanceof Error) {

@@ -97,13 +97,13 @@ export default function PaymentHistory() {
             0,
         )
 
-        const sortedPayments = [...paidPayments].sort(
-            (a, b) =>
-                new Date(b.payment_date).getTime() -
-                new Date(a.payment_date).getTime(),
-        )
+        // const sortedPayments = [...paidPayments].sort(
+        //     (a, b) =>
+        //         new Date(b.payment_date).getTime() -
+        //         new Date(a.payment_date).getTime(),
+        // )
 
-        const lastPayment = sortedPayments[0]
+        // const lastPayment = sortedPayments[0]
 
         const upcomingPayments = payments.filter(p => {
             if (!p.expiration_date) return false
@@ -261,7 +261,7 @@ export default function PaymentHistory() {
 
         return availableClasses
     }
-    const renderNextPaymentStatus = (paymentData: any) => {
+    const renderNextPaymentStatus = (paymentData: PaymentSummary | null) => {
         if (
             !paymentData?.nextPayments ||
             paymentData.nextPayments.length === 0
@@ -354,7 +354,8 @@ export default function PaymentHistory() {
                                 {nextPaymentStatus.nextPaymentDate === '---'
                                     ? 'Se define al aprobarse el pago'
                                     : formatDate(
-                                          nextPaymentStatus.nextPaymentDate,
+                                          nextPaymentStatus.nextPaymentDate ||
+                                              '',
                                       )}
                             </span>
                         </p>

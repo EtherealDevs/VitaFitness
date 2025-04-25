@@ -55,7 +55,7 @@ export default function TeacherProfile() {
     // const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
 
     const { getTeacher, updateTeacher } = useTeachers()
-    const { getTeacherSchedules, createTeacherSchedule } = useTeacherSchedules()
+    const { getTeacherSchedules } = useTeacherSchedules()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -105,25 +105,25 @@ export default function TeacherProfile() {
         }
     }
 
-    const handleAddSchedule = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        formData.append('teacher_id', id)
+    // const handleAddSchedule = async (e: React.FormEvent<HTMLFormElement>) => {
+    //     e.preventDefault()
+    //     const formData = new FormData(e.currentTarget)
+    //     formData.append('teacher_id', id)
 
-        try {
-            await createTeacherSchedule(formData)
-            // setIsScheduleModalOpen(false)
-            // Recargar horarios
-            const response = await getTeacherSchedules()
-            const teacherSchedules = response.teacher_schedules.filter(
-                (schedule: { teacher: { id: number } }) =>
-                    schedule.teacher.id === Number.parseInt(id),
-            )
-            setTeacherSchedules(teacherSchedules)
-        } catch (error) {
-            console.error('Error creating schedule:', error)
-        }
-    }
+    //     try {
+    //         await createTeacherSchedule(formData)
+    //         // setIsScheduleModalOpen(false)
+    //         // Recargar horarios
+    //         const response = await getTeacherSchedules()
+    //         const teacherSchedules = response.teacher_schedules.filter(
+    //             (schedule: { teacher: { id: number } }) =>
+    //                 schedule.teacher.id === Number.parseInt(id),
+    //         )
+    //         setTeacherSchedules(teacherSchedules)
+    //     } catch (error) {
+    //         console.error('Error creating schedule:', error)
+    //     }
+    // }
 
     if (!teacher) {
         return <div className="p-6">Cargando...</div>
