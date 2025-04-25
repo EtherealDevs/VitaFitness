@@ -230,6 +230,7 @@ export default function PaymentsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>ID</TableHead>
                                     <TableHead>Nombre</TableHead>
                                     <TableHead>Monto</TableHead>
                                     <TableHead>Clase</TableHead>
@@ -251,6 +252,10 @@ export default function PaymentsPage() {
                                                 className="font-medium hover:underline">
                                                 {payment.student_id}
                                             </Link>
+                                        </TableCell>
+                                        <TableCell>
+                                            {payment.student.name}{' '}
+                                            {payment.student.last_name}
                                         </TableCell>
                                         <TableCell>${payment.amount}</TableCell>
                                         <TableCell>
