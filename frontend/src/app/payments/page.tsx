@@ -23,12 +23,7 @@ interface PaymentSummary {
     totalPaid: number
     paymentHistory: Payment[]
 }
-// interface nextPayment {
-//     nextPaymentDate: string | null
-//     nextPaymentAmount: number | null
-//     nextPaymentClass: string | null
-// }
-// Format currency helper
+
 const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('es-AR', {
         style: 'currency',
@@ -97,14 +92,6 @@ export default function PaymentHistory() {
             0,
         )
 
-        // const sortedPayments = [...paidPayments].sort(
-        //     (a, b) =>
-        //         new Date(b.payment_date).getTime() -
-        //         new Date(a.payment_date).getTime(),
-        // )
-
-        // const lastPayment = sortedPayments[0]
-
         const upcomingPayments = payments.filter(p => {
             if (!p.expiration_date) return false
             const daysRemaining = getDaysRemaining(p.expiration_date)
@@ -113,11 +100,6 @@ export default function PaymentHistory() {
         console.log('upcoming payments')
         console.log(upcomingPayments)
 
-        // const nextPayment = upcomingPayments.sort(
-        //     (a, b) =>
-        //         new Date(a.expiration_date).getTime() -
-        //         new Date(b.expiration_date).getTime(),
-        // )[0]
         const nextPayments = upcomingPayments.sort(
             (a, b) =>
                 new Date(a.expiration_date).getTime() -
