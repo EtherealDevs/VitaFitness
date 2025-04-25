@@ -9,6 +9,7 @@ import {
     Activity,
     Calendar,
     Users,
+    Eye,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import {
@@ -207,6 +208,14 @@ export default function PaymentsPage() {
                                         <TableCell>{payment.status}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
+                                                <Link
+                                                    href={`/admin/payments/show/${payment.id}`}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm">
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
                                                 <Link
                                                     href={`/admin/payments/edit/${payment.id}`}>
                                                     <Button

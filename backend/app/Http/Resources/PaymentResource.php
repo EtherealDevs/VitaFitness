@@ -15,7 +15,7 @@ class PaymentResource extends JsonResource
     public function toArray(Request $request): array
     {
         $comprobante = null;
-        if ($this->whenLoaded('comprobante')) {
+        if ($this->relationLoaded('comprobante') && $this->comprobante && $this->comprobante->url) {
             $comprobante = asset('storage/' . $this->comprobante->url);
         }
         return [

@@ -170,8 +170,8 @@ export default function CreatePayment() {
                                     onChange={handleChange}
                                     className="w-full p-2 rounded-md cursor-pointer border border-gray-300 dark:border-gray-300 bg-white dark:bg-[#393d40] text-black dark:text-white">
                                     <option value="pendiente">Pendiente</option>
-                                    <option value="pagado">Activo</option>
-                                    <option value="rechazado">Inactivo</option>
+                                    <option value="pagado">Pagado</option>
+                                    <option value="rechazado">Rechazado</option>
                                 </select>
                             </div>
                             <div>

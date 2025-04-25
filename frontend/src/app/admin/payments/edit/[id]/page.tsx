@@ -235,14 +235,19 @@ export default function EditPayment({ params }: EditPaymentProps) {
                                 />
                             </div>
                             <div>
-                                <Label>Estado</Label>
-                                <Input
-                                    className="dark:text-white cursor-pointer border-gray-300 dark:border-gray-300 dark:bg-[#393d40]"
+                                <Label className="dark:text-white">
+                                    Estado
+                                </Label>
+                                <select
+                                    id="status"
                                     name="status"
                                     value={form.status}
                                     onChange={handleChange}
-                                    required
-                                />
+                                    className="w-full p-2 rounded-md cursor-pointer border border-gray-300 dark:border-gray-300 bg-white dark:bg-[#393d40] text-black dark:text-white">
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="pagado">Pagado</option>
+                                    <option value="rechazado">Rechezado</option>
+                                </select>
                             </div>
                             <div>
                                 <Label>Fecha de inicio</Label>

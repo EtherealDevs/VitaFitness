@@ -6,7 +6,7 @@ import { ClassSchedule, usePayments } from '@/hooks/payments'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/app/admin/components/ui/button'
 import { useStudents } from '@/hooks/students'
-import axios from '@/lib/axios'
+
 import type { Student } from '@/app/admin/students/columns'
 
 import Image from 'next/image'
@@ -108,39 +108,6 @@ export default function ShowPayment() {
             month: '2-digit',
             year: 'numeric',
         })
-    }
-    const handleDownloadComprobante = async () => {
-        if (!payment.comprobante) {
-            alert('No hay comprobante disponible para descargar.')
-            return
-        }
-
-        try {
-            const filename = payment.comprobante.split('/').pop()
-            if (!filename) throw new Error('Nombre de archivo no válido.')
-
-            const response = await axios.get(
-                `/api/comprobante/download/${filename}`,
-            )
-            console.log('response', response)
-            // if (!response.ok) {
-            //     throw new Error('Error al descargar el comprobante.')
-            // }
-
-            // const blob = await response.blob()
-            // const blobUrl = URL.createObjectURL(blob)
-
-            // const link = document.createElement('a')
-            // link.href = blobUrl
-            // link.download = filename
-            // document.body.appendChild(link)
-            // link.click()
-            // document.body.removeChild(link)
-            // URL.revokeObjectURL(blobUrl)
-        } catch (error) {
-            console.error('Error en la descarga del comprobante:', error)
-            alert('Ocurrió un error al intentar descargar el comprobante.')
-        }
     }
 
     if (loadingData) {
@@ -315,14 +282,6 @@ export default function ShowPayment() {
                                                 }>
                                                 Ver
                                             </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={
-                                                    handleDownloadComprobante
-                                                }>
-                                                Descargar comprobante
-                                            </Button>
                                         </div>
                                     </div>
                                 </div>
@@ -340,20 +299,7 @@ export default function ShowPayment() {
                                             className="w-full h-[500px] object-cover"
                                         />
                                     </div>
-                                    <div className="flex justify-end">
-                                        <Button
-                                            onClick={() => {
-                                                const link =
-                                                    document.createElement('a')
-                                                link.href = payment.comprobante
-                                                link.download = `comprobante-pago-${payment.id}.jpg`
-                                                document.body.appendChild(link)
-                                                link.click()
-                                                document.body.removeChild(link)
-                                            }}>
-                                            Descargar Comprobante
-                                        </Button>
-                                    </div>
+                                    <div className="flex justify-end"></div>
                                 </div>
                             )}
                         </div>

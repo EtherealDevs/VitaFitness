@@ -24,16 +24,17 @@ class RegisteredUserController extends Controller
         $request->validate([
             // 'name' => ['required', 'string', 'max:255'],
             // 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'dni' => ['required', 'string', 'max:255', 'unique:' . User::class, 'unique:' . Student::class],
+            'dni' => ['required', 'string', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
         $student = Student::where('dni', $request->dni)->first();
-        $name = $student->name + " $student->last_name";
+        $name = $student->name;
         $email = $student->email;
 
         $user = User::create([
             'name' => $name,
             'email' => $email,
+            'dni' => $request->dni,
             'password' => Hash::make($request->string('password')),
         ]);
 
