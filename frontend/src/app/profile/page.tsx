@@ -11,25 +11,24 @@ import axios from '@/lib/axios'
 export default function ProfileCard() {
     const { user } = useAuth()
     const [student, setStudent] = useState<Student>()
-    const fetchStudentData = async () => {
-        if (!user?.dni) return
-        try {
-            const response = await axios.get('/api/student/search', {
-                params: {
-                    field: 'dni',
-                    search: user.dni,
-                },
-            })
-            const studentData = response.data.students[0]
-
-            console.log(studentData.classes)
-            setStudent(studentData)
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
     useEffect(() => {
+        const fetchStudentData = async () => {
+            if (!user?.dni) return
+            try {
+                const response = await axios.get('/api/student/search', {
+                    params: {
+                        field: 'dni',
+                        search: user.dni,
+                    },
+                })
+                const studentData = response.data.students[0]
+                setStudent(studentData)
+            } catch (error) {
+                console.error(error)
+                throw error
+            }
+        }
+
         if (user?.dni) {
             fetchStudentData()
         }
