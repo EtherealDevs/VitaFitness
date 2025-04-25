@@ -66,7 +66,7 @@ export default function EditProductPage() {
         } catch (error) {
             console.error(error)
         }
-    }, [getProduct])
+    }, [getProduct, id])
     useEffect(() => {
         fetchData()
     }, [fetchData])

@@ -1,22 +1,24 @@
 'use client'
-import { useClassStudents } from '@/hooks/classStudents';
-import { useClassTimeslots } from '@/hooks/classTimeslots';
-import { useStudents } from '@/hooks/students';
-import React, { useEffect, useState } from 'react';
+
+import { useClassTimeslots } from '@/hooks/classTimeslots'
+import React, { useEffect, useState } from 'react'
 
 type ModalProps = {
-  onClose: () => void;
-  classScheduleId: string;
-  isTimeslotModalOpen: boolean;
-};
+    onClose: () => void
+    classScheduleId: string
+    isTimeslotModalOpen: boolean
+}
 interface Timeslot {
     id: string
     hour: string
 }
 
-export default function AddTimeslotModal({ onClose, classScheduleId, isTimeslotModalOpen }: ModalProps) {
+export default function AddTimeslotModal({
+    onClose,
+    classScheduleId,
+    isTimeslotModalOpen,
+}: ModalProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string | null>(null)
     const { createClassTimeslot } = useClassTimeslots()
 
     const timeslots: Timeslot[] = [
@@ -51,69 +53,74 @@ export default function AddTimeslotModal({ onClose, classScheduleId, isTimeslotM
         setIsLoading(true)
         try {
             const formData = new FormData()
-            console.log(e.target.timeslot_id.value)
-            formData.append('timeslot_id', e.target.timeslot_id.value)
+
+            const target = e.target as HTMLFormElement
+            formData.append(
+                'timeslot_id',
+                (target.elements.namedItem('timeslot_id') as HTMLSelectElement)
+                    .value,
+            )
             formData.append('class_schedule_id', classScheduleId)
             await createClassTimeslot(formData)
             onClose()
         } catch (error) {
             console.error('Error creating timeslot:', error)
-            setError('Error al crear el estudiante')
+            alert('Error al crear el timeslot:')
         } finally {
-
             setIsLoading(false)
-            alert('Form submitted!');
-            onClose();
+            alert('Form submitted!')
+            onClose()
         }
     }
     useEffect(() => {
         if (isTimeslotModalOpen) {
-          document.body.style.overflow = 'hidden'
+            document.body.style.overflow = 'hidden'
         } else {
-          document.body.style.overflow = ''
+            document.body.style.overflow = ''
         }
-    
+
         // Clean up on unmount or when isOpen changes
         return () => {
-          document.body.style.overflow = ''
+            document.body.style.overflow = ''
         }
-      }, [isTimeslotModalOpen])
-    
-      if (!isTimeslotModalOpen) return null
+    }, [isTimeslotModalOpen])
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg space-y-4 relative">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-        >
-          ✕
-        </button>
+    if (!isTimeslotModalOpen) return null
 
-        <h2 className="text-lg font-semibold">Formulario</h2>
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg space-y-4 relative">
+                <button
+                    onClick={onClose}
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                    ✕
+                </button>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Hora
-            </label>
-            <select name="timeslot_id" id="timeslot_id" className="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                {timeslots?.map(timeslot => (
-                    <option key={timeslot.id} value={timeslot.id}>
-                        {timeslot.hour}
-                    </option>
-                ))}
-            </select>
-          </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            Enviar
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+                <h2 className="text-lg font-semibold">Formulario</h2>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Hora
+                        </label>
+                        <select
+                            name="timeslot_id"
+                            id="timeslot_id"
+                            className="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            {timeslots?.map(timeslot => (
+                                <option key={timeslot.id} value={timeslot.id}>
+                                    {timeslot.hour}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        {isLoading ? 'Cargando...' : 'Enviar'}
+                    </button>
+                </form>
+            </div>
+        </div>
+    )
 }

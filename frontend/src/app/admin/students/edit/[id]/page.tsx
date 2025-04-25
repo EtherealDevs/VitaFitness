@@ -58,7 +58,7 @@ export default function EditStudentPage() {
         } finally {
             setLoading(false)
         }
-    }, [getStudent])
+    }, [getStudent, id])
 
     useEffect(() => {
         fetchStudent()

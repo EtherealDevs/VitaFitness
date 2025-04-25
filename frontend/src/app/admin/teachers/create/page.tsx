@@ -6,17 +6,9 @@ import { Input } from '@/app/admin/components/ui/input'
 import { Button } from '@/app/admin/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useTeachers } from '@/hooks/teachers'
 
-interface Branch {
-    id: number
-    name: string
-}
-
-export default function CreateTeacherView({
-    branches,
-}: {
-    branches: Branch[]
-}) {
+export default function CreateTeacherView() {
     const router = useRouter()
 
     const [form, setForm] = useState({
@@ -25,8 +17,8 @@ export default function CreateTeacherView({
         email: '',
         phone: '',
         dni: '',
-        branch_id: '',
     })
+    const { createTeacher } = useTeachers()
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -34,10 +26,27 @@ export default function CreateTeacherView({
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         // lógica para guardar profesor
-        console.log('Crear profesor:', form)
+        const formData = new FormData()
+        formData.append('name', form.name)
+        formData.append('last_name', form.last_name)
+        formData.append('email', form.email)
+        formData.append('phone', form.phone)
+        formData.append('dni', form.dni)
+
+        try {
+            const response = await createTeacher(formData)
+            const data = await response
+            console.log(data)
+            alert('Profesor creado exitosamente')
+            router.push('/admin/teachers')
+        } catch (error) {
+            console.error('Error al crear el profesor:', error)
+            alert('Error al crear el profesor')
+            throw error
+        }
     }
 
     return (
@@ -99,26 +108,6 @@ export default function CreateTeacherView({
                                     value={form.dni}
                                     onChange={handleChange}
                                 />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="branch_id">Sucursal</Label>
-                                <select
-                                    id="branch_id"
-                                    name="branch_id"
-                                    value={form.branch_id}
-                                    onChange={handleChange}
-                                    className="mt-1 block w-full border rounded-md shadow-sm p-2 text-sm dark:bg-zinc-900 dark:text-white">
-                                    <option value="">
-                                        Seleccione una sucursal
-                                    </option>
-                                    {branches?.map(branch => (
-                                        <option
-                                            key={branch.id}
-                                            value={branch.id}>
-                                            {branch.name}
-                                        </option>
-                                    ))}
-                                </select>
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 pt-4">

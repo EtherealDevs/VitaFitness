@@ -1,6 +1,7 @@
 /* import useSWR from 'swr' */
 import axios from '@/lib/axios'
-/* import { useEffect } from 'react'
+import { useCallback } from 'react'
+/* import { useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation' */
 
 // export interface Class {
@@ -15,7 +16,7 @@ import { useParams, useRouter } from 'next/navigation' */
 
 export const useClassSchedules = () => {
     const csrf = () => axios.get('/sanctum/csrf-cookie')
-    const getClassSchedules = async () => {
+    const getClassSchedules = useCallback(async () => {
         await csrf()
         try {
             const response = await axios.get('/api/classSchedules')
@@ -24,8 +25,8 @@ export const useClassSchedules = () => {
             console.error(error)
             throw error
         }
-    }
-    const getClassSchedule = async (id: string) => {
+    }, [])
+    const getClassSchedule = useCallback(async (id: string) => {
         try {
             const response = await axios.get(`/api/classSchedules/${id}`)
             return response.data
@@ -33,7 +34,7 @@ export const useClassSchedules = () => {
             console.error(error)
             throw error
         }
-    }
+    }, [])
     const createClassSchedule = async (formData: FormData) => {
         await csrf()
         try {

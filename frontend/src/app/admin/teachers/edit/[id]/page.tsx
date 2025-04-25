@@ -144,7 +144,6 @@ export default function TeacherProfile() {
         }
         return dayMap[schedule.day] || 1
     })
-    console.log(teacher)
 
     return (
         <div className="space-y-6 p-6">

@@ -14,8 +14,6 @@ const Register = () => {
         redirectIfAuthenticated: '/',
     })
 
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
     const [dni, setDni] = useState('')
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -34,8 +32,6 @@ const Register = () => {
         event.preventDefault()
 
         register({
-            name,
-            email,
             dni,
             password,
             password_confirmation: passwordConfirmation,

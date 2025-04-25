@@ -182,7 +182,7 @@ export default function TeacherIndex() {
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Link
-                                                    href={`/admin/teachers/${teacher.id}`}>
+                                                    href={`/admin/teachers/edit/${teacher.id}`}>
                                                     <Button
                                                         variant="outline"
                                                         size="sm">
