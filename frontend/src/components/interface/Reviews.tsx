@@ -13,8 +13,7 @@ const reviews = [
             'Increíble ambiente y excelentes entrenadores. ¡He visto resultados en solo 2 meses!',
         rating: 5,
         avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200',
-        role: 'Miembro Premium',
-        date: 'Hace 2 semanas',
+        date: 'Hace 2 meses',
     },
     {
         name: 'Carlos R.',
@@ -22,7 +21,6 @@ const reviews = [
             'Las instalaciones son de primera y el personal siempre está dispuesto a ayudar. Recomiendo totalmente las clases de spinning.',
         rating: 5,
         avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200',
-        role: 'Miembro Elite',
         date: 'Hace 1 mes',
     },
     {
@@ -31,17 +29,7 @@ const reviews = [
             'Me encanta la variedad de clases. Los entrenadores son muy profesionales y siempre te motivan a dar lo mejor.',
         rating: 4,
         avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200',
-        role: 'Miembro Regular',
         date: 'Hace 3 semanas',
-    },
-    {
-        name: 'Juan P.',
-        comment:
-            'El plan premium vale cada centavo. Mi entrenador personal es excepcional y los resultados hablan por sí solos.',
-        rating: 5,
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200',
-        role: 'Miembro Premium',
-        date: 'Hace 1 semana',
     },
     {
         name: 'Laura M.',
@@ -49,17 +37,15 @@ const reviews = [
             'El ambiente es muy motivador y las instalaciones siempre están impecables. ¡Me encanta entrenar aquí!',
         rating: 5,
         avatar: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?q=80&w=200',
-        role: 'Miembro Elite',
-        date: 'Hace 5 días',
+        date: 'Hace 5 años',
     },
     {
         name: 'Diego S.',
         comment:
-            'Las clases de CrossFit son increíbles. He mejorado mi condición física más de lo que esperaba.',
+            'Las clases de Fit-Boxing son increíbles. He mejorado mi condición física más de lo que esperaba.',
         rating: 5,
         avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200',
-        role: 'Miembro Regular',
-        date: 'Hace 2 días',
+        date: 'Hace 2 meses',
     },
 ]
 
@@ -254,14 +240,12 @@ function ReviewCard({
     rating,
     comment,
     avatar,
-    role,
     date,
 }: {
     name: string
     rating: number
     comment: string
     avatar: string
-    role: string
     date: string
 }) {
     return (
@@ -277,7 +261,6 @@ function ReviewCard({
                 </div>
                 <div>
                     <h3 className="font-semibold text-lg text-white">{name}</h3>
-                    <p className="text-[#40E0D0] text-sm">{role}</p>
                     <div className="flex items-center gap-1 mt-1">
                         <div className="flex">
                             {Array.from({ length: 5 }).map((_, i) => (
