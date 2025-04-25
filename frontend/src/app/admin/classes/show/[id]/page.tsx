@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import AddStudentsModal from '@/components/ui/add-students-modal'
+import AddTeachersModal from '@/components/ui/add-teachers-modal'
 import { useSchedules } from '@/hooks/schedules'
 import { useClassSchedules } from '@/hooks/classSchedules'
 import { useClassTeachers } from '@/hooks/classTeachers'
@@ -110,6 +111,7 @@ export default function AdminSchedulePanel({ params }: { params: { id: string } 
     >({})
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
     const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false)
+    const [isTeacherModalOpen, setIsTeacherModalOpen] = useState<boolean>(false)
 
     // Fetch schedule data
     useEffect(() => {
@@ -275,6 +277,9 @@ export default function AdminSchedulePanel({ params }: { params: { id: string } 
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-start p-4">
+            {isStudentModalOpen && <AddStudentsModal onClose={() => setIsStudentModalOpen(false)} classScheduleId={params.id} timeslots={scheduleData.timeslots} isStudentModalOpen={isStudentModalOpen}/>}
+            {isTeacherModalOpen && <AddTeachersModal onClose={() => setIsTeacherModalOpen(false)} classScheduleId={params.id} timeslots={scheduleData.timeslots} isTeacherModalOpen={isTeacherModalOpen}/>}
+
             <h2 className="text-2xl font-bold text-center mb-6 text-purple-700 dark:text-purple-400">
                 Ver Clases y Horarios
             </h2>
@@ -346,10 +351,7 @@ export default function AdminSchedulePanel({ params }: { params: { id: string } 
                                                 <button
                                                     className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                                                     onClick={() => {
-                                                        setIsMenuOpen(false)
-                                                        alert(
-                                                            'Agregar estudiante - Funcionalidad a implementar',
-                                                        )
+                                                        setIsStudentModalOpen(true)
                                                     }}>
                                                     <UserPlus className="h-4 w-4" />
                                                     <span>

@@ -17,13 +17,13 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/app/admin/components/ui/button'
+import { useStudents } from '@/hooks/students'
 
 // Types for our student data
 interface Student {
     id: string
     name: string
     last_name: string
-    email: string
     phone: string
     dni: string
     status: 'activo' | 'inactivo' | 'pendiente'
@@ -78,7 +78,6 @@ const mockStudents: Student[] = [
         id: '1',
         name: 'Eliana',
         last_name: 'Aguirre',
-        email: 'eliana.aguirre@example.com',
         phone: '+54 11 5555-1234',
         dni: '32456789',
         status: 'activo',
@@ -107,7 +106,6 @@ const mockStudents: Student[] = [
         id: '10',
         name: 'Gladys',
         last_name: 'Kurylo',
-        email: 'gladys.kurylo@example.com',
         phone: '+54 11 5555-5678',
         dni: '28765432',
         status: 'activo',
@@ -152,12 +150,7 @@ export default function StudentManagement() {
         lastPaymentAmount: 29000,
     })
 
-    // Define these functions with useCallback to prevent recreation on each render
-    const getStudents = useCallback(async () => {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800))
-        return { students: mockStudents }
-    }, [])
+    const { getStudents } = useStudents();
 
     const deleteStudent = useCallback(async (id: string) => {
         // Simulate API delay
@@ -256,9 +249,6 @@ export default function StudentManagement() {
             student =>
                 student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 student.last_name
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
-                student.email
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase()) ||
                 (student.dni &&
@@ -398,20 +388,6 @@ export default function StudentManagement() {
                                     </th>
                                     <th className="px-4 py-3 text-left">
                                         <button
-                                            onClick={() => handleSort('email')}
-                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
-                                            Email
-                                            {sortConfig?.key === 'email' &&
-                                                (sortConfig.direction ===
-                                                'asc' ? (
-                                                    <ChevronUp className="h-4 w-4" />
-                                                ) : (
-                                                    <ChevronDown className="h-4 w-4" />
-                                                ))}
-                                        </button>
-                                    </th>
-                                    <th className="px-4 py-3 text-left">
-                                        <button
                                             onClick={() => handleSort('status')}
                                             className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
                                             Estado
@@ -516,9 +492,6 @@ export default function StudentManagement() {
                                             </td>
                                             <td className="px-4 py-3">
                                                 {student.phone}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                {student.email}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span
@@ -627,17 +600,6 @@ export default function StudentManagement() {
                                     Información Personal
                                 </h4>
                                 <div className="space-y-2">
-                                    <div className="flex items-start gap-2">
-                                        <Mail className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
-                                        <div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                Email
-                                            </p>
-                                            <p className="dark:text-white">
-                                                {selectedStudent.email}
-                                            </p>
-                                        </div>
-                                    </div>
                                     <div className="flex items-start gap-2">
                                         <Phone className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
                                         <div>

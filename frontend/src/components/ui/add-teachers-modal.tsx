@@ -1,41 +1,37 @@
 'use client'
 import { useClassStudents } from '@/hooks/classStudents';
+import { useClassTeachers } from '@/hooks/classTeachers';
 import { useStudents } from '@/hooks/students';
+import { useTeachers } from '@/hooks/teachers';
 import React, { useEffect, useState } from 'react';
 
 type ModalProps = {
   onClose: () => void;
   classScheduleId: string;
   timeslots: any[];
-  isStudentModalOpen: boolean;
+  isTeacherModalOpen: boolean;
 };
-interface Student {
-    id: string
-    name: string
-    last_name: string
-    registration_date: string
-    status: 'activo' | 'inactivo' | 'pendiente'
-    email: string
-    phone: string
-    dni: string
+interface Teacher {
+    id: number;
+    name: string;
 }
 
-export default function AddStudentsModal({ onClose, classScheduleId, timeslots, isStudentModalOpen }: ModalProps) {
-    const [students, setStudents] = useState<Student[]>([])
+export default function AddTeachersModal({ onClose, classScheduleId, timeslots, isTeacherModalOpen }: ModalProps) {
+    const [teachers, setTeachers] = useState<Teacher[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
-    const { getStudents } = useStudents()
-    const { createClassStudent } = useClassStudents()
+    const { getTeachers } = useTeachers()
+    const { createClassTeacher } = useClassTeachers()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
         try {
             const formData = new FormData()
-            console.log(e.target.students.value)
-            formData.append('students[]', e.target.students.value)
+            console.log(e.target.teachers.value)
+            formData.append('teachers[]', e.target.teachers.value)
             formData.append('c_sch_ts_id', e.target.c_sch_ts_id.value)
-            await createClassStudent(formData)
+            await createClassTeacher(formData)
             onClose()
         } catch (error) {
             console.error('Error creating class student:', error)
@@ -50,17 +46,17 @@ export default function AddStudentsModal({ onClose, classScheduleId, timeslots, 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await getStudents()
-                setStudents(res.students)
+                const res = await getTeachers()
+                setTeachers(res.teachers)
             } catch (error) {
-                console.error('Error fetching class students:', error)
-                setError('Error al obtener los estudiantes')
+                console.error('Error fetching class teachers:', error)
+                setError('Error al obtener los profes')
             }
         }
         fetchData()
     }, [])
     useEffect(() => {
-        if (isStudentModalOpen) {
+        if (isTeacherModalOpen) {
           document.body.style.overflow = 'hidden'
         } else {
           document.body.style.overflow = ''
@@ -70,10 +66,10 @@ export default function AddStudentsModal({ onClose, classScheduleId, timeslots, 
         return () => {
           document.body.style.overflow = ''
         }
-      }, [isStudentModalOpen])
+      }, [isTeacherModalOpen])
     
-      if (!isStudentModalOpen) return null
-    console.log(students)
+      if (!isTeacherModalOpen) return null
+    console.log(teachers)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -100,10 +96,10 @@ export default function AddStudentsModal({ onClose, classScheduleId, timeslots, 
             <label className="block text-sm font-medium text-gray-700">
               Estudiantes (se pueden seleccionar varios manteniendo apretado la tecla CTRL)
             </label>
-            <select name="students[]" id="students" multiple className="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                {students?.map(student => (
-                    <option key={student.id} value={student.id}>
-                        {student.name}
+            <select name="teachers[]" id="teachers" multiple className="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                {teachers?.map(teacher => (
+                    <option key={teacher.id} value={teacher.id}>
+                        {teacher.name}
                     </option>
                 ))}
             </select>
