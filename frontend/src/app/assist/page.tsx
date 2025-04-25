@@ -1,5 +1,7 @@
 'use client'
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import { useState, useEffect } from 'react'
 import {
     ChevronLeft,
@@ -11,23 +13,10 @@ import {
 import Link from 'next/link'
 import { useAttendances } from '@/hooks/attendances'
 
-// Types for our attendance data
-
 interface Class {
     id: string
     name: string
 }
-// interface Branch {
-//     id: string
-//     name: string
-//     address: string
-// }
-// interface Plan {
-//     id: string
-//     name: string
-//     description: string
-//     status: string
-// }
 interface ClassSchedule {
     id: string
     class: Class
@@ -64,20 +53,17 @@ interface DayAttendance {
 }
 
 interface MonthAttendance {
-    month: number // 0-11 (JavaScript month)
+    month: number
     year: number
     days: DayAttendance[]
 }
 
-// Helper functions for calendar
 const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate()
 }
 
 const getFirstDayOfMonth = (year: number, month: number) => {
-    // Get day of week (0 = Sunday, 1 = Monday, etc.)
     const firstDay = new Date(year, month, 1).getDay()
-    // Convert to Monday-first format (0 = Monday, 6 = Sunday)
     return firstDay === 0 ? 6 : firstDay - 1
 }
 
@@ -96,9 +82,6 @@ const monthNames = [
     'Diciembre',
 ]
 
-// Mock API function to simulate fetching attendance data
-// s
-
 export default function Assists() {
     const { getAttendancesForCurrentStudent } = useAttendances()
 
@@ -113,9 +96,12 @@ export default function Assists() {
     const [error, setError] = useState<string | null>(null)
     const [attendanceData, setAttendanceData] =
         useState<MonthAttendance | null>(null)
+
     const [selectedDay, setSelectedDay] = useState<
         DayAttendance | Attendance | null
     >(null)
+
+    const today = new Date()
 
     useEffect(() => {
         let isMounted = true
@@ -128,7 +114,7 @@ export default function Assists() {
                 const response = await getAttendancesForCurrentStudent()
                 if (isMounted) {
                     setAttendances(response.attendances)
-                    setAttendanceData(response.data) // si response.data es MonthAttendance
+                    setAttendanceData(response.data)
                     setSelectedDay(null)
                 }
             } catch (err) {
@@ -148,27 +134,22 @@ export default function Assists() {
         return () => {
             isMounted = false
         }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentMonth, currentYear])
 
-    // Calendar calculations
     const daysInMonth = getDaysInMonth(currentYear, currentMonth)
     const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth)
     const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
-    // Create calendar grid
     const calendarDays = []
-
-    // Add empty cells for days before the 1st of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
         calendarDays.push(null)
     }
-
-    // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
         calendarDays.push(day)
     }
 
-    // Function to check if a day has attendance
     const getDayAttendance = (day: number) => {
         return (
             attendances?.find(
@@ -180,7 +161,6 @@ export default function Assists() {
         )
     }
 
-    // Function to navigate between months
     const navigateMonth = (direction: number) => {
         let newMonth = currentMonth + direction
         let newYear = currentYear
@@ -197,7 +177,6 @@ export default function Assists() {
         setCurrentYear(newYear)
     }
 
-    // Check if a day is today
     const isToday = (day: number) => {
         return (
             currentMonth === today.getMonth() &&
@@ -206,13 +185,11 @@ export default function Assists() {
         )
     }
 
-    // Function to handle day selection
     const handleDaySelect = (day: number) => {
         const attendance = getDayAttendance(day)
         setSelectedDay(attendance)
     }
 
-    // Render calendar day
     const renderCalendarDay = (day: number | null, index: number) => {
         if (day === null) {
             return <div key={`empty-${index}`} className="aspect-square"></div>
