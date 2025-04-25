@@ -94,7 +94,7 @@ export default function AddTeachersModal({ onClose, classScheduleId, timeslots, 
                 ))}
             </select>
             <label className="block text-sm font-medium text-gray-700">
-              Estudiantes (se pueden seleccionar varios manteniendo apretado la tecla CTRL)
+              Profes (se pueden seleccionar varios manteniendo apretado la tecla CTRL)
             </label>
             <select name="teachers[]" id="teachers" multiple className="mt-1 block w-full border border-gray-300 rounded-md p-2">
                 {teachers?.map(teacher => (

@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/upload/comprobante', [PaymentController::class, 'storeComprobante']);
     Route::get('/comprobante/download/{filename}', [PaymentController::class, 'downloadComprobante']);
     Route::get('/attendances/getAllForCurrent', [AttendanceController::class, 'getAllAttendancesForCurrentStudent']);
+    Route::apiResource('class/timeslots', ClassScheduleTimeslotController::class);
     Route::apiResource('attendances', AttendanceController::class);
     Route::apiResource('students', StudentController::class);
     Route::apiResource('branches', BranchController::class)->except(['index', 'show']);
