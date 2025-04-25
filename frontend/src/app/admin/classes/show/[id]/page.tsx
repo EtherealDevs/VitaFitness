@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react'
 import AddStudentsModal from '@/components/ui/add-students-modal'
 import { useSchedules } from '@/hooks/schedules'
 import { useClassSchedules } from '@/hooks/classSchedules'
+import { useClassTeachers } from '@/hooks/classTeachers'
+import { useClassStudents } from '@/hooks/classStudents'
 
 interface Timeslot {
     id: number
@@ -95,6 +97,8 @@ interface TimeSlot {
 
 export default function AdminSchedulePanel({ params }: { params: { id: string } }) {
     const { getClassSchedule } = useClassSchedules()
+    const { deleteClassTeacher } = useClassTeachers()
+    const { deleteClassStudent } = useClassStudents()
 
     const [scheduleData, setScheduleData] = useState<ClassSchedule>([])
     const [loading, setLoading] = useState<boolean>(true)
@@ -165,6 +169,75 @@ export default function AdminSchedulePanel({ params }: { params: { id: string } 
             ...prev,
             [timeSlotId]: !prev[timeSlotId],
         }))
+    }
+    const handleDeleteTeacher = async (id: string) => {
+        try {
+            const res = await deleteClassTeacher(id)
+            console.log('Deleted successfully:', res)
+            let isMounted = true
+
+            const fetchData = async () => {
+                if (!isMounted) return
+
+                setLoading(true)
+                setError(null)
+
+                try {
+                    const res = await getClassSchedule(params.id)
+
+                    if (isMounted) {
+                        setScheduleData(res.classSchedule)
+                    }
+                } catch (err) {
+                    if (isMounted) {
+                        setError('Error al cargar los horarios')
+                        console.error(err)
+                    }
+                } finally {
+                    if (isMounted) {
+                        setLoading(false)
+                    }
+                }
+            }
+            fetchData()
+        } catch (err) {
+            console.error('Error deleting teacher:', err)
+        }
+    }
+    const handleDeleteStudent = async (id: string) => {
+        try {
+            const res = await deleteClassStudent(id)
+            console.log('Deleted successfully:', res)
+            let isMounted = true
+
+            const fetchData = async () => {
+                if (!isMounted) return
+
+                setLoading(true)
+                setError(null)
+
+                try {
+                    const res = await getClassSchedule(params.id)
+
+                    if (isMounted) {
+                        setScheduleData(res.classSchedule)
+                    }
+                } catch (err) {
+                    if (isMounted) {
+                        setError('Error al cargar los horarios')
+                        console.error(err)
+                    }
+                } finally {
+                    if (isMounted) {
+                        setLoading(false)
+                    }
+                }
+            }
+
+            fetchData()
+        } catch (err) {
+            console.error('Error deleting student:', err)
+        }
     }
 
     // Handle deletion of items
@@ -399,11 +472,8 @@ export default function AdminSchedulePanel({ params }: { params: { id: string } 
                                                                                     <button
                                                                                         className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors opacity-0 group-hover:opacity-100"
                                                                                         onClick={() =>
-                                                                                            handleDelete(
-                                                                                                'student',
-                                                                                                dayIndex,
-                                                                                                index,
-                                                                                                idx,
+                                                                                            handleDeleteStudent(
+                                                                                                student.id
                                                                                             )
                                                                                         }
                                                                                         title="Eliminar estudiante">
@@ -452,11 +522,8 @@ export default function AdminSchedulePanel({ params }: { params: { id: string } 
                                                                                     <button
                                                                                         className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors opacity-0 group-hover:opacity-100"
                                                                                         onClick={() =>
-                                                                                            handleDelete(
-                                                                                                'professor',
-                                                                                                dayIndex,
-                                                                                                index,
-                                                                                                idx,
+                                                                                            handleDeleteTeacher(
+                                                                                                professor.id
                                                                                             )
                                                                                         }
                                                                                         title="Eliminar profesor">
