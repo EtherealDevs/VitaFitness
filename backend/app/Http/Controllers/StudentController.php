@@ -140,8 +140,8 @@ class StudentController extends Controller
         $currentDay = strtolower($now->format('l'));
 
 
-        $hasClassNow = false;
-        $currentClassScheduleId = null;
+        // $hasClassNow = false;
+        // $currentClassScheduleId = null;
         $validPayment = null;
         $dayMap = [
             'monday' => 'lunes',
@@ -153,41 +153,52 @@ class StudentController extends Controller
             'sunday' => 'domingo',
         ];
         // Buscar si tiene clase ahora
-        foreach ($student->classScheduleTimeSlots as $timeSlot) {
-            $days = $timeSlot->classSchedule->schedule->days ?? [];
+        // foreach ($student->classScheduleTimeSlots as $timeSlot) {
+        //     $days = $timeSlot->classSchedule->schedule->days ?? [];
 
 
-            $slotBase = Carbon::createFromFormat('H:i:s', $timeSlot->timeslot->hour, 'America/Argentina/Buenos_Aires')
-                ->setDate($now->year, $now->month, $now->day);
+        //     $slotBase = Carbon::createFromFormat('H:i:s', $timeSlot->timeslot->hour, 'America/Argentina/Buenos_Aires')
+        //         ->setDate($now->year, $now->month, $now->day);
 
-            $slotStart = $slotBase->copy()->subMinutes(5);
-            $slotEnd = $slotBase->copy()->addHour(1);
-            if (in_array($dayMap[$currentDay], $days) && $now->between($slotStart, $slotEnd)) {
-                $hasClassNow = true;
-                $currentClassScheduleId = $timeSlot->classSchedule->id;
-                break;
-            }
-        }
+        //     $slotStart = $slotBase->copy()->subMinutes(5);
+        //     $slotEnd = $slotBase->copy()->addHour(1);
+        //     if (in_array($dayMap[$currentDay], $days) && $now->between($slotStart, $slotEnd)) {
+        //         $hasClassNow = true;
+        //         $currentClassScheduleId = $timeSlot->classSchedule->id;
+        //         break;
+        //     }
+        // }
 
         // Buscar si hay un pago válido para esa clase
 
-        if ($hasClassNow && $currentClassScheduleId) {
+        // if ($hasClassNow && $currentClassScheduleId) {
 
-            $validPayment = $student->payments
-                ->where('classSchedule_id', $currentClassScheduleId)
-                ->where('status', 'pagado')
-                ->where('date_start', '<=', $now)
-                ->where('expiration_date', '>=', $now)
-                ->first();
-        }
+        //     $validPayment = $student->payments
+        //         ->where('classSchedule_id', $currentClassScheduleId)
+        //         ->where('status', 'pagado')
+        //         ->where('date_start', '<=', $now)
+        //         ->where('expiration_date', '>=', $now)
+        //         ->first();
+        // }
+        $validPayment = $student->payments
+            ->where('status', 'pagado')
+            ->where('expiration_date', '>=', $now)
+            ->first();
 
+        // return response()->json([
+        //     'student_id' => $student->id,
+        //     'has_class_now' => $hasClassNow,
+        //     'is_payment_valid' => (bool) $validPayment,
+        //     'payment_date' => $validPayment?->payment_date,
+        //     'expiration_date' => $validPayment?->expiration_date,
+        //     'access_granted' => $hasClassNow && $validPayment !== null,
+        // ]);
         return response()->json([
             'student_id' => $student->id,
-            'has_class_now' => $hasClassNow,
             'is_payment_valid' => (bool) $validPayment,
             'payment_date' => $validPayment?->payment_date,
             'expiration_date' => $validPayment?->expiration_date,
-            'access_granted' => $hasClassNow && $validPayment !== null,
+            'access_granted' => $validPayment !== null,
         ]);
     }
     public function destroy(Student $student)

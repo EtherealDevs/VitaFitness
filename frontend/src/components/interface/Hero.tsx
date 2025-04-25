@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Button from '@/components/ui/Button'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
+import { getWhatsAppLink } from '@/utils/whatsapp'
+import Link from 'next/link'
 
 // Carrusel para desktop
 const desktopImages = [
@@ -21,20 +23,24 @@ const mobileImages = [
 
 export default function Hero() {
     const [currentImage, setCurrentImage] = useState(0)
+    const classInfo =
+        'Hola vi tu pagina y quiero saber más sobre tu clases y disponibilidad'
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentImage((prev) => (prev + 1) % desktopImages.length)
+            setCurrentImage(prev => (prev + 1) % desktopImages.length)
         }, 5000)
         return () => clearInterval(interval)
     }, [])
 
     const nextImage = () => {
-        setCurrentImage((prev) => (prev + 1) % desktopImages.length)
+        setCurrentImage(prev => (prev + 1) % desktopImages.length)
     }
 
     const prevImage = () => {
-        setCurrentImage((prev) => (prev - 1 + desktopImages.length) % desktopImages.length)
+        setCurrentImage(
+            prev => (prev - 1 + desktopImages.length) % desktopImages.length,
+        )
     }
 
     // COMPONENTE BASE
@@ -47,8 +53,7 @@ export default function Hero() {
                         className="text-3xl sm:text-6xl md:text-7xl font-bold text-white mt-16 md:mt-0"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
+                        transition={{ delay: 0.2 }}>
                         Transforma tu vida
                         <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-500">
                             con nosotros
@@ -60,10 +65,10 @@ export default function Hero() {
                         className="text-lg sm:text-xl text-gray-300 max-w-2xl"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                    >
-                        En Vita Fitness, no solo entrenamos tu cuerpo, transformamos tu mentalidad
-                        para que cada día te acerques a tu mejor versión
+                        transition={{ delay: 0.4 }}>
+                        En Vita Fitness, no solo entrenamos tu cuerpo,
+                        transformamos tu mentalidad para que cada día te
+                        acerques a tu mejor versión
                     </motion.p>
 
                     {/* Schedule */}
@@ -71,27 +76,38 @@ export default function Hero() {
                         className="w-full max-w-2xl mt-12 bg-black/25 p-8 rounded-xl backdrop-blur-sm"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8 }}
-                    >
+                        transition={{ delay: 0.8 }}>
                         <h2 className="text-2xl font-semibold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-500">
                             Horarios
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-white">
                             <div>
-                                <p className="font-semibold text-lg">Lunes y Martes</p>
-                                <p className="text-gray-400">8:00 AM - 10:00 PM</p>
+                                <p className="font-semibold text-lg">
+                                    Lunes y Martes
+                                </p>
+                                <p className="text-gray-400">
+                                    8:00 AM - 10:00 PM
+                                </p>
                             </div>
                             <div>
-                                <p className="font-semibold text-lg">Miércoles y Jueves</p>
-                                <p className="text-gray-400">10:00 AM - 10:00 PM</p>
+                                <p className="font-semibold text-lg">
+                                    Miércoles y Jueves
+                                </p>
+                                <p className="text-gray-400">
+                                    10:00 AM - 10:00 PM
+                                </p>
                             </div>
                             <div>
                                 <p className="font-semibold text-lg">Viernes</p>
-                                <p className="text-gray-400">8:00 AM - 8:00 PM</p>
+                                <p className="text-gray-400">
+                                    8:00 AM - 8:00 PM
+                                </p>
                             </div>
                             <div>
                                 <p className="font-semibold text-lg">Sábados</p>
-                                <p className="text-gray-400">8:00 AM - 2:00 PM</p>
+                                <p className="text-gray-400">
+                                    8:00 AM - 2:00 PM
+                                </p>
                             </div>
                         </div>
                     </motion.div>
@@ -101,14 +117,20 @@ export default function Hero() {
                         className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 }}
-                    >
-                        <Button className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90 text-white text-lg">
-                            Reservar clase Ahora
-                        </Button>
-                        <Button className="w-full sm:w-auto px-8 py-3 border-2 border-gray-500 hover:border-purple-500 text-white text-lg">
-                            Explorar nuestros planes
-                        </Button>
+                        transition={{ delay: 0.6 }}>
+                        <a
+                            href={getWhatsAppLink(classInfo)}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            <Button className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90 text-white text-lg">
+                                Reservar clase Ahora
+                            </Button>
+                        </a>
+                        <Link href="#productos" passHref>
+                            <Button className="w-full sm:w-auto px-8 py-3 border-2 border-gray-500 hover:border-purple-500 text-white text-lg">
+                                Explorar nuestros planes
+                            </Button>
+                        </Link>
                     </motion.div>
                 </div>
             </div>
@@ -117,20 +139,25 @@ export default function Hero() {
 
     const CarouselControls = () => (
         <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center space-x-4 z-20">
-            <button onClick={prevImage} className="text-white p-2 rounded-full bg-black/30 hover:bg-black/50">
+            <button
+                onClick={prevImage}
+                className="text-white p-2 rounded-full bg-black/30 hover:bg-black/50">
                 <ChevronLeft size={24} />
             </button>
             <div className="flex space-x-2">
                 {desktopImages.map((_, index) => (
                     <button
                         key={index}
-                        className={`w-3 h-3 rounded-full transition-colors ${index === currentImage ? 'bg-white' : 'bg-gray-500'
-                            }`}
+                        className={`w-3 h-3 rounded-full transition-colors ${
+                            index === currentImage ? 'bg-white' : 'bg-gray-500'
+                        }`}
                         onClick={() => setCurrentImage(index)}
                     />
                 ))}
             </div>
-            <button onClick={nextImage} className="text-white p-2 rounded-full bg-black/30 hover:bg-black/50">
+            <button
+                onClick={nextImage}
+                className="text-white p-2 rounded-full bg-black/30 hover:bg-black/50">
                 <ChevronRight size={24} />
             </button>
         </div>
@@ -148,7 +175,9 @@ export default function Hero() {
                         animate={{ opacity: 0.5 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 1 }}
-                        style={{ backgroundImage: `url(${desktopImages[currentImage]})` }}
+                        style={{
+                            backgroundImage: `url(${desktopImages[currentImage]})`,
+                        }}
                     />
                 </AnimatePresence>
                 <div className="absolute inset-0 bg-black/50" />
@@ -166,7 +195,9 @@ export default function Hero() {
                         animate={{ opacity: 0.5 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 1 }}
-                        style={{ backgroundImage: `url(${mobileImages[currentImage]})` }}
+                        style={{
+                            backgroundImage: `url(${mobileImages[currentImage]})`,
+                        }}
                     />
                 </AnimatePresence>
                 <div className="absolute inset-0 bg-black/50" />

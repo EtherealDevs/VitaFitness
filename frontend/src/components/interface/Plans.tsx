@@ -11,6 +11,7 @@ import { User, ArrowRight, ShoppingCart } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Product, useProducts } from '@/hooks/products'
 import { Plan, usePlans } from '@/hooks/plans'
+import { getWhatsAppLink } from '@/utils/whatsapp'
 
 export default function Services() {
     const { getProducts } = useProducts()
@@ -28,6 +29,8 @@ export default function Services() {
     const [visibleProducts, setVisibleProducts] = useState<number>(4)
     const plansContainerRef = useRef<HTMLDivElement>(null)
     const productsContainerRef = useRef<HTMLDivElement>(null)
+    const plansInfo =
+        'Hola, vi tu pagina y quiero más información sobre los planes'
     const fetchProducts = useCallback(async () => {
         try {
             const response = await getProducts()
@@ -216,9 +219,14 @@ export default function Services() {
                         </div>
 
                         <div className="mt-8 text-center">
-                            <Button className="bg-transparent rounded-xl border">
-                                SOLICITAR INFO
-                            </Button>
+                            <a
+                                href={getWhatsAppLink(plansInfo)}
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                <Button className="bg-transparent rounded-xl border">
+                                    SOLICITAR INFO
+                                </Button>
+                            </a>
                         </div>
                     </div>
 

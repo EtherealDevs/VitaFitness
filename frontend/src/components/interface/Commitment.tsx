@@ -107,10 +107,13 @@ export default function CommitmentSection() {
                                 ¿POR QUÉ ELEGIR A VITA?
                             </h2>
                             <p className="text-gray-300 relative z-10">
-                                The smartest & most effective workout in 50
-                                minutes. VITA is functional fitness at its
-                                finest & will have your body feeling strong &
-                                sculpted fast.
+                                En nuestro gimnasio no solo encontrás variedad
+                                de planes como Pilates, Functional, Fitboxing y
+                                Cycling, también te acompañamos en cada paso
+                                para que logres tus objetivos. Contamos con
+                                profesores calificados, clases dinámicas, un
+                                ambiente motivador y la mejor energía todos los
+                                días. 💪 ¡Tu bienestar es nuestra prioridad!
                             </p>
                             <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-r from-green-400/10 to-purple-500/10 rounded-full blur-xl"></div>
                         </div>

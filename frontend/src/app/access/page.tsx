@@ -157,7 +157,7 @@ function AccessCard({
 }
 interface access {
     student_id: string
-    has_class_now: boolean
+    has_class_now?: boolean
     is_payment_valid: boolean
     payment_date: string
     expiration_date: string
@@ -218,15 +218,7 @@ export default function AccessPage() {
             } else {
                 setStatus('unauthorized')
 
-                if (!accessData.has_class_now && !accessData.is_payment_valid) {
-                    setErrorMessage(
-                        'No tienes clases en este momento y tu pago está vencido.',
-                    )
-                } else if (!accessData.has_class_now) {
-                    setErrorMessage(
-                        'No tienes clases programadas en este momento.',
-                    )
-                } else if (!accessData.is_payment_valid) {
+                if (!accessData.is_payment_valid) {
                     setErrorMessage('El pago está vencido o no es válido.')
                 }
             }
@@ -272,13 +264,5 @@ export default function AccessPage() {
             documentNumber={documentNumber}
             setDocumentNumber={setDocumentNumber}
         />
-        // <AccessCard
-        //     name={`${student.name} ${student.lastname}`}
-        //     paymentDate={payment.payment_date}
-        //     status={status}
-        //     errorMessage={errorMessage}
-        //     documentNumber={documentNumber}
-        //     setDocumentNumber={setDocumentNumber}
-        // />
     )
 }
