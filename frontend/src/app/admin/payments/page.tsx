@@ -23,12 +23,16 @@ import {
 import { Input } from '../components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import Link from 'next/link'
+import { Label } from '../components/ui/label'
 
 export default function PaymentsPage() {
     const { getPayments, deletePayment } = usePayments()
     const [payments, setPayments] = useState<Payment[]>([])
     const [loading, setLoading] = useState(false)
     const [search, setSearch] = useState('')
+    const [filterStartDate, setFilterStartDate] = useState('')
+    const [filterPaymentDate, setFilterPaymentDate] = useState('')
+    const [filterExpirationDate, setFilterExpirationDate] = useState('')
 
     useEffect(() => {
         async function fetchPayments() {
@@ -61,13 +65,43 @@ export default function PaymentsPage() {
     }
 
     // Filtrar pagos según la búsqueda
-    const filteredPayments = payments?.filter(
-        (payment: Payment) =>
+    const filteredPayments = payments?.filter((payment: Payment) => {
+        const matchesSearch =
             payment.status?.toLowerCase().includes(search.toLowerCase()) ||
             payment.expiration_date
                 ?.toLowerCase()
-                .includes(search.toLowerCase()),
+                .includes(search.toLowerCase())
+
+        const matchesStartDate = filterStartDate
+            ? payment.date_start?.startsWith(filterStartDate)
+            : true
+
+        const matchesPaymentDate = filterPaymentDate
+            ? payment.payment_date?.startsWith(filterPaymentDate)
+            : true
+
+        const matchesExpirationDate = filterExpirationDate
+            ? payment.expiration_date?.startsWith(filterExpirationDate)
+            : true
+
+        return (
+            matchesSearch &&
+            matchesStartDate &&
+            matchesPaymentDate &&
+            matchesExpirationDate
+        )
+    })
+    const [currentPage, setCurrentPage] = useState(1)
+    const paymentsPerPage = 20
+
+    const indexOfLastPayment = currentPage * paymentsPerPage
+    const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage
+    const currentPayments = filteredPayments.slice(
+        indexOfFirstPayment,
+        indexOfLastPayment,
     )
+
+    const totalPages = Math.ceil(filteredPayments.length / paymentsPerPage)
 
     if (loading) {
         return (
@@ -93,6 +127,32 @@ export default function PaymentsPage() {
                     onChange={e => setSearch(e.target.value)}
                     className="max-w-sm"
                 />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                    <Label>Fecha de inicio</Label>
+                    <Input
+                        type="date"
+                        value={filterStartDate}
+                        onChange={e => setFilterStartDate(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <Label>Fecha de pago</Label>
+                    <Input
+                        type="date"
+                        value={filterPaymentDate}
+                        onChange={e => setFilterPaymentDate(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <Label>Fecha de expiración</Label>
+                    <Input
+                        type="date"
+                        value={filterExpirationDate}
+                        onChange={e => setFilterExpirationDate(e.target.value)}
+                    />
+                </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -170,6 +230,7 @@ export default function PaymentsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>ID</TableHead>
                                     <TableHead>Nombre</TableHead>
                                     <TableHead>Monto</TableHead>
                                     <TableHead>Clase</TableHead>
@@ -183,7 +244,7 @@ export default function PaymentsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredPayments?.map((payment: Payment) => (
+                                {currentPayments?.map((payment: Payment) => (
                                     <TableRow key={payment.id}>
                                         <TableCell>
                                             <Link
@@ -191,6 +252,10 @@ export default function PaymentsPage() {
                                                 className="font-medium hover:underline">
                                                 {payment.student_id}
                                             </Link>
+                                        </TableCell>
+                                        <TableCell>
+                                            {payment.student.name}{' '}
+                                            {payment.student.last_name}
                                         </TableCell>
                                         <TableCell>${payment.amount}</TableCell>
                                         <TableCell>
@@ -238,6 +303,25 @@ export default function PaymentsPage() {
                                 ))}
                             </TableBody>
                         </Table>
+                    </div>
+                    <div className="flex justify-between items-center mt-4">
+                        <Button
+                            variant="outline"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(prev => prev - 1)}>
+                            ← Anterior
+                        </Button>
+
+                        <span className="text-sm">
+                            Página {currentPage} de {totalPages}
+                        </span>
+
+                        <Button
+                            variant="outline"
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(prev => prev + 1)}>
+                            Siguiente →
+                        </Button>
                     </div>
                 </CardContent>
             </Card>
