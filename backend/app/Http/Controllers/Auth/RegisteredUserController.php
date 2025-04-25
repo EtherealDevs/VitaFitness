@@ -29,7 +29,7 @@ class RegisteredUserController extends Controller
         ]);
         $student = Student::where('dni', $request->dni)->first();
         $name = $student->name;
-        $email = $student->email;
+        $email = $student->email ?? '';
 
         $user = User::create([
             'name' => $name,
