@@ -52,12 +52,6 @@ interface DayAttendance {
     classes: ClassAttendance[]
 }
 
-interface MonthAttendance {
-    month: number
-    year: number
-    days: DayAttendance[]
-}
-
 const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate()
 }
@@ -94,8 +88,6 @@ export default function Assists() {
     )
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
-    const [attendanceData, setAttendanceData] =
-        useState<MonthAttendance | null>(null)
 
     const [selectedDay, setSelectedDay] = useState<
         DayAttendance | Attendance | null
@@ -114,7 +106,6 @@ export default function Assists() {
                 const response = await getAttendancesForCurrentStudent()
                 if (isMounted) {
                     setAttendances(response.attendances)
-                    setAttendanceData(response.data)
                     setSelectedDay(null)
                 }
             } catch (err) {
