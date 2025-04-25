@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('last_name');
             $table->date('registration_date');
-            $table->enum('status', ['activo', 'inactivo', 'pendiente'])->default('pendiente');
-            $table->string('email')->unique();
+            $table->enum('status', ['activo', 'inactivo'])->default('activo');
+            $table->string('email')->nullable();
             $table->string('phone');
             $table->string('dni')->unique();
 
