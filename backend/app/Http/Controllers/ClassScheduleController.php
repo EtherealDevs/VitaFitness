@@ -29,6 +29,22 @@ class ClassScheduleController extends Controller
         ];
         return response()->json($data, 200);
     }
+    public function show(string $id)
+    {
+        try {
+            $classSchedule = ClassSchedule::find($id);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+        $classSchedule->load('class', 'schedule', 'students', 'teachers', 'classScheduleTimeslots.classStudents', 'classScheduleTimeslots.classTeachers');
+        $classSchedule = new ClassScheduleResource($classSchedule);
+        $data = [
+            'classSchedule' => $classSchedule,
+            'message' => 'ClassSchedule retrieved successfully',
+            'status' => 'success (200)'
+        ];
+        return response()->json($data, 200);
+    }
     public function create()
     {
         $classes = Classe::all();

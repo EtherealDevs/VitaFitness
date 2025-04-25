@@ -10,6 +10,9 @@ import {
     UserX,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import AddStudentsModal from '@/components/ui/add-students-modal'
+import { useSchedules } from '@/hooks/schedules'
+import { useClassSchedules } from '@/hooks/classSchedules'
 
 interface Timeslot {
     id: number
@@ -24,6 +27,15 @@ interface Schedule {
     timeslots: Timeslot[]
     time_start: string
     time_end: string
+}
+interface ClassSchedule {
+    id: string
+    class: Class
+    schedule: Schedule
+    selectedDays: string[]
+    timeslots: any[]
+    students: string[]
+    teachers: string[]
 }
 
 interface Plan {
@@ -81,115 +93,10 @@ interface TimeSlot {
     professors: string[]
 }
 
-interface DaySchedule {
-    day: string
-    timeSlots: TimeSlot[]
-}
+export default function AdminSchedulePanel({ params }: { params: { id: string } }) {
+    const { getClassSchedule } = useClassSchedules()
 
-// Mock data for schedules
-const mockScheduleData: DaySchedule[] = [
-    {
-        day: 'Lunes',
-        timeSlots: [
-            {
-                time: '08:00:00',
-                students: [
-                    'First Student Name',
-                    'Second Student Name',
-                    'Third Student Name',
-                ],
-                professors: [],
-            },
-            {
-                time: '09:00:00',
-                students: [
-                    'First Student Name',
-                    'Second Student Name',
-                    'Third Student Name',
-                ],
-                professors: [],
-            },
-            {
-                time: '10:00:00',
-                students: ['First Student Name'],
-                professors: [],
-            },
-            {
-                time: '11:00:00',
-                students: [],
-                professors: [],
-            },
-            {
-                time: '12:00:00',
-                students: [],
-                professors: [],
-            },
-        ],
-    },
-    {
-        day: 'Martes',
-        timeSlots: [
-            {
-                time: '08:00:00',
-                students: ['Maria González', 'Juan Pérez'],
-                professors: ['Prof. Rodriguez'],
-            },
-            {
-                time: '09:00:00',
-                students: ['Ana López', 'Carlos Sánchez'],
-                professors: ['Prof. Martinez'],
-            },
-        ],
-    },
-    {
-        day: 'Miércoles',
-        timeSlots: [
-            {
-                time: '10:00:00',
-                students: ['Laura Díaz', 'Pedro Fernández'],
-                professors: ['Prof. Gómez'],
-            },
-            {
-                time: '11:00:00',
-                students: ['Sofia Ruiz'],
-                professors: ['Prof. Hernández'],
-            },
-        ],
-    },
-    {
-        day: 'Jueves',
-        timeSlots: [
-            {
-                time: '09:00:00',
-                students: ['Miguel Torres', 'Isabel Vargas'],
-                professors: ['Prof. López'],
-            },
-            {
-                time: '10:00:00',
-                students: ['Roberto Mendoza'],
-                professors: ['Prof. Sánchez'],
-            },
-        ],
-    },
-    {
-        day: 'Viernes',
-        timeSlots: [
-            {
-                time: '08:00:00',
-                students: ['Carmen Ortiz', 'Daniel Morales'],
-                professors: ['Prof. Flores'],
-            },
-            {
-                time: '12:00:00',
-                students: ['Elena Castro'],
-                professors: ['Prof. Ramírez'],
-            },
-        ],
-    },
-]
-
-export default function AdminSchedulePanel() {
-    const [scheduleData, setScheduleData] = useState<DaySchedule[]>([])
+    const [scheduleData, setScheduleData] = useState<ClassSchedule>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
     const [selectedDay, setSelectedDay] = useState<string | null>(null)
@@ -198,6 +105,7 @@ export default function AdminSchedulePanel() {
         Record<string, boolean>
     >({})
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
+    const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false)
 
     // Fetch schedule data
     useEffect(() => {
@@ -210,11 +118,10 @@ export default function AdminSchedulePanel() {
             setError(null)
 
             try {
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 800))
+                const res = await getClassSchedule(params.id)
 
                 if (isMounted) {
-                    setScheduleData(mockScheduleData)
+                    setScheduleData(res.classSchedule)
                 }
             } catch (err) {
                 if (isMounted) {
@@ -234,7 +141,7 @@ export default function AdminSchedulePanel() {
             isMounted = false
         }
     }, [])
-
+    console.log(scheduleData)   
     // Handle day selection
     const handleDayClick = (day: string) => {
         if (selectedDay === day) {
@@ -248,9 +155,9 @@ export default function AdminSchedulePanel() {
     }
 
     // Get the selected day's schedule
-    const getSelectedDaySchedule = () => {
-        return scheduleData.find(schedule => schedule.day === selectedDay)
-    }
+    // const getSelectedDaySchedule = () => {
+    //     return scheduleData.find(schedule => schedule.day === selectedDay)
+    // }
 
     // Toggle time slot expansion
     const toggleTimeSlot = (timeSlotId: string) => {
@@ -293,21 +200,6 @@ export default function AdminSchedulePanel() {
         alert(`Elemento eliminado correctamente`)
     }
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            const target = event.target as HTMLElement
-            if (isMenuOpen && !target.closest('.admin-menu-container')) {
-                setIsMenuOpen(false)
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside)
-        }
-    }, [isMenuOpen])
-
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-start p-4">
             <h2 className="text-2xl font-bold text-center mb-6 text-purple-700 dark:text-purple-400">
@@ -321,7 +213,7 @@ export default function AdminSchedulePanel() {
                 <div
                     className={`bg-white/80 dark:bg-transparent  backdrop-blur shadow-lg rounded-lg border border-opacity-50 overflow-hidden
           transition-all duration-300 ease-in-out
-          ${isPanelOpen ? 'md:w-1/3' : 'w-full'}`}>
+          md:w-1/3'`}>
                     {loading ? (
                         <div className="flex justify-center items-center py-16">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
@@ -332,33 +224,20 @@ export default function AdminSchedulePanel() {
                         </div>
                     ) : (
                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {scheduleData.map(schedule => (
-                                <button
-                                    key={schedule.day}
-                                    onClick={() => handleDayClick(schedule.day)}
-                                    className={`w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors
-                    ${
-                        selectedDay === schedule.day
-                            ? 'bg-gray-100 dark:bg-gray-800/50'
-                            : ''
-                    }`}>
+                            {scheduleData.selectedDays.map(schedule => (
+                                <div
+                                    key={schedule}
+                                    className={`w-full px-6 py-4 flex items-center justify-between text-left`}>
                                     <span className="font-medium">
-                                        {schedule.day}
+                                        {schedule}
                                     </span>
-                                    {selectedDay === schedule.day &&
-                                    isPanelOpen ? (
-                                        <ChevronDown className="h-5 w-5 text-dark" />
-                                    ) : (
-                                        <ChevronRight className="h-5 w-5 text-dark" />
-                                    )}
-                                </button>
+                                </div>
                             ))}
                         </div>
                     )}
                 </div>
 
                 {/* Detail panel - only visible when a day is selected */}
-                {isPanelOpen && (
                     <div
                         className={`bg-white/80 dark:bg-transparent backdrop-blur shadow-lg rounded-lg border border-opacity-50 overflow-hidden
             mt-4 md:mt-0 transition-all duration-300 ease-in-out md:w-2/3`}>
@@ -423,19 +302,13 @@ export default function AdminSchedulePanel() {
                                 </div>
                             </div>
 
-                            {selectedDay && getSelectedDaySchedule() ? (
                                 <div className="space-y-4">
-                                    {getSelectedDaySchedule()?.timeSlots.map(
+                                    {scheduleData?.timeslots?.map(
                                         (slot, index) => {
                                             const timeSlotId = `${selectedDay}-${slot.time}-${index}`
                                             const isExpanded =
                                                 expandedTimeSlots[timeSlotId] ||
                                                 false
-                                            const dayIndex =
-                                                scheduleData.findIndex(
-                                                    day =>
-                                                        day.day === selectedDay,
-                                                )
 
                                             return (
                                                 <div
@@ -450,7 +323,7 @@ export default function AdminSchedulePanel() {
                                                                 )
                                                             }>
                                                             <h3 className="font-medium text-purple-700 dark:text-purple-400">
-                                                                {slot.time}
+                                                                {slot.hour}
                                                             </h3>
                                                         </div>
                                                         <div className="flex items-center gap-2">
@@ -462,11 +335,11 @@ export default function AdminSchedulePanel() {
                                                                             '¿Estás seguro de que deseas eliminar este horario?',
                                                                         )
                                                                     ) {
-                                                                        handleDelete(
-                                                                            'timeslot',
-                                                                            dayIndex,
-                                                                            index,
-                                                                        )
+                                                                        // handleDelete(
+                                                                        //     'timeslot',
+                                                                        //     dayIndex,
+                                                                        //     index,
+                                                                        // )
                                                                     }
                                                                 }}
                                                                 title="Eliminar horario">
@@ -504,11 +377,11 @@ export default function AdminSchedulePanel() {
                                                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                                                     Estudiantes:
                                                                 </p>
-                                                                {slot.students
+                                                                {slot.classStudents
                                                                     .length >
                                                                 0 ? (
                                                                     <ul className="pl-4">
-                                                                        {slot.students.map(
+                                                                        {slot.classStudents.map(
                                                                             (
                                                                                 student,
                                                                                 idx,
@@ -520,7 +393,7 @@ export default function AdminSchedulePanel() {
                                                                                     className="text-gray-800 dark:text-gray-200 flex items-center justify-between group">
                                                                                     <span>
                                                                                         {
-                                                                                            student
+                                                                                            student.student?.name + ' ' + student.student?.last_name + ' ' + student.student?.dni
                                                                                         }
                                                                                     </span>
                                                                                     <button
@@ -557,11 +430,11 @@ export default function AdminSchedulePanel() {
                                                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                                                     Profesores:
                                                                 </p>
-                                                                {slot.professors
+                                                                {slot.classTeachers
                                                                     .length >
                                                                 0 ? (
                                                                     <ul className="pl-4">
-                                                                        {slot.professors.map(
+                                                                        {slot.classTeachers.map(
                                                                             (
                                                                                 professor,
                                                                                 idx,
@@ -573,7 +446,7 @@ export default function AdminSchedulePanel() {
                                                                                     className="text-gray-800 dark:text-gray-200 flex items-center justify-between group">
                                                                                     <span>
                                                                                         {
-                                                                                            professor
+                                                                                            professor.teacher?.name + ' ' + professor.teacher?.last_name + ' ' + professor.teacher?.dni
                                                                                         }
                                                                                     </span>
                                                                                     <button
@@ -612,14 +485,8 @@ export default function AdminSchedulePanel() {
                                         },
                                     )}
                                 </div>
-                            ) : (
-                                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                                    Selecciona un día para ver los horarios
-                                </div>
-                            )}
                         </div>
                     </div>
-                )}
             </div>
         </div>
     )
