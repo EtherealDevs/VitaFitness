@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { Card } from '@/components/ui/card'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Student } from '../admin/students/columns'
 import axios from '@/lib/axios'
 
@@ -26,7 +26,9 @@ function AccessCard({
     documentNumber,
     setDocumentNumber,
 }: AccessCardProps) {
-    // Función para alternar pantalla completa
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    // Función para alternar pantalla completa manualmente
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
@@ -40,6 +42,12 @@ function AccessCard({
         }
     }
 
+    useEffect(() => {
+        if (status === 'pending' && inputRef.current) {
+            inputRef.current.focus()
+        }
+    }, [status])
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4 relative">
             {/* Botón de maximizar pantalla */}
@@ -52,14 +60,12 @@ function AccessCard({
             {/* Fondo con gradiente */}
             <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
 
-            {/* Mostrar título solo si está en estado "pending" */}
             {status === 'pending' && (
                 <h2 className="text-2xl font-semibold text-white mb-4 text-center">
                     Ingresa tu número de documento para verificar acceso
                 </h2>
             )}
 
-            {/* Contenido principal */}
             <div className="relative">
                 <h1 className="text-4xl font-bold text-white text-center mb-6">
                     {status === 'authorized'
@@ -71,19 +77,17 @@ function AccessCard({
                         : ''}
                 </h1>
 
-                {/* Modal más grande */}
                 <Card
                     className={`w-[600px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6 
-                    ${
-                        status === 'authorized'
-                            ? 'bg-emerald-400'
-                            : status === 'unauthorized'
-                            ? 'bg-red-500'
-                            : status === 'error'
-                            ? 'bg-red-700'
-                            : 'bg-gray-300'
-                    }`}>
-                    {/* Logo */}
+                        ${
+                            status === 'authorized'
+                                ? 'bg-emerald-400'
+                                : status === 'unauthorized'
+                                ? 'bg-red-500'
+                                : status === 'error'
+                                ? 'bg-red-700'
+                                : 'bg-gray-300'
+                        }`}>
                     <div className="w-32 h-16 relative">
                         <Image
                             src="/favicon.ico"
@@ -94,31 +98,32 @@ function AccessCard({
                         />
                     </div>
 
-                    {/* Input solo si está en estado "pending" */}
-                    {status === 'pending' && (
-                        <div className="w-full space-y-4">
-                            <label className="block text-black text-lg">
-                                Número de Documento
-                            </label>
-                            <input
-                                type="text"
-                                className="w-full p-2 rounded-md text-black border border-gray-300"
-                                placeholder="Ej: 12345678"
-                                value={documentNumber || ''} // Asegura que siempre tenga un valor
-                                onChange={e => {
-                                    // Solo permitir números
-                                    const value = e.target.value
-                                    if (/^\d*$/.test(value)) {
-                                        setDocumentNumber(value)
-                                    }
-                                }}
-                                inputMode="numeric" // Para dispositivos móviles
-                                maxLength={8} // Limitar a 8 caracteres (ajustar según el formato)
-                            />
-                        </div>
-                    )}
+                    <div className="w-full space-y-4">
+                        <label className="block text-black text-lg text-center">
+                            Número de Documento
+                        </label>
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            className="w-full p-2 rounded-md text-black border border-gray-300 text-center text-2xl font-bold"
+                            placeholder="Ej: 12345678"
+                            value={documentNumber || ''}
+                            onChange={e => {
+                                const value = e.target.value
+                                if (/^\d*$/.test(value)) {
+                                    setDocumentNumber(value)
+                                }
+                            }}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    inputRef.current?.blur()
+                                }
+                            }}
+                            inputMode="numeric"
+                            maxLength={8}
+                        />
+                    </div>
 
-                    {/* Estado de acceso */}
                     {status !== 'pending' && (
                         <p
                             className={`text-xl font-medium ${
@@ -134,14 +139,12 @@ function AccessCard({
                         </p>
                     )}
 
-                    {/* Nombre del miembro */}
                     {status === 'authorized' && (
                         <h2 className="text-4xl font-black tracking-wide text-center">
                             {name}
                         </h2>
                     )}
 
-                    {/* Fecha de pago */}
                     {status === 'authorized' && (
                         <div className="text-center space-y-1">
                             <p className="text-lg font-medium">
@@ -155,6 +158,7 @@ function AccessCard({
         </div>
     )
 }
+
 interface access {
     student_id: string
     has_class_now?: boolean
@@ -163,7 +167,7 @@ interface access {
     expiration_date: string
     access_granted: boolean
 }
-// Componente principal
+
 export default function AccessPage() {
     const [documentNumber, setDocumentNumber] = useState<string>('')
     const [status, setStatus] = useState<AccessStatus>('pending')
@@ -178,14 +182,16 @@ export default function AccessPage() {
         access_granted: false,
     })
 
-    // Validación del documento (debe tener 8 dígitos)
+    const validateDocument = (docNumber: string): boolean =>
+        /^\d{8}$/.test(docNumber)
+
     const handleValidation = useCallback(async (dni: string) => {
         if (!validateDocument(dni)) {
             setStatus('error')
             setErrorMessage(
                 'Número de documento inválido. Debe tener 8 dígitos.',
             )
-            resetAfterDelay()
+
             return
         }
 
@@ -201,7 +207,7 @@ export default function AccessPage() {
             if (!studentData) {
                 setStatus('error')
                 setErrorMessage('Estudiante no encontrado.')
-                resetAfterDelay()
+
                 return
             }
 
@@ -222,24 +228,42 @@ export default function AccessPage() {
                     setErrorMessage('El pago está vencido o no es válido.')
                 }
             }
-
-            resetAfterDelay()
         } catch (error) {
             console.error(error)
             setStatus('error')
             setErrorMessage('Error al buscar el estudiante o su acceso.')
-            resetAfterDelay()
         }
-    }, []) // <---- Poné dependencias si usás variables externas
-
-    const validateDocument = (docNumber: string): boolean =>
-        /^\d{8}$/.test(docNumber)
+    }, [])
 
     useEffect(() => {
+        // Si el input está vacío, resetea todo
         if (documentNumber === '') {
             setStatus('pending')
+            setErrorMessage('')
+            setStudent(undefined)
+            setAccess({
+                student_id: '',
+                has_class_now: false,
+                is_payment_valid: false,
+                payment_date: '',
+                expiration_date: '',
+                access_granted: false,
+            })
             return
         }
+
+        // Al cambiar el DNI, también resetea todo antes de validar
+        setStatus('pending')
+        setErrorMessage('')
+        setStudent(undefined)
+        setAccess({
+            student_id: '',
+            has_class_now: false,
+            is_payment_valid: false,
+            payment_date: '',
+            expiration_date: '',
+            access_granted: false,
+        })
 
         const timeout = setTimeout(() => {
             handleValidation(documentNumber)
@@ -248,13 +272,40 @@ export default function AccessPage() {
         return () => clearTimeout(timeout)
     }, [documentNumber, handleValidation])
 
-    const resetAfterDelay = () => {
-        setTimeout(() => {
-            setDocumentNumber('')
-            setStatus('pending')
-            setErrorMessage('')
-        }, 2000)
-    }
+    useEffect(() => {
+        const enterFullScreen = () => {
+            if (document.fullscreenElement === null) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn('No se pudo entrar en fullscreen:', err)
+                })
+            }
+        }
+
+        enterFullScreen()
+
+        const keepInputFocused = (e: KeyboardEvent) => {
+            const isNumberKey = e.key >= '0' && e.key <= '9'
+            const isEnterKey = e.key === 'Enter'
+
+            if (!isNumberKey && !isEnterKey) return
+
+            const active = document.activeElement
+            const input = document.querySelector('input') as HTMLInputElement
+
+            if (active?.tagName !== 'INPUT') {
+                input?.focus()
+            }
+
+            if (isEnterKey && input) {
+                input.value = ''
+                setDocumentNumber('')
+            }
+        }
+
+        window.addEventListener('keydown', keepInputFocused)
+        return () => window.removeEventListener('keydown', keepInputFocused)
+    }, [])
+
     return (
         <AccessCard
             name={student ? `${student.name} ${student.last_name}` : ''}

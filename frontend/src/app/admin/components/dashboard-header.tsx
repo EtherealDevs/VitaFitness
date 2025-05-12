@@ -19,7 +19,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ admin }: DashboardHeaderProps) {
     return (
-        <header className="sticky top-0 z-30 flex h-14 w-full items-center bg-white px-4 dark:bg-zinc-950">
+        <header className="sticky top-0 z-30 flex h-14 w-full items-center bg-white px-4 dark:bg-gray-900 shadow-sm">
             <div className="flex flex-1 items-center gap-4 ">
                 <Sheet>
                     <SheetTrigger asChild>
