@@ -27,6 +27,15 @@ function AccessCard({
     setDocumentNumber,
 }: AccessCardProps) {
     const inputRef = useRef<HTMLInputElement>(null)
+    const [currentTime, setCurrentTime] = useState(new Date())
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date())
+        }, 1000)
+
+        return () => clearInterval(interval)
+    }, [])
 
     // Función para alternar pantalla completa manualmente
     const toggleFullScreen = () => {
@@ -48,6 +57,18 @@ function AccessCard({
         }
     }, [status])
 
+    const formattedTime = currentTime.toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    })
+
+    const formattedDate = currentTime.toLocaleDateString('es-AR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    })
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4 relative">
             {/* Botón de maximizar pantalla */}
@@ -59,6 +80,14 @@ function AccessCard({
 
             {/* Fondo con gradiente */}
             <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
+
+            {/* Reloj y fecha */}
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center z-50">
+                <p className="text-7xl font-extrabold text-white drop-shadow-lg">
+                    {formattedTime}
+                </p>
+                <p className="text-xl text-white mt-1">{formattedDate}</p>
+            </div>
 
             {status === 'pending' && (
                 <h2 className="text-2xl font-semibold text-white mb-4 text-center">
