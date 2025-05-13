@@ -85,11 +85,10 @@ class Student extends Model
     {
         return $this->belongsTo(Branch::class);
     }
-    // public function plans()
-    // {
-    //     $this->classes()
-    //     return $this->hasManyThrough(Plan::class, Classe::class, 'id', 'plan_id', 'id', 'attendance_id');
-    // }
+    public function plans()
+    {
+        return $this->belongsToMany(Plan::class);
+    }
     public function attendances()
     {
         return $this->hasManyThrough(Attendance::class, ClassScheduleTimeslotStudent::class, 'c_sch_ts_id', 'c_sch_ts_student_id', 'id', 'student_id');

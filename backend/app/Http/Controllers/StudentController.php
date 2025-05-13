@@ -21,7 +21,7 @@ class StudentController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $students->load('branch', 'payments', 'attendances', 'classes');
+        $students->load('branch', 'payments');
         $students = StudentResource::collection($students);
         $data = [
             'students' => $students,
@@ -40,7 +40,7 @@ class StudentController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
         $student->load('branch');
-        // $student->load('plans');
+        $student->load('plans');
         $student->load('attendances');
         $student->load('classes');
 

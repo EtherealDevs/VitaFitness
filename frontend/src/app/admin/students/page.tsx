@@ -26,39 +26,27 @@ interface Student {
     last_name: string
     phone: string
     dni: string
-    registration_date: string
     status: 'activo' | 'inactivo' | 'pendiente'
     paymentDueDate: string
     daysOverdue: number
     remainingClasses: number
     canAttend: boolean
     branch: string
-    payments?: [Payment]
-    attendances?: Attendances[]
-    accountInfo?: AccountInfo
+    payments: [Payment]
     // Additional details for the expanded view
     address?: string
     birthDate?: string
     memberSince?: string
     lastPaymentAmount?: number
-    paymentHistory?: Payment[]
+    paymentHistory?: {
+        date: string
+        amount: number
+        concept: string
+    }[]
     attendanceHistory?: {
         date: string
         className: string
     }[]
-}
-interface Attendances {
-    date: string
-    classSchedule: ClassSchedule
-
-}
-interface ClassSchedule {
-    id: string
-    class: Class
-}
-interface Class {
-    id: string
-    name: string
 }
 
 interface AccountInfo {
@@ -165,7 +153,14 @@ export default function StudentManagement() {
     } | null>(null)
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
     const [showDetails, setShowDetails] = useState<boolean>(false)
-    const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
+    const [accountInfo] = useState<AccountInfo>({
+        balance: 0,
+        lastEntryDate: '17/4/2025',
+        lastEntryTime: '12:42:20',
+        lastPaymentDate: '18/3/2025',
+        lastPaymentPlan: 'FUNCIONAL 21hs',
+        lastPaymentAmount: 29000,
+    })
 
     const { getStudents } = useStudents()
 
@@ -233,22 +228,8 @@ export default function StudentManagement() {
     const handleStudentClick = (student: Student) => {
         if (selectedStudent?.id === student.id) {
             setSelectedStudent(null) // Deselect if clicking the same student
-            setAccountInfo(null)
         } else {
-            let sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
-            let sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
-            console.log(sortedDates)
-            
-            let accountInfo = {
-                balance: 0,
-                lastEntryDate: String(sortedAttendances?.[0]?.date),
-                lastEntryTime: '',
-                lastPaymentDate: String(sortedDates?.[0]?.payment_date), 
-                lastPaymentPlan: String(sortedDates?.[0]?.classSchedule.class.name),
-                lastPaymentAmount: Number(sortedDates?.[0]?.amount),
-            }
             setSelectedStudent(student) // Select the clicked student
-            setAccountInfo(accountInfo)
         }
     }
 
@@ -716,9 +697,9 @@ export default function StudentManagement() {
                                                     Miembro desde
                                                 </p>
                                                 <p className="dark:text-white">
-                                                    {selectedStudent.registration_date
+                                                    {selectedStudent.memberSince
                                                         ? formatDate(
-                                                              selectedStudent.registration_date,
+                                                              selectedStudent.memberSince,
                                                           )
                                                         : 'No disponible'}
                                                 </p>
@@ -733,10 +714,10 @@ export default function StudentManagement() {
                                         Historial de Pagos
                                     </h4>
                                     <div className="space-y-2">
-                                        {selectedStudent.payments &&
-                                        selectedStudent.payments.length >
+                                        {selectedStudent.paymentHistory &&
+                                        selectedStudent.paymentHistory.length >
                                             0 ? (
-                                            selectedStudent.payments.map(
+                                            selectedStudent.paymentHistory.map(
                                                 (payment, index) => (
                                                     <div
                                                         key={index}
@@ -744,18 +725,18 @@ export default function StudentManagement() {
                                                         <div>
                                                             <p className="text-sm font-medium dark:text-white">
                                                                 {formatDate(
-                                                                    payment.payment_date,
+                                                                    payment.date,
                                                                 )}
                                                             </p>
                                                             <p className="text-xs text-gray-500 dark:text-gray-400">
                                                                 {
-                                                                    payment.classSchedule.class.name
+                                                                    payment.concept
                                                                 }
                                                             </p>
                                                         </div>
                                                         <span className="font-medium dark:text-white">
                                                             {formatCurrency(
-                                                                Number(payment.amount),
+                                                                payment.amount,
                                                             )}
                                                         </span>
                                                     </div>
@@ -776,10 +757,10 @@ export default function StudentManagement() {
                                         Historial de Asistencias
                                     </h4>
                                     <div className="space-y-2">
-                                        {selectedStudent.attendances &&
-                                        selectedStudent.attendances
+                                        {selectedStudent.attendanceHistory &&
+                                        selectedStudent.attendanceHistory
                                             .length > 0 ? (
-                                            selectedStudent.attendances.map(
+                                            selectedStudent.attendanceHistory.map(
                                                 (attendance, index) => (
                                                     <div
                                                         key={index}
@@ -791,7 +772,7 @@ export default function StudentManagement() {
                                                         </p>
                                                         <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
                                                             {
-                                                                attendance.classSchedule.class.name
+                                                                attendance.className
                                                             }
                                                         </span>
                                                     </div>
@@ -832,7 +813,7 @@ export default function StudentManagement() {
                                                 Promoción Principal:
                                             </span>
                                             <span className="ml-2 font-medium dark:text-white">
-                                                {accountInfo?.lastPaymentPlan}
+                                                FUNCIONAL 21hs
                                             </span>
                                         </div>
                                     </div>
@@ -869,14 +850,14 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             <span>
-                                                {accountInfo?.lastPaymentDate}
+                                                {accountInfo.lastPaymentDate}
                                             </span>
                                             <span>
-                                                {accountInfo?.lastPaymentPlan}
+                                                {accountInfo.lastPaymentPlan}
                                             </span>
                                             <span className="font-semibold">
                                                 {formatCurrency(
-                                                    accountInfo?.lastPaymentAmount,
+                                                    accountInfo.lastPaymentAmount,
                                                 )}
                                             </span>
                                         </div>
