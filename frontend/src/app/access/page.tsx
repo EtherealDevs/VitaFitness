@@ -41,14 +41,53 @@ function AccessCard({
     // Función para alternar pantalla completa manualmente
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
+            try {
+                // Intentar con el método estándar
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(
+                        'Error al intentar entrar en pantalla completa: ',
+                        err,
+                    )
+
+                    // Intentar con métodos específicos de navegadores
+                    const docEl = document.documentElement as HTMLElement & {
+                        mozRequestFullScreen?: () => Promise<void>
+                        webkitRequestFullscreen?: () => Promise<void>
+                        msRequestFullscreen?: () => Promise<void>
+                    }
+
+                    if (docEl.mozRequestFullScreen) {
+                        docEl.mozRequestFullScreen()
+                    } else if (docEl.webkitRequestFullscreen) {
+                        docEl.webkitRequestFullscreen()
+                    } else if (docEl.msRequestFullscreen) {
+                        docEl.msRequestFullscreen()
+                    }
+                })
+            } catch (error) {
                 console.error(
-                    'Error al intentar entrar en pantalla completa: ',
-                    err,
+                    'Error al intentar entrar en pantalla completa:',
+                    error,
                 )
-            })
+            }
         } else {
-            document.exitFullscreen()
+            if (document.exitFullscreen) {
+                document.exitFullscreen()
+            } else {
+                const doc = document as Document & {
+                    mozCancelFullScreen?: () => Promise<void>
+                    webkitExitFullscreen?: () => Promise<void>
+                    msExitFullscreen?: () => Promise<void>
+                }
+
+                if (doc.mozCancelFullScreen) {
+                    doc.mozCancelFullScreen()
+                } else if (doc.webkitExitFullscreen) {
+                    doc.webkitExitFullscreen()
+                } else if (doc.msExitFullscreen) {
+                    doc.msExitFullscreen()
+                }
+            }
         }
     }
 
@@ -356,15 +395,55 @@ export default function AccessPage() {
     }, [documentNumber, handleValidation])
 
     useEffect(() => {
+        // Intentar entrar en pantalla completa después de un pequeño retraso
         const enterFullScreen = () => {
             if (document.fullscreenElement === null) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.warn('No se pudo entrar en fullscreen:', err)
-                })
+                try {
+                    // Intentar con el método estándar
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.warn(
+                            'No se pudo entrar en fullscreen con método estándar:',
+                            err,
+                        )
+
+                        // Intentar con métodos específicos de navegadores
+                        const docEl =
+                            document.documentElement as HTMLElement & {
+                                mozRequestFullScreen?: () => Promise<void>
+                                webkitRequestFullscreen?: () => Promise<void>
+                                msRequestFullscreen?: () => Promise<void>
+                            }
+
+                        if (docEl.mozRequestFullScreen) {
+                            docEl.mozRequestFullScreen()
+                        } else if (docEl.webkitRequestFullscreen) {
+                            docEl.webkitRequestFullscreen()
+                        } else if (docEl.msRequestFullscreen) {
+                            docEl.msRequestFullscreen()
+                        }
+                    })
+                } catch (error) {
+                    console.warn(
+                        'Error al intentar entrar en pantalla completa:',
+                        error,
+                    )
+                }
             }
         }
+        const fullscreenTimeout = setTimeout(() => {
+            enterFullScreen()
+        }, 500)
 
-        enterFullScreen()
+        // También intentar cuando el usuario interactúe con la página
+        const handleUserInteraction = () => {
+            enterFullScreen()
+            // Eliminar el event listener después de la primera interacción
+            document.removeEventListener('click', handleUserInteraction)
+            document.removeEventListener('keydown', handleUserInteraction)
+        }
+
+        document.addEventListener('click', handleUserInteraction)
+        document.addEventListener('keydown', handleUserInteraction)
 
         const keepInputFocused = (e: KeyboardEvent) => {
             const isNumberKey = e.key >= '0' && e.key <= '9'
@@ -386,7 +465,13 @@ export default function AccessPage() {
         }
 
         window.addEventListener('keydown', keepInputFocused)
-        return () => window.removeEventListener('keydown', keepInputFocused)
+
+        return () => {
+            clearTimeout(fullscreenTimeout)
+            window.removeEventListener('keydown', keepInputFocused)
+            document.removeEventListener('click', handleUserInteraction)
+            document.removeEventListener('keydown', handleUserInteraction)
+        }
     }, [])
 
     return (
