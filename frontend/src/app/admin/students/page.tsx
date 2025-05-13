@@ -26,27 +26,39 @@ interface Student {
     last_name: string
     phone: string
     dni: string
+    registration_date: string
     status: 'activo' | 'inactivo' | 'pendiente'
     paymentDueDate: string
     daysOverdue: number
     remainingClasses: number
     canAttend: boolean
     branch: string
-    payments: [Payment]
+    payments?: [Payment]
+    attendances?: Attendances[]
+    accountInfo?: AccountInfo
     // Additional details for the expanded view
     address?: string
     birthDate?: string
     memberSince?: string
     lastPaymentAmount?: number
-    paymentHistory?: {
-        date: string
-        amount: number
-        concept: string
-    }[]
+    paymentHistory?: Payment[]
     attendanceHistory?: {
         date: string
         className: string
     }[]
+}
+interface Attendances {
+    date: string
+    classSchedule: ClassSchedule
+
+}
+interface ClassSchedule {
+    id: string
+    class: Class
+}
+interface Class {
+    id: string
+    name: string
 }
 
 interface AccountInfo {
@@ -153,14 +165,7 @@ export default function StudentManagement() {
     } | null>(null)
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
     const [showDetails, setShowDetails] = useState<boolean>(false)
-    const [accountInfo] = useState<AccountInfo>({
-        balance: 0,
-        lastEntryDate: '17/4/2025',
-        lastEntryTime: '12:42:20',
-        lastPaymentDate: '18/3/2025',
-        lastPaymentPlan: 'FUNCIONAL 21hs',
-        lastPaymentAmount: 29000,
-    })
+    const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
 
     const { getStudents } = useStudents()
 
@@ -228,8 +233,22 @@ export default function StudentManagement() {
     const handleStudentClick = (student: Student) => {
         if (selectedStudent?.id === student.id) {
             setSelectedStudent(null) // Deselect if clicking the same student
+            setAccountInfo(null)
         } else {
+            const sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
+            const sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
+            console.log(sortedDates)
+            
+            const accountInfo = {
+                balance: 0,
+                lastEntryDate: String(sortedAttendances?.[0]?.date),
+                lastEntryTime: '',
+                lastPaymentDate: String(sortedDates?.[0]?.payment_date), 
+                lastPaymentPlan: String(sortedDates?.[0]?.classSchedule.class.name),
+                lastPaymentAmount: Number(sortedDates?.[0]?.amount),
+            }
             setSelectedStudent(student) // Select the clicked student
+            setAccountInfo(accountInfo)
         }
     }
 
@@ -511,55 +530,63 @@ export default function StudentManagement() {
                                             <td className="px-4 py-3">
                                                 {student.last_name}
                                             </td>
-                                            <td className="px-4 py-3">
-                                                {student.phone}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span
-                                                    className={`px-2 py-1 text-xs rounded-full ${
-                                                        student.status ===
-                                                        'activo'
-                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                                                            : student.status ===
-                                                              'inactivo'
-                                                            ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
-                                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
-                                                    }`}>
-                                                    {student.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                {formatDate(
-                                                    student.payments[0]
-                                                        ?.expiration_date,
-                                                )}
-                                            </td>
+                                        </tr>
+                                    ) : (
+                                        paginatedStudents.map(student => (
+                                            <tr
+                                                key={student.id}
+                                                className={`${getRowColor(
+                                                    student.daysOverdue,
+                                                )} hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
+                                                    selectedStudent?.id ===
+                                                    student.id
+                                                        ? 'ring-2 ring-inset ring-purple-500'
+                                                        : ''
+                                                }`}
+                                                onClick={() =>
+                                                    handleStudentClick(student)
+                                                }>
+                                                <td className="px-4 py-3">
+                                                    {student.dni}
+                                                </td>
+                                                <td className="px-4 py-3 font-medium">
+                                                    {student.name}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {student.last_name}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {student.phone}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span
+                                                        className={`px-2 py-1 text-xs rounded-full ${
+                                                            student.status ===
+                                                            'activo'
+                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                                                                : student.status ===
+                                                                  'inactivo'
+                                                                ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                                                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
+                                                        }`}>
+                                                        {student.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {formatDate(
+                                                        student.payments?.[0]
+                                                            ?.expiration_date || "",
+                                                    )}
+                                                </td>
 
-                                            <td className="px-4 py-3 text-center">
-                                                {getDaysRemaining(
-                                                    student.payments[0]
-                                                        ?.expiration_date,
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={e => {
-                                                            e.stopPropagation()
-                                                            handleStudentClick(
-                                                                student,
-                                                            )
-                                                        }}
-                                                        className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                    <Link
-                                                        href={`/admin/students/edit/${student.id}`}
-                                                        onClick={e =>
-                                                            e.stopPropagation()
-                                                        }>
+                                                <td className="px-4 py-3 text-center">
+                                                    {getDaysRemaining(
+                                                        student.payments?.[0]
+                                                            ?.expiration_date || "",
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className="flex justify-end gap-2">
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
@@ -655,27 +682,63 @@ export default function StudentManagement() {
                                                 {selectedStudent.phone}
                                             </p>
                                         </div>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
-                                        <div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                Fecha de Nacimiento
-                                            </p>
-                                            <p className="dark:text-white">
-                                                {selectedStudent.birthDate
-                                                    ? formatDate(
-                                                          selectedStudent.birthDate,
-                                                      )
-                                                    : 'No disponible'}
-                                            </p>
+
+                                        <div className="flex items-start gap-2">
+                                            <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                    Miembro desde
+                                                </p>
+                                                <p className="dark:text-white">
+                                                    {selectedStudent.registration_date
+                                                        ? formatDate(
+                                                              selectedStudent.registration_date,
+                                                          )
+                                                        : 'No disponible'}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-start gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
-                                        <div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                Miembro desde
+                                </div>
+
+                                {/* Payment History */}
+                                <div className="space-y-4">
+                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                        Historial de Pagos
+                                    </h4>
+                                    <div className="space-y-2">
+                                        {selectedStudent.payments &&
+                                        selectedStudent.payments.length >
+                                            0 ? (
+                                            selectedStudent.payments.map(
+                                                (payment, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                                                        <div>
+                                                            <p className="text-sm font-medium dark:text-white">
+                                                                {formatDate(
+                                                                    payment.payment_date,
+                                                                )}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                {
+                                                                    payment.classSchedule.class.name
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                        <span className="font-medium dark:text-white">
+                                                            {formatCurrency(
+                                                                Number(payment.amount),
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                ),
+                                            )
+                                        ) : (
+                                            <p className="text-gray-500 dark:text-gray-400 italic">
+                                                No hay historial de pagos
+                                                disponible
                                             </p>
                                             <p className="dark:text-white">
                                                 {selectedStudent.memberSince
@@ -689,29 +752,34 @@ export default function StudentManagement() {
                                 </div>
                             </div>
 
-                            {/* Payment History */}
-                            <div className="space-y-4">
-                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                    Historial de Pagos
-                                </h4>
-                                <div className="space-y-2">
-                                    {selectedStudent.paymentHistory &&
-                                    selectedStudent.paymentHistory.length >
-                                        0 ? (
-                                        selectedStudent.paymentHistory.map(
-                                            (payment, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
-                                                    <div>
+
+                                {/* Attendance History */}
+                                <div className="space-y-4">
+                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                        Historial de Asistencias
+                                    </h4>
+                                    <div className="space-y-2">
+                                        {selectedStudent.attendances &&
+                                        selectedStudent.attendances
+                                            .length > 0 ? (
+                                            selectedStudent.attendances.map(
+                                                (attendance, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+
                                                         <p className="text-sm font-medium dark:text-white">
                                                             {formatDate(
                                                                 payment.date,
                                                             )}
                                                         </p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                            {payment.concept}
-                                                        </p>
+
+                                                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
+                                                            {
+                                                                attendance.classSchedule.class.name
+                                                            }
+                                                        </span>
+
                                                     </div>
                                                     <span className="font-medium dark:text-white">
                                                         {formatCurrency(
@@ -729,69 +797,81 @@ export default function StudentManagement() {
                                 </div>
                             </div>
 
-                            {/* Attendance History */}
-                            <div className="space-y-4">
-                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                    Historial de Asistencias
-                                </h4>
-                                <div className="space-y-2">
-                                    {selectedStudent.attendanceHistory &&
-                                    selectedStudent.attendanceHistory.length >
-                                        0 ? (
-                                        selectedStudent.attendanceHistory.map(
-                                            (attendance, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
-                                                    <p className="text-sm font-medium dark:text-white">
-                                                        {formatDate(
-                                                            attendance.date,
-                                                        )}
-                                                    </p>
-                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
-                                                        {attendance.className}
-                                                    </span>
-                                                </div>
-                                            ),
-                                        )
-                                    ) : (
-                                        <p className="text-gray-500 dark:text-gray-400 italic">
-                                            No hay historial de asistencias
-                                            disponible
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
 
-                        {/* Account info and actions */}
-                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {/* Account balance */}
-                                <div className="flex flex-col">
-                                    <div className="mt-2">
-                                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                                            Promoción Principal:
-                                        </span>
-                                        <span className="ml-2 font-medium dark:text-white">
-                                            ??
-                                        </span>
+                            {/* Account info and actions */}
+                            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {/* Account balance */}
+                                    <div className="flex flex-col">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                Saldo Cta Cte:
+                                            </span>
+                                            <span className="font-semibold dark:text-white">
+                                                {formatCurrency(
+                                                    accountInfo?.balance || 0,
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                                Ver Detalle Saldo
+                                            </button>
+                                        </div>
+                                        <div className="mt-2">
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                Promoción Principal:
+                                            </span>
+                                            <span className="ml-2 font-medium dark:text-white">
+                                                {accountInfo?.lastPaymentPlan}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Last entry */}
+                                    <div className="flex flex-col">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="font-medium dark:text-white">
+                                                Último Ingreso
+                                            </span>
+                                            <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                                Ver Historial
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center gap-2 dark:text-white">
+                                            <span>
+                                                {accountInfo?.lastEntryDate}
+                                            </span>
+                                            <span>
+                                                {accountInfo?.lastEntryTime}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Last entry */}
-                                <div className="flex flex-col">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="font-medium dark:text-white">
-                                            Último Ingreso
-                                        </span>
-                                        <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
-                                            Ver Historial
-                                        </button>
-                                    </div>
-                                    <div className="flex items-center gap-2 dark:text-white">
-                                        <span>{accountInfo.lastEntryDate}</span>
-                                        <span>{accountInfo.lastEntryTime}</span>
+                                    {/* Last payment */}
+                                    <div className="flex flex-col">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="font-medium dark:text-white">
+                                                Último Pago Cuota
+                                            </span>
+                                            <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                                Ver Historial
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center justify-between dark:text-white">
+                                            <span>
+                                                {accountInfo?.lastPaymentDate}
+                                            </span>
+                                            <span>
+                                                {accountInfo?.lastPaymentPlan}
+                                            </span>
+                                            <span className="font-semibold">
+                                                {formatCurrency(
+                                                    accountInfo?.lastPaymentAmount || 0,
+                                                )}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
