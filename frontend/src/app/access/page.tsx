@@ -110,7 +110,7 @@ function AccessCard({
     })
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex flex-col items-center justify-start pt-16 relative overflow-hidden">
+        <div className="min-h-screen max-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex flex-col items-center justify-start pt-16 relative overflow-hidden">
             {/* Elementos decorativos de fondo */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute -top-40 -left-40 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
