@@ -3,8 +3,9 @@
 import Image from 'next/image'
 import { Card } from '@/components/ui/card'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Student } from '../admin/students/columns'
+import type { Student } from '../admin/students/columns'
 import axios from '@/lib/axios'
+import { Search, Maximize2, X, Check } from 'lucide-react'
 
 // Estados posibles
 type AccessStatus = 'authorized' | 'unauthorized' | 'pending' | 'error'
@@ -70,71 +71,98 @@ function AccessCard({
     })
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4 relative">
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex flex-col items-center justify-start pt-16 relative overflow-hidden">
+            {/* Elementos decorativos de fondo */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -top-40 -left-40 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
+                <div className="absolute top-1/3 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl" />
+                <div className="absolute -bottom-40 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
+            </div>
+
             {/* Botón de maximizar pantalla */}
             <button
                 onClick={toggleFullScreen}
-                className="fixed top-4 right-4 z-50 bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 cursor-pointer">
-                ⛶
+                className="fixed top-4 right-4 z-50 bg-slate-800/80 text-white p-2.5 rounded-full hover:bg-slate-700 transition-colors duration-200 backdrop-blur-sm border border-slate-700/50 shadow-lg">
+                <Maximize2 size={20} />
             </button>
 
-            {/* Fondo con gradiente */}
-            <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
-
             {/* Reloj y fecha */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center z-50">
-                <p className="text-7xl font-extrabold text-white drop-shadow-lg">
+            <div className="relative z-10 text-center mb-12">
+                <p className="text-8xl font-bold text-white tracking-tight drop-shadow-lg">
                     {formattedTime}
                 </p>
-                <p className="text-xl text-white mt-1">{formattedDate}</p>
+                <p className="text-xl text-white/80 mt-1 font-medium">
+                    {formattedDate}
+                </p>
             </div>
 
-            {status === 'pending' && (
-                <h2 className="text-2xl font-semibold text-white mb-4 text-center">
-                    Ingresa tu número de documento para verificar acceso
-                </h2>
-            )}
-
-            <div className="relative">
-                <h1 className="text-4xl font-bold text-white text-center mb-6">
-                    {status === 'authorized'
-                        ? 'ACCESO PERMITIDO'
-                        : status === 'unauthorized'
-                        ? 'ACCESO DENEGADO'
-                        : status === 'error'
-                        ? 'ERROR'
-                        : ''}
-                </h1>
-
-                <Card
-                    className={`w-[600px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6 
-                        ${
+            {/* Título de estado */}
+            <div className="relative z-10 h-16 mb-6">
+                {status === 'pending' && (
+                    <h2 className="text-2xl font-medium text-white/90 text-center">
+                        Ingresa tu número de documento para verificar acceso
+                    </h2>
+                )}
+                {status !== 'pending' && (
+                    <h1
+                        className={`text-4xl font-bold text-center ${
                             status === 'authorized'
-                                ? 'bg-emerald-400'
-                                : status === 'unauthorized'
-                                ? 'bg-red-500'
-                                : status === 'error'
-                                ? 'bg-red-700'
-                                : 'bg-gray-300'
+                                ? 'text-emerald-400'
+                                : 'text-red-400'
                         }`}>
-                    <div className="w-32 h-16 relative">
-                        <Image
-                            src="/favicon.ico"
-                            alt="VITA fitness"
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
+                        {status === 'authorized'
+                            ? 'ACCESO PERMITIDO'
+                            : status === 'unauthorized'
+                            ? 'ACCESO DENEGADO'
+                            : 'ERROR'}
+                    </h1>
+                )}
+            </div>
 
-                    <div className="w-full space-y-4">
-                        <label className="block text-black text-lg text-center">
-                            Número de Documento
-                        </label>
+            {/* Tarjeta principal */}
+            <Card
+                className={`w-[600px] rounded-2xl p-8 flex flex-col items-center space-y-6 shadow-2xl backdrop-blur-sm border-2 transition-all duration-300 ${
+                    status === 'authorized'
+                        ? 'bg-emerald-500/90 border-emerald-400'
+                        : status === 'unauthorized' || status === 'error'
+                        ? 'bg-red-500/90 border-red-400'
+                        : 'bg-white/90 border-slate-200'
+                }`}>
+                {/* Logo */}
+                <div className="w-24 h-24 relative bg-white rounded-full p-2 shadow-md">
+                    <Image
+                        src="/favicon.ico"
+                        alt="VITA fitness"
+                        fill
+                        className="object-contain p-2"
+                        priority
+                    />
+                </div>
+
+                {/* Campo de documento */}
+                <div className="w-full space-y-3">
+                    <label
+                        className={`block text-lg text-center font-medium ${
+                            status === 'authorized' ||
+                            status === 'unauthorized' ||
+                            status === 'error'
+                                ? 'text-white'
+                                : 'text-slate-700'
+                        }`}>
+                        Número de Documento
+                    </label>
+                    <div className="relative">
                         <input
                             ref={inputRef}
                             type="text"
-                            className="w-full p-2 rounded-md text-black border border-gray-300 text-center text-2xl font-bold"
+                            className={`w-full p-4 pr-12 rounded-xl text-slate-800 border-2 text-center text-2xl font-bold shadow-sm focus:outline-none focus:ring-2 transition-all ${
+                                status === 'authorized'
+                                    ? 'border-emerald-300 focus:ring-emerald-300'
+                                    : status === 'unauthorized' ||
+                                      status === 'error'
+                                    ? 'border-red-300 focus:ring-red-300'
+                                    : 'border-slate-200 focus:ring-emerald-500'
+                            }`}
                             placeholder="Ej: 12345678"
                             value={documentNumber || ''}
                             onChange={e => {
@@ -151,39 +179,65 @@ function AccessCard({
                             inputMode="numeric"
                             maxLength={8}
                         />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <Search size={20} />
+                        </div>
                     </div>
+                </div>
 
-                    {status !== 'pending' && (
-                        <p
-                            className={`text-xl font-medium ${
-                                status === 'authorized'
-                                    ? 'text-white'
-                                    : 'text-black'
-                            }`}>
+                {/* Mensaje de estado */}
+                {status !== 'pending' && (
+                    <div
+                        className={`flex items-center justify-center gap-2 text-xl font-medium ${
+                            status === 'authorized' ||
+                            status === 'unauthorized' ||
+                            status === 'error'
+                                ? 'text-white'
+                                : 'text-slate-700'
+                        }`}>
+                        {status === 'authorized' ? (
+                            <Check className="text-white" size={24} />
+                        ) : (
+                            <X className="text-white" size={24} />
+                        )}
+                        <p>
                             {status === 'authorized'
                                 ? 'ACCESO PERMITIDO'
                                 : status === 'unauthorized'
                                 ? `ACCESO DENEGADO ${errorMessage}`
                                 : errorMessage}
                         </p>
-                    )}
+                    </div>
+                )}
 
-                    {status === 'authorized' && (
-                        <h2 className="text-4xl font-black tracking-wide text-center">
-                            {name}
-                        </h2>
-                    )}
+                {/* Nombre del estudiante */}
+                {status === 'authorized' && (
+                    <h2 className="text-4xl font-black tracking-wide text-center text-white mt-2">
+                        {name}
+                    </h2>
+                )}
 
-                    {status === 'authorized' && (
-                        <div className="text-center space-y-1">
-                            <p className="text-lg font-medium">
-                                FECHA DE PAGO:
-                            </p>
-                            <p className="text-lg font-medium">{paymentDate}</p>
-                        </div>
-                    )}
-                </Card>
-            </div>
+                {/* Fecha de pago */}
+                {status === 'authorized' && (
+                    <div className="text-center space-y-1 bg-white/20 px-6 py-3 rounded-xl backdrop-blur-sm">
+                        <p className="text-lg font-medium text-white">
+                            FECHA DE PAGO:
+                        </p>
+                        <p className="text-lg font-bold text-white">
+                            {paymentDate}
+                        </p>
+                    </div>
+                )}
+            </Card>
+
+            {/* Instrucciones adicionales */}
+            {status === 'pending' && (
+                <div className="mt-8 text-white/60 text-center max-w-md">
+                    <p>
+                        Ingresa tu DNI y presiona Enter para verificar tu acceso
+                    </p>
+                </div>
+            )}
         </div>
     )
 }
