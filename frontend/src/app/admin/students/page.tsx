@@ -235,11 +235,11 @@ export default function StudentManagement() {
             setSelectedStudent(null) // Deselect if clicking the same student
             setAccountInfo(null)
         } else {
-            let sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
-            let sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
+            const sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
+            const sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
             console.log(sortedDates)
             
-            let accountInfo = {
+            const accountInfo = {
                 balance: 0,
                 lastEntryDate: String(sortedAttendances?.[0]?.date),
                 lastEntryTime: '',
