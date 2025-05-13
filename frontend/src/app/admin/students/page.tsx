@@ -26,27 +26,39 @@ interface Student {
     last_name: string
     phone: string
     dni: string
+    registration_date: string
     status: 'activo' | 'inactivo' | 'pendiente'
     paymentDueDate: string
     daysOverdue: number
     remainingClasses: number
     canAttend: boolean
     branch: string
-    payments: [Payment]
+    payments?: [Payment]
+    attendances?: Attendances[]
+    accountInfo?: AccountInfo
     // Additional details for the expanded view
     address?: string
     birthDate?: string
     memberSince?: string
     lastPaymentAmount?: number
-    paymentHistory?: {
-        date: string
-        amount: number
-        concept: string
-    }[]
+    paymentHistory?: Payment[]
     attendanceHistory?: {
         date: string
         className: string
     }[]
+}
+interface Attendances {
+    date: string
+    classSchedule: ClassSchedule
+
+}
+interface ClassSchedule {
+    id: string
+    class: Class
+}
+interface Class {
+    id: string
+    name: string
 }
 
 interface AccountInfo {
@@ -153,14 +165,7 @@ export default function StudentManagement() {
     } | null>(null)
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
     const [showDetails, setShowDetails] = useState<boolean>(false)
-    const [accountInfo] = useState<AccountInfo>({
-        balance: 0,
-        lastEntryDate: '17/4/2025',
-        lastEntryTime: '12:42:20',
-        lastPaymentDate: '18/3/2025',
-        lastPaymentPlan: 'FUNCIONAL 21hs',
-        lastPaymentAmount: 29000,
-    })
+    const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
 
     const { getStudents } = useStudents()
 
@@ -228,8 +233,22 @@ export default function StudentManagement() {
     const handleStudentClick = (student: Student) => {
         if (selectedStudent?.id === student.id) {
             setSelectedStudent(null) // Deselect if clicking the same student
+            setAccountInfo(null)
         } else {
+            let sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
+            let sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
+            console.log(sortedDates)
+            
+            let accountInfo = {
+                balance: 0,
+                lastEntryDate: String(sortedAttendances?.[0]?.date),
+                lastEntryTime: '',
+                lastPaymentDate: String(sortedDates?.[0]?.payment_date), 
+                lastPaymentPlan: String(sortedDates?.[0]?.classSchedule.class.name),
+                lastPaymentAmount: Number(sortedDates?.[0]?.amount),
+            }
             setSelectedStudent(student) // Select the clicked student
+            setAccountInfo(accountInfo)
         }
     }
 
@@ -544,15 +563,15 @@ export default function StudentManagement() {
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     {formatDate(
-                                                        student.payments[0]
-                                                            ?.expiration_date,
+                                                        student.payments?.[0]
+                                                            ?.expiration_date || "",
                                                     )}
                                                 </td>
 
                                                 <td className="px-4 py-3 text-center">
                                                     {getDaysRemaining(
-                                                        student.payments[0]
-                                                            ?.expiration_date,
+                                                        student.payments?.[0]
+                                                            ?.expiration_date || "",
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
@@ -697,9 +716,9 @@ export default function StudentManagement() {
                                                     Miembro desde
                                                 </p>
                                                 <p className="dark:text-white">
-                                                    {selectedStudent.memberSince
+                                                    {selectedStudent.registration_date
                                                         ? formatDate(
-                                                              selectedStudent.memberSince,
+                                                              selectedStudent.registration_date,
                                                           )
                                                         : 'No disponible'}
                                                 </p>
@@ -714,10 +733,10 @@ export default function StudentManagement() {
                                         Historial de Pagos
                                     </h4>
                                     <div className="space-y-2">
-                                        {selectedStudent.paymentHistory &&
-                                        selectedStudent.paymentHistory.length >
+                                        {selectedStudent.payments &&
+                                        selectedStudent.payments.length >
                                             0 ? (
-                                            selectedStudent.paymentHistory.map(
+                                            selectedStudent.payments.map(
                                                 (payment, index) => (
                                                     <div
                                                         key={index}
@@ -725,18 +744,18 @@ export default function StudentManagement() {
                                                         <div>
                                                             <p className="text-sm font-medium dark:text-white">
                                                                 {formatDate(
-                                                                    payment.date,
+                                                                    payment.payment_date,
                                                                 )}
                                                             </p>
                                                             <p className="text-xs text-gray-500 dark:text-gray-400">
                                                                 {
-                                                                    payment.concept
+                                                                    payment.classSchedule.class.name
                                                                 }
                                                             </p>
                                                         </div>
                                                         <span className="font-medium dark:text-white">
                                                             {formatCurrency(
-                                                                payment.amount,
+                                                                Number(payment.amount),
                                                             )}
                                                         </span>
                                                     </div>
@@ -757,10 +776,10 @@ export default function StudentManagement() {
                                         Historial de Asistencias
                                     </h4>
                                     <div className="space-y-2">
-                                        {selectedStudent.attendanceHistory &&
-                                        selectedStudent.attendanceHistory
+                                        {selectedStudent.attendances &&
+                                        selectedStudent.attendances
                                             .length > 0 ? (
-                                            selectedStudent.attendanceHistory.map(
+                                            selectedStudent.attendances.map(
                                                 (attendance, index) => (
                                                     <div
                                                         key={index}
@@ -772,7 +791,7 @@ export default function StudentManagement() {
                                                         </p>
                                                         <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
                                                             {
-                                                                attendance.className
+                                                                attendance.classSchedule.class.name
                                                             }
                                                         </span>
                                                     </div>
@@ -799,7 +818,7 @@ export default function StudentManagement() {
                                             </span>
                                             <span className="font-semibold dark:text-white">
                                                 {formatCurrency(
-                                                    accountInfo.balance,
+                                                    accountInfo?.balance || 0,
                                                 )}
                                             </span>
                                         </div>
@@ -813,7 +832,7 @@ export default function StudentManagement() {
                                                 Promoción Principal:
                                             </span>
                                             <span className="ml-2 font-medium dark:text-white">
-                                                FUNCIONAL 21hs
+                                                {accountInfo?.lastPaymentPlan}
                                             </span>
                                         </div>
                                     </div>
@@ -830,10 +849,10 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center gap-2 dark:text-white">
                                             <span>
-                                                {accountInfo.lastEntryDate}
+                                                {accountInfo?.lastEntryDate}
                                             </span>
                                             <span>
-                                                {accountInfo.lastEntryTime}
+                                                {accountInfo?.lastEntryTime}
                                             </span>
                                         </div>
                                     </div>
@@ -850,14 +869,14 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             <span>
-                                                {accountInfo.lastPaymentDate}
+                                                {accountInfo?.lastPaymentDate}
                                             </span>
                                             <span>
-                                                {accountInfo.lastPaymentPlan}
+                                                {accountInfo?.lastPaymentPlan}
                                             </span>
                                             <span className="font-semibold">
                                                 {formatCurrency(
-                                                    accountInfo.lastPaymentAmount,
+                                                    accountInfo?.lastPaymentAmount || 0,
                                                 )}
                                             </span>
                                         </div>
