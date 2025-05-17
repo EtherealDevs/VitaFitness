@@ -79,27 +79,35 @@ export default function CreateClassPage() {
         fetchBranches()
     }, [getBranches, getPlans])
     // Days of the week
-const daysOfWeek = [
-    { id: 'lunes', label: 'Lunes' },
-    { id: 'martes', label: 'Martes' },
-    { id: 'miercoles', label: 'Miércoles' },
-    { id: 'jueves', label: 'Jueves' },
-    { id: 'viernes', label: 'Viernes' },
-    { id: 'sabado', label: 'Sábado' },
-    { id: 'domingo', label: 'Domingo' },
-]
+    const daysOfWeek = [
+        { id: 'lunes', label: 'Lunes' },
+        { id: 'martes', label: 'Martes' },
+        { id: 'miercoles', label: 'Miércoles' },
+        { id: 'jueves', label: 'Jueves' },
+        { id: 'viernes', label: 'Viernes' },
+        { id: 'sabado', label: 'Sábado' },
+        { id: 'domingo', label: 'Domingo' },
+    ]
 
-// Generate hours for select (only on-the-hour times)
-const generateHourOptions = () => {
-    const options = []
-    for (let i = 6; i <= 22; i++) {
-        const hour = i < 10 ? `0${i}` : `${i}`
-        options.push({ value: `${hour}:00`, label: `${hour}:00` })
+    // Generate hours for select (only on-the-hour times)
+    const generateHourOptions = () => {
+        const options = []
+        for (let i = 6; i <= 22; i++) {
+            const hour = i < 10 ? `0${i}` : `${i}`
+            options.push({ value: `${hour}:00`, label: `${hour}:00` })
+        }
+        return options
     }
-    return options
-}
 
-const hourOptions = generateHourOptions()
+    function getPlanName() {
+        const planObj = plans.find(p => p.id == selectedPlan)
+        return planObj?.name ?? ''
+    }
+    function getBranchName() {
+        const branchObj = branches.find(b => b.id == selectedBranch)
+        return branchObj?.name ?? ''
+    }
+    const hourOptions = generateHourOptions()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -187,10 +195,12 @@ const hourOptions = generateHourOptions()
                                             <Select
                                                 value={selectedPlan}
                                                 onValueChange={setSelectedPlan}>
-                                                <SelectTrigger
-                                                    id="plan"
-                                                    className="w-full">
-                                                    <SelectValue placeholder="Seleccionar plan" />
+                                                <SelectTrigger id="plan" className="w-full">
+                                                    {selectedPlan ? (
+                                                        <span>{getPlanName()}</span>
+                                                    ) : (
+                                                        <span className="text-muted-foreground">Seleccionar plan</span>
+                                                    )}
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {plans.map(plan => (
@@ -217,7 +227,11 @@ const hourOptions = generateHourOptions()
                                                 <SelectTrigger
                                                     id="branch"
                                                     className="w-full">
-                                                    <SelectValue placeholder="Seleccionar sucursal" />
+                                                        {selectedPlan ? (
+                                                        <span>{getBranchName()}</span>
+                                                    ) : (
+                                                        <span className="text-muted-foreground">Seleccionar plan</span>
+                                                    )}
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {branches.map(branch => (
@@ -291,98 +305,98 @@ const hourOptions = generateHourOptions()
                             <div>
                                 <h1>Horario:</h1>
                                 {/* Days Selection */}
-                            <div className="space-y-3">
-                                <Label
-                                    htmlFor="days"
-                                    className="font-medium flex items-center">
-                                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                                    Días de la semana
-                                </Label>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                    {daysOfWeek.map(day => (
-                                        <div
-                                            key={day.id}
-                                            className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={day.id}
-                                                checked={selectedDays.includes(
-                                                    day.id,
-                                                )}
-                                                onCheckedChange={checked =>
-                                                    handleDayChange(
+                                <div className="space-y-3">
+                                    <Label
+                                        htmlFor="days"
+                                        className="font-medium flex items-center">
+                                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                                        Días de la semana
+                                    </Label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                        {daysOfWeek.map(day => (
+                                            <div
+                                                key={day.id}
+                                                className="flex items-center space-x-2">
+                                                <Checkbox
+                                                    id={day.id}
+                                                    checked={selectedDays.includes(
                                                         day.id,
-                                                        checked === true,
-                                                    )
-                                                }
-                                            />
-                                            <Label
-                                                htmlFor={day.id}
-                                                className="text-sm cursor-pointer">
-                                                {day.label}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Time Selection */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Start Time */}
-                                <div className="space-y-2">
-                                    <Label
-                                        htmlFor="start_time"
-                                        className="font-medium flex items-center">
-                                        <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                                        Hora de inicio
-                                    </Label>
-                                    <Select
-                                        value={startTime}
-                                        onValueChange={setStartTime}>
-                                        <SelectTrigger
-                                            id="start_time"
-                                            className="w-full">
-                                            <SelectValue placeholder="Seleccionar hora" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {hourOptions.map(hour => (
-                                                <SelectItem
-                                                    key={hour.value}
-                                                    value={hour.value}>
-                                                    {hour.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                                    )}
+                                                    onCheckedChange={checked =>
+                                                        handleDayChange(
+                                                            day.id,
+                                                            checked === true,
+                                                        )
+                                                    }
+                                                />
+                                                <Label
+                                                    htmlFor={day.id}
+                                                    className="text-sm cursor-pointer">
+                                                    {day.label}
+                                                </Label>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                {/* End Time */}
-                                <div className="space-y-2">
-                                    <Label
-                                        htmlFor="end_time"
-                                        className="font-medium flex items-center">
-                                        <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                                        Hora de fin
-                                    </Label>
-                                    <Select
-                                        value={endTime}
-                                        onValueChange={setEndTime}>
-                                        <SelectTrigger
-                                            id="end_time"
-                                            className="w-full">
-                                            <SelectValue placeholder="Seleccionar hora" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {hourOptions.map(hour => (
-                                                <SelectItem
-                                                    key={hour.value}
-                                                    value={hour.value}>
-                                                    {hour.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                {/* Time Selection */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Start Time */}
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="start_time"
+                                            className="font-medium flex items-center">
+                                            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                                            Hora de inicio
+                                        </Label>
+                                        <Select
+                                            value={startTime}
+                                            onValueChange={setStartTime}>
+                                            <SelectTrigger
+                                                id="start_time"
+                                                className="w-full">
+                                                <SelectValue placeholder="Seleccionar hora" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {hourOptions.map(hour => (
+                                                    <SelectItem
+                                                        key={hour.value}
+                                                        value={hour.value}>
+                                                        {hour.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {/* End Time */}
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="end_time"
+                                            className="font-medium flex items-center">
+                                            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                                            Hora de fin
+                                        </Label>
+                                        <Select
+                                            value={endTime}
+                                            onValueChange={setEndTime}>
+                                            <SelectTrigger
+                                                id="end_time"
+                                                className="w-full">
+                                                <SelectValue placeholder="Seleccionar hora" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {hourOptions.map(hour => (
+                                                    <SelectItem
+                                                        key={hour.value}
+                                                        value={hour.value}>
+                                                        {hour.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         </CardContent>
 

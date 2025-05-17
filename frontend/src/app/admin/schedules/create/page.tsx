@@ -200,7 +200,14 @@ export default function CreateSchedulePage() {
                                     <SelectTrigger
                                         id="class"
                                         className="w-full">
+                                        {/* aca falta algo */}
+                                        {selectedClass && (
+                                            <p>{' '}
+                                                {getClassName()}
+                                            </p>
+                                        )}
                                         <SelectValue placeholder="Seleccionar clase" />
+                                        
                                     </SelectTrigger>
                                     <SelectContent>
                                         {classes.map(classItem => (
