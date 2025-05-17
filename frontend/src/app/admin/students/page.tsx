@@ -11,8 +11,7 @@ import {
     Phone,
     Plus,
     Edit2,
-    Trash2,
-    Eye,
+    Trash2
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/app/admin/components/ui/button'
@@ -508,31 +507,6 @@ export default function StudentManagement() {
                                     </tr>
                                 ) : (
                                     paginatedStudents.map(student => (
-                                        <tr
-                                            key={student.id}
-                                            className={`${getRowColor(
-                                                student.daysOverdue,
-                                            )} hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
-                                                selectedStudent?.id ===
-                                                student.id
-                                                    ? 'ring-2 ring-inset ring-purple-500'
-                                                    : ''
-                                            }`}
-                                            onClick={() =>
-                                                handleStudentClick(student)
-                                            }>
-                                            <td className="px-4 py-3">
-                                                {student.dni}
-                                            </td>
-                                            <td className="px-4 py-3 font-medium">
-                                                {student.name}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                {student.last_name}
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        paginatedStudents.map(student => (
                                             <tr
                                                 key={student.id}
                                                 className={`${getRowColor(
@@ -593,7 +567,7 @@ export default function StudentManagement() {
                                                             className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                                                             <Edit2 className="h-4 w-4" />
                                                         </Button>
-                                                    </Link>
+                                                    </div>
                                                     <Button
                                                         variant="destructive"
                                                         size="sm"
@@ -606,8 +580,7 @@ export default function StudentManagement() {
                                                         className="h-8 w-8 p-0">
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
-                                                </div>
-                                            </td>
+                                                </td>
                                         </tr>
                                     ))
                                 )}
@@ -740,62 +713,44 @@ export default function StudentManagement() {
                                                 No hay historial de pagos
                                                 disponible
                                             </p>
-                                            <p className="dark:text-white">
-                                                {selectedStudent.memberSince
-                                                    ? formatDate(
-                                                          selectedStudent.memberSince,
-                                                      )
-                                                    : 'No disponible'}
-                                            </p>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
-                            </div>
-
 
                                 {/* Attendance History */}
-                                <div className="space-y-4">
-                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                        Historial de Asistencias
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStudent.attendances &&
-                                        selectedStudent.attendances
-                                            .length > 0 ? (
-                                            selectedStudent.attendances.map(
-                                                (attendance, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
-
-                                                        <p className="text-sm font-medium dark:text-white">
-                                                            {formatDate(
-                                                                payment.date,
-                                                            )}
-                                                        </p>
-
-                                                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
-                                                            {
-                                                                attendance.classSchedule.class.name
-                                                            }
-                                                        </span>
-
-                                                    </div>
-                                                    <span className="font-medium dark:text-white">
-                                                        {formatCurrency(
-                                                            payment.amount,
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                    Historial de Asistencias
+                                </h4>
+                                <div className="space-y-2">
+                                    {selectedStudent.attendanceHistory &&
+                                    selectedStudent.attendanceHistory.length >
+                                        0 ? (
+                                        selectedStudent.attendanceHistory.map(
+                                            (attendance, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                                                    <p className="text-sm font-medium dark:text-white">
+                                                        {formatDate(
+                                                            attendance.date,
                                                         )}
+                                                    </p>
+                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
+                                                        {attendance.className}
                                                     </span>
                                                 </div>
                                             ),
                                         )
                                     ) : (
                                         <p className="text-gray-500 dark:text-gray-400 italic">
-                                            No hay historial de pagos disponible
+                                            No hay historial de asistencias
+                                            disponible
                                         </p>
                                     )}
                                 </div>
                             </div>
+                        </div>
 
 
                             {/* Account info and actions */}
@@ -873,7 +828,7 @@ export default function StudentManagement() {
                                             </span>
                                         </div>
                                     </div>
-                                </div>
+                            </div>
 
                                 {/* Last payment */}
                                 <div className="flex flex-col">
@@ -887,19 +842,18 @@ export default function StudentManagement() {
                                     </div>
                                     <div className="flex items-center justify-between dark:text-white">
                                         <span>
-                                            {accountInfo.lastPaymentDate}
+                                            {accountInfo?.lastPaymentDate}
                                         </span>
                                         <span>
-                                            {accountInfo.lastPaymentPlan}
+                                            {accountInfo?.lastPaymentPlan}
                                         </span>
                                         <span className="font-semibold">
                                             {formatCurrency(
-                                                accountInfo.lastPaymentAmount,
+                                                accountInfo?.lastPaymentAmount || 0,
                                             )}
                                         </span>
                                     </div>
                                 </div>
-                            </div>
 
                             {/* Action buttons */}
                             <div className="flex justify-end mt-4 gap-2">
@@ -912,19 +866,19 @@ export default function StudentManagement() {
                                 </p>
                             </div>
                         </div>
-                    </div>
-                )}
 
-                {/* Mobile new student button */}
-                <div className="sm:hidden flex justify-center mt-6">
-                    <Link href="/admin/students/create" className="w-full">
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Nuevo Alumno
-                        </Button>
-                    </Link>
-                </div>
+                    {/* Mobile new student button */}
+                    <div className="sm:hidden flex justify-center mt-6">
+                        <Link href="/admin/students/create" className="w-full">
+                            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Nuevo Alumno
+                            </Button>
+                        </Link>
+                    </div>
             </div>
+            )}
+        </div>
         </div>
     )
 }
