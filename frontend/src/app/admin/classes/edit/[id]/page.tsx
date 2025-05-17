@@ -77,7 +77,7 @@ export default function EditClassPage() {
 
                 // Cargar datos de la clase
                 const classData = await getClass(classId)
-                
+
                 // Cargar planes y sucursales en paralelo
                 const [plansData, branchesData] = await Promise.all([
                     getPlans(),
@@ -99,12 +99,6 @@ export default function EditClassPage() {
                     setPrice(classData.classe.precio.toString())
                     setMaxStudents(classData.classe.max_students.toString())
                 }
-                console.log(classData)
-                console.log(classData.classe)
-                console.log(selectedPlan)
-                console.log(selectedBranch)
-                console.log(price)
-                console.log(maxStudents)
             } catch (error) {
                 // if (!signal.aborted) {
                     console.error('Error loading data:', error)
