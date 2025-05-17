@@ -35,7 +35,7 @@ import { useClasses } from '@/hooks/classes'
 import { type Plan, usePlans } from '@/hooks/plans'
 import { type Branch, useBranches } from '@/hooks/branches'
 import { useParams, useRouter } from 'next/navigation'
-import { Skeleton } from '@/app/admin/components/ui/skeleton'
+/* import { Skeleton } from '@/app/admin/components/ui/skeleton' */
 
 export default function EditClassPage() {
     // Acceder directamente a params.id ya que es un objeto simple
@@ -46,7 +46,7 @@ export default function EditClassPage() {
     const [selectedBranch, setSelectedBranch] = useState('')
     const [price, setPrice] = useState('')
     const [maxStudents, setMaxStudents] = useState('')
-    const [isLoading, setIsLoading] = useState(true)
+   /*  const [isLoading, setIsLoading] = useState(true) */
     const [isSaving, setIsSaving] = useState(false)
     const [plans, setPlans] = useState<Plan[]>([])
     const [branches, setBranches] = useState<Branch[]>([])
@@ -73,7 +73,7 @@ export default function EditClassPage() {
 
         async function loadData() {
             try {
-                setIsLoading(true)
+                /* setIsLoading(true) */
 
                 // Cargar datos de la clase
                 const classData = await getClass(classId)
@@ -110,9 +110,9 @@ export default function EditClassPage() {
                     })
                 }
             } finally {
-                if (!signal.aborted) {
+               /*  if (!signal.aborted) {
                     setIsLoading(false)
-                }
+                } */
             }
         }
 
