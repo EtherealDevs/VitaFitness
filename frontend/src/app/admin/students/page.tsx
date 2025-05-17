@@ -340,7 +340,7 @@ export default function StudentManagement() {
                     </div>
                     <div className="hidden sm:flex justify-end gap-2">
                         <Link href="/admin/students/create">
-                            <Button className=" text-white">
+                            <Button className="dark:text-white text-black">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Nuevo Alumno
                             </Button>
