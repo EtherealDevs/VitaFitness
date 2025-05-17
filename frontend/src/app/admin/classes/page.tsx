@@ -183,8 +183,6 @@ export default function ClassPage() {
                 <DataTable
                     columns={columns}
                     data={classes}
-                    filterColumn="name"
-                    filterPlaceholder="Filtrar clases..."
                 />
             </div>
         </div>

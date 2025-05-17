@@ -674,7 +674,42 @@ export default function StudentManagement() {
                                     </div>
                                 </div>
 
-                                {/* Payment History */}
+                                
+                            </div>
+                            {/* Attendance History */}
+                                <div className="space-y-4">
+                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                        Historial de Asistencias
+                                    </h4>
+                                    <div className="space-y-2">
+                                        {selectedStudent.attendanceHistory &&
+                                        selectedStudent.attendanceHistory.length >
+                                            0 ? (
+                                            selectedStudent.attendanceHistory.map(
+                                                (attendance, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                                                        <p className="text-sm font-medium dark:text-white">
+                                                            {formatDate(
+                                                                attendance.date,
+                                                            )}
+                                                        </p>
+                                                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
+                                                            {attendance.className}
+                                                        </span>
+                                                    </div>
+                                                ),
+                                            )
+                                        ) : (
+                                            <p className="text-gray-500 dark:text-gray-400 italic">
+                                                No hay historial de asistencias
+                                                disponible
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            {/* Payment History */}
                                 <div className="space-y-4">
                                     <h4 className="font-medium text-gray-700 dark:text-gray-300">
                                         Historial de Pagos
@@ -717,62 +752,12 @@ export default function StudentManagement() {
                                     </div>
                                 </div>
 
-                                {/* Attendance History */}
-                            <div className="space-y-4">
-                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                    Historial de Asistencias
-                                </h4>
-                                <div className="space-y-2">
-                                    {selectedStudent.attendanceHistory &&
-                                    selectedStudent.attendanceHistory.length >
-                                        0 ? (
-                                        selectedStudent.attendanceHistory.map(
-                                            (attendance, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
-                                                    <p className="text-sm font-medium dark:text-white">
-                                                        {formatDate(
-                                                            attendance.date,
-                                                        )}
-                                                    </p>
-                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
-                                                        {attendance.className}
-                                                    </span>
-                                                </div>
-                                            ),
-                                        )
-                                    ) : (
-                                        <p className="text-gray-500 dark:text-gray-400 italic">
-                                            No hay historial de asistencias
-                                            disponible
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-
                             {/* Account info and actions */}
-                            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur md:col-span-3">
+                                <div className="grid grid-cols-1 gap-4">
                                     {/* Account balance */}
                                     <div className="flex flex-col">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                Saldo Cta Cte:
-                                            </span>
-                                            <span className="font-semibold dark:text-white">
-                                                {formatCurrency(
-                                                    accountInfo?.balance || 0,
-                                                )}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
-                                                Ver Detalle Saldo
-                                            </button>
-                                        </div>
+                                        
                                         <div className="mt-2">
                                             <span className="text-sm text-gray-600 dark:text-gray-400">
                                                 Promoción Principal:
@@ -783,27 +768,7 @@ export default function StudentManagement() {
                                         </div>
                                     </div>
 
-                                    {/* Last entry */}
-                                    <div className="flex flex-col">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="font-medium dark:text-white">
-                                                Último Ingreso
-                                            </span>
-                                            <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
-                                                Ver Historial
-                                            </button>
-                                        </div>
-                                        <div className="flex items-center gap-2 dark:text-white">
-                                            <span>
-                                                {accountInfo?.lastEntryDate}
-                                            </span>
-                                            <span>
-                                                {accountInfo?.lastEntryTime}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
+                                    
                                     {/* Last payment */}
                                     <div className="flex flex-col">
                                         <div className="flex justify-between items-center mb-2">
@@ -828,31 +793,6 @@ export default function StudentManagement() {
                                             </span>
                                         </div>
                                     </div>
-                            </div>
-
-                                {/* Last payment */}
-                                <div className="flex flex-col">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="font-medium dark:text-white">
-                                            Último Pago Cuota
-                                        </span>
-                                        <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
-                                            Ver Historial
-                                        </button>
-                                    </div>
-                                    <div className="flex items-center justify-between dark:text-white">
-                                        <span>
-                                            {accountInfo?.lastPaymentDate}
-                                        </span>
-                                        <span>
-                                            {accountInfo?.lastPaymentPlan}
-                                        </span>
-                                        <span className="font-semibold">
-                                            {formatCurrency(
-                                                accountInfo?.lastPaymentAmount || 0,
-                                            )}
-                                        </span>
-                                    </div>
                                 </div>
 
                             {/* Action buttons */}
@@ -867,18 +807,20 @@ export default function StudentManagement() {
                             </div>
                         </div>
 
-                    {/* Mobile new student button */}
-                    <div className="sm:hidden flex justify-center mt-6">
-                        <Link href="/admin/students/create" className="w-full">
-                            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Nuevo Alumno
-                            </Button>
-                        </Link>
+                        </div>
+
+                        {/* Mobile new student button */}
+                        <div className="sm:hidden flex justify-center mt-6">
+                            <Link href="/admin/students/create" className="w-full">
+                                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Nuevo Alumno
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
+                )}
             </div>
-            )}
-        </div>
         </div>
     )
 }
