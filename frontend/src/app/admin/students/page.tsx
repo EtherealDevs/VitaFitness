@@ -11,8 +11,7 @@ import {
     Phone,
     Plus,
     Edit2,
-    Trash2,
-    Eye,
+    Trash2
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/app/admin/components/ui/button'
