@@ -46,7 +46,7 @@ export default function EditClassPage() {
     const [selectedBranch, setSelectedBranch] = useState('')
     const [price, setPrice] = useState('')
     const [maxStudents, setMaxStudents] = useState('')
-   /*  const [isLoading, setIsLoading] = useState(true) */
+    const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [plans, setPlans] = useState<Plan[]>([])
     const [branches, setBranches] = useState<Branch[]>([])
@@ -58,36 +58,26 @@ export default function EditClassPage() {
     const router = useRouter()
 
     // Bandera para controlar si ya se ha realizado la carga inicial
-    const initialLoadDone = useRef(false)
+    // const initialLoadDone = useRef(false)
 
     // Función para cargar los datos iniciales
     useEffect(() => {
         // Prevenir múltiples cargas y bucles infinitos
-        if (initialLoadDone.current) return
+        // if (initialLoadDone.current) return
 
         // Marcar inmediatamente que estamos en proceso de carga
-        initialLoadDone.current = true
+        // initialLoadDone.current = true
 
-        const controller = new AbortController()
-        const signal = controller.signal
+        // const controller = new AbortController()
+        // const signal = controller.signal
 
         async function loadData() {
             try {
-                /* setIsLoading(true) */
+                setIsLoading(true)
 
                 // Cargar datos de la clase
                 const classData = await getClass(classId)
-
-                // Verificar si la petición fue abortada
-                if (signal.aborted) return
-
-                if (classData && classData.class) {
-                    setSelectedPlan(classData.class.plan_id.toString())
-                    setSelectedBranch(classData.class.branch_id.toString())
-                    setPrice(classData.class.precio.toString())
-                    setMaxStudents(classData.class.max_students.toString())
-                }
-
+                
                 // Cargar planes y sucursales en paralelo
                 const [plansData, branchesData] = await Promise.all([
                     getPlans(),
@@ -95,12 +85,28 @@ export default function EditClassPage() {
                 ])
 
                 // Verificar si la petición fue abortada
-                if (signal.aborted) return
+                // if (signal.aborted) return
 
                 setPlans(plansData.plans)
                 setBranches(branchesData.branches)
+
+                // Verificar si la petición fue abortada
+                // if (signal.aborted) return
+
+                if (classData && classData.classe) {
+                    setSelectedPlan(classData.classe.plan.id.toString())
+                    setSelectedBranch(classData.classe.branch.id.toString())
+                    setPrice(classData.classe.precio.toString())
+                    setMaxStudents(classData.classe.max_students.toString())
+                }
+                console.log(classData)
+                console.log(classData.classe)
+                console.log(selectedPlan)
+                console.log(selectedBranch)
+                console.log(price)
+                console.log(maxStudents)
             } catch (error) {
-                if (!signal.aborted) {
+                // if (!signal.aborted) {
                     console.error('Error loading data:', error)
                     toast({
                         title: 'Error',
@@ -108,20 +114,20 @@ export default function EditClassPage() {
                             'No se pudo cargar la información necesaria',
                         variant: 'destructive',
                     })
-                }
+                // }
             } finally {
-               /*  if (!signal.aborted) {
+                // if (!signal.aborted) {
                     setIsLoading(false)
-                } */
+                // }
             }
         }
 
         loadData()
 
         // Función de limpieza para abortar peticiones pendientes
-        return () => {
-            controller.abort()
-        }
+        // return () => {
+        //     controller.abort()
+        // }
     }, [classId, getClass, getPlans, getBranches])
 
     const handleSubmit = async (e: React.FormEvent) => {
