@@ -35,7 +35,7 @@ import { useClasses } from '@/hooks/classes'
 import { type Plan, usePlans } from '@/hooks/plans'
 import { type Branch, useBranches } from '@/hooks/branches'
 import { useParams, useRouter } from 'next/navigation'
-import { Skeleton } from '@/app/admin/components/ui/skeleton'
+/* import { Skeleton } from '@/app/admin/components/ui/skeleton' */
 
 export default function EditClassPage() {
     // Acceder directamente a params.id ya que es un objeto simple
@@ -58,18 +58,18 @@ export default function EditClassPage() {
     const router = useRouter()
 
     // Bandera para controlar si ya se ha realizado la carga inicial
-    const initialLoadDone = useRef(false)
+    // const initialLoadDone = useRef(false)
 
     // Función para cargar los datos iniciales
     useEffect(() => {
         // Prevenir múltiples cargas y bucles infinitos
-        if (initialLoadDone.current) return
+        // if (initialLoadDone.current) return
 
         // Marcar inmediatamente que estamos en proceso de carga
-        initialLoadDone.current = true
+        // initialLoadDone.current = true
 
-        const controller = new AbortController()
-        const signal = controller.signal
+        // const controller = new AbortController()
+        // const signal = controller.signal
 
         async function loadData() {
             try {
@@ -78,16 +78,6 @@ export default function EditClassPage() {
                 // Cargar datos de la clase
                 const classData = await getClass(classId)
 
-                // Verificar si la petición fue abortada
-                if (signal.aborted) return
-
-                if (classData && classData.class) {
-                    setSelectedPlan(classData.class.plan_id.toString())
-                    setSelectedBranch(classData.class.branch_id.toString())
-                    setPrice(classData.class.precio.toString())
-                    setMaxStudents(classData.class.max_students.toString())
-                }
-
                 // Cargar planes y sucursales en paralelo
                 const [plansData, branchesData] = await Promise.all([
                     getPlans(),
@@ -95,12 +85,22 @@ export default function EditClassPage() {
                 ])
 
                 // Verificar si la petición fue abortada
-                if (signal.aborted) return
+                // if (signal.aborted) return
 
                 setPlans(plansData.plans)
                 setBranches(branchesData.branches)
+
+                // Verificar si la petición fue abortada
+                // if (signal.aborted) return
+
+                if (classData && classData.classe) {
+                    setSelectedPlan(classData.classe.plan.id.toString())
+                    setSelectedBranch(classData.classe.branch.id.toString())
+                    setPrice(classData.classe.precio.toString())
+                    setMaxStudents(classData.classe.max_students.toString())
+                }
             } catch (error) {
-                if (!signal.aborted) {
+                // if (!signal.aborted) {
                     console.error('Error loading data:', error)
                     toast({
                         title: 'Error',
@@ -108,20 +108,20 @@ export default function EditClassPage() {
                             'No se pudo cargar la información necesaria',
                         variant: 'destructive',
                     })
-                }
+                // }
             } finally {
-                if (!signal.aborted) {
+                // if (!signal.aborted) {
                     setIsLoading(false)
-                }
+                // }
             }
         }
 
         loadData()
 
         // Función de limpieza para abortar peticiones pendientes
-        return () => {
-            controller.abort()
-        }
+        // return () => {
+        //     controller.abort()
+        // }
     }, [classId, getClass, getPlans, getBranches])
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -174,7 +174,156 @@ export default function EditClassPage() {
                         </CardDescription>
                     </CardHeader>
 
-                    {isLoading ? (
+                    <form onSubmit={handleSubmit}>
+                        <CardContent className="space-y-4 sm:space-y-6">
+                            {/* Plan and Branch Selection */}
+                            <div className="space-y-3 sm:space-y-4">
+                                <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">
+                                    Plan y Sucursal
+                                </h3>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                    <div className="space-y-1 sm:space-y-2">
+                                        <Label htmlFor="plan">Plan</Label>
+                                        <div className="relative">
+                                            <Select
+                                                value={selectedPlan}
+                                                onValueChange={
+                                                    setSelectedPlan
+                                                }>
+                                                <SelectTrigger
+                                                    id="plan"
+                                                    className="w-full">
+                                                    <SelectValue placeholder="Seleccionar plan" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {plans.map(plan => (
+                                                        <SelectItem
+                                                            key={plan.id}
+                                                            value={plan.id.toString()}>
+                                                            {plan.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <CalendarRange className="absolute right-10 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1 sm:space-y-2">
+                                        <Label htmlFor="branch">
+                                            Sucursal
+                                        </Label>
+                                        <div className="relative">
+                                            <Select
+                                                value={selectedBranch}
+                                                onValueChange={
+                                                    setSelectedBranch
+                                                }>
+                                                <SelectTrigger
+                                                    id="branch"
+                                                    className="w-full">
+                                                    <SelectValue placeholder="Seleccionar sucursal" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {branches.map(
+                                                        branch => (
+                                                            <SelectItem
+                                                                key={
+                                                                    branch.id
+                                                                }
+                                                                value={branch.id.toString()}>
+                                                                {
+                                                                    branch.name
+                                                                }
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            <Building className="absolute right-10 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Class Details */}
+                            <div className="space-y-3 sm:space-y-4">
+                                <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">
+                                    Detalles de la Clase
+                                </h3>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 bg-transparent">
+                                    <div className="space-y-1 sm:space-y-2">
+                                        <Label htmlFor="price">
+                                            Precio
+                                        </Label>
+                                        <div className="relative">
+                                            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                name="price"
+                                                id="price"
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                value={price}
+                                                onChange={e =>
+                                                    setPrice(e.target.value)
+                                                }
+                                                placeholder="0.00"
+                                                className="pl-10 bg-transparent"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1 sm:space-y-2">
+                                        <Label htmlFor="max_students">
+                                            Máximo de Estudiantes
+                                        </Label>
+                                        <div className="relative">
+                                            <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                name="max_students"
+                                                id="max_students"
+                                                type="number"
+                                                min="1"
+                                                value={maxStudents}
+                                                onChange={e =>
+                                                    setMaxStudents(
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                placeholder="20"
+                                                className="pl-10 bg-transparent"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+
+                        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 border-t pt-4 sm:pt-6">
+                            <Button
+                                className="w-full sm:w-auto bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white"
+                                type="button"
+                                onClick={() => router.back()}>
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Cancelar
+                            </Button>
+                            <Button
+                                className="w-full sm:w-auto bg-transparent text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white"
+                                type="submit"
+                                disabled={isSaving}>
+                                <Save className="mr-2 h-4 w-4" />
+                                {isSaving
+                                    ? 'Guardando...'
+                                    : 'Guardar Cambios'}
+                            </Button>
+                        </CardFooter>
+                    </form>
+                    {/* {isLoading ? (
                         <CardContent className="space-y-6">
                             <div className="space-y-4">
                                 <Skeleton className="h-4 w-32" />
@@ -192,156 +341,8 @@ export default function EditClassPage() {
                             </div>
                         </CardContent>
                     ) : (
-                        <form onSubmit={handleSubmit}>
-                            <CardContent className="space-y-4 sm:space-y-6">
-                                {/* Plan and Branch Selection */}
-                                <div className="space-y-3 sm:space-y-4">
-                                    <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                                        Plan y Sucursal
-                                    </h3>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                        <div className="space-y-1 sm:space-y-2">
-                                            <Label htmlFor="plan">Plan</Label>
-                                            <div className="relative">
-                                                <Select
-                                                    value={selectedPlan}
-                                                    onValueChange={
-                                                        setSelectedPlan
-                                                    }>
-                                                    <SelectTrigger
-                                                        id="plan"
-                                                        className="w-full">
-                                                        <SelectValue placeholder="Seleccionar plan" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {plans.map(plan => (
-                                                            <SelectItem
-                                                                key={plan.id}
-                                                                value={plan.id.toString()}>
-                                                                {plan.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <CalendarRange className="absolute right-10 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-1 sm:space-y-2">
-                                            <Label htmlFor="branch">
-                                                Sucursal
-                                            </Label>
-                                            <div className="relative">
-                                                <Select
-                                                    value={selectedBranch}
-                                                    onValueChange={
-                                                        setSelectedBranch
-                                                    }>
-                                                    <SelectTrigger
-                                                        id="branch"
-                                                        className="w-full">
-                                                        <SelectValue placeholder="Seleccionar sucursal" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {branches.map(
-                                                            branch => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        branch.id
-                                                                    }
-                                                                    value={branch.id.toString()}>
-                                                                    {
-                                                                        branch.name
-                                                                    }
-                                                                </SelectItem>
-                                                            ),
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                                <Building className="absolute right-10 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Class Details */}
-                                <div className="space-y-3 sm:space-y-4">
-                                    <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">
-                                        Detalles de la Clase
-                                    </h3>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 bg-transparent">
-                                        <div className="space-y-1 sm:space-y-2">
-                                            <Label htmlFor="price">
-                                                Precio
-                                            </Label>
-                                            <div className="relative">
-                                                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                <Input
-                                                    name="price"
-                                                    id="price"
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.01"
-                                                    value={price}
-                                                    onChange={e =>
-                                                        setPrice(e.target.value)
-                                                    }
-                                                    placeholder="0.00"
-                                                    className="pl-10 bg-transparent"
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-1 sm:space-y-2">
-                                            <Label htmlFor="max_students">
-                                                Máximo de Estudiantes
-                                            </Label>
-                                            <div className="relative">
-                                                <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                <Input
-                                                    name="max_students"
-                                                    id="max_students"
-                                                    type="number"
-                                                    min="1"
-                                                    value={maxStudents}
-                                                    onChange={e =>
-                                                        setMaxStudents(
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    placeholder="20"
-                                                    className="pl-10 bg-transparent"
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-
-                            <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 border-t pt-4 sm:pt-6">
-                                <Button
-                                    className="w-full sm:w-auto bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white"
-                                    type="button"
-                                    onClick={() => router.back()}>
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Cancelar
-                                </Button>
-                                <Button
-                                    className="w-full sm:w-auto bg-transparent text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white"
-                                    type="submit"
-                                    disabled={isSaving}>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    {isSaving
-                                        ? 'Guardando...'
-                                        : 'Guardar Cambios'}
-                                </Button>
-                            </CardFooter>
-                        </form>
-                    )}
+                        
+                    )} */}
                 </Card>
             </div>
         </div>

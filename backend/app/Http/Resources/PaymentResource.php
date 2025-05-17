@@ -23,6 +23,7 @@ class PaymentResource extends JsonResource
             'student_id' => $this->student_id,
             'student' => new StudentResource($this->whenLoaded('student')),
             'classSchedule_id' => $this->classSchedule_id,
+            'class_id' => $this->classSchedule->class->id,
             'classSchedule' => new ClassScheduleResource($this->whenLoaded('classSchedule')),
             'comprobante' => $comprobante,
             'date_start' => $this->date_start,

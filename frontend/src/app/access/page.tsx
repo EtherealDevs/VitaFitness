@@ -2,9 +2,10 @@
 
 import Image from 'next/image'
 import { Card } from '@/components/ui/card'
-import { useState, useEffect, useCallback } from 'react'
-import { Student } from '../admin/students/columns'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import type { Student } from '../admin/students/columns'
 import axios from '@/lib/axios'
+import { Search, Maximize2, X, Check } from 'lucide-react'
 
 // Estados posibles
 type AccessStatus = 'authorized' | 'unauthorized' | 'pending' | 'error'
@@ -26,135 +27,260 @@ function AccessCard({
     documentNumber,
     setDocumentNumber,
 }: AccessCardProps) {
-    // Función para alternar pantalla completa
+    const inputRef = useRef<HTMLInputElement>(null)
+    const [currentTime, setCurrentTime] = useState(new Date())
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date())
+        }, 1000)
+
+        return () => clearInterval(interval)
+    }, [])
+
+    // Función para alternar pantalla completa manualmente
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
+            try {
+                // Intentar con el método estándar
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(
+                        'Error al intentar entrar en pantalla completa: ',
+                        err,
+                    )
+
+                    // Intentar con métodos específicos de navegadores
+                    const docEl = document.documentElement as HTMLElement & {
+                        mozRequestFullScreen?: () => Promise<void>
+                        webkitRequestFullscreen?: () => Promise<void>
+                        msRequestFullscreen?: () => Promise<void>
+                    }
+
+                    if (docEl.mozRequestFullScreen) {
+                        docEl.mozRequestFullScreen()
+                    } else if (docEl.webkitRequestFullscreen) {
+                        docEl.webkitRequestFullscreen()
+                    } else if (docEl.msRequestFullscreen) {
+                        docEl.msRequestFullscreen()
+                    }
+                })
+            } catch (error) {
                 console.error(
-                    'Error al intentar entrar en pantalla completa: ',
-                    err,
+                    'Error al intentar entrar en pantalla completa:',
+                    error,
                 )
-            })
+            }
         } else {
-            document.exitFullscreen()
+            if (document.exitFullscreen) {
+                document.exitFullscreen()
+            } else {
+                const doc = document as Document & {
+                    mozCancelFullScreen?: () => Promise<void>
+                    webkitExitFullscreen?: () => Promise<void>
+                    msExitFullscreen?: () => Promise<void>
+                }
+
+                if (doc.mozCancelFullScreen) {
+                    doc.mozCancelFullScreen()
+                } else if (doc.webkitExitFullscreen) {
+                    doc.webkitExitFullscreen()
+                } else if (doc.msExitFullscreen) {
+                    doc.msExitFullscreen()
+                }
+            }
         }
     }
 
+    useEffect(() => {
+        if (status === 'pending' && inputRef.current) {
+            inputRef.current.focus()
+        }
+    }, [status])
+
+    const formattedTime = currentTime.toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    })
+
+    const formattedDate = currentTime.toLocaleDateString('es-AR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    })
+
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4 relative">
+        <div className="min-h-screen max-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex flex-col items-center justify-start pt-16 relative overflow-hidden">
+            {/* Elementos decorativos de fondo */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -top-40 -left-40 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
+                <div className="absolute top-1/3 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl" />
+                <div className="absolute -bottom-40 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
+            </div>
+
             {/* Botón de maximizar pantalla */}
             <button
                 onClick={toggleFullScreen}
-                className="fixed top-4 right-4 z-50 bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 cursor-pointer">
-                ⛶
+                className="fixed top-4 right-4 z-50 bg-slate-800/80 text-white p-2.5 rounded-full hover:bg-slate-700 transition-colors duration-200 backdrop-blur-sm border border-slate-700/50 shadow-lg">
+                <Maximize2 size={20} />
             </button>
 
-            {/* Fondo con gradiente */}
-            <div className="fixed inset-0 bg-gradient-to-br from-purple-900/40 via-emerald-600/30 to-black blur-3xl" />
+            {/* Reloj y fecha */}
+            <div className="relative z-10 text-center mb-12">
+                <p className="text-8xl font-bold text-white tracking-tight drop-shadow-lg">
+                    {formattedTime}
+                </p>
+                <p className="text-xl text-white/80 mt-1 font-medium">
+                    {formattedDate}
+                </p>
+            </div>
 
-            {/* Mostrar título solo si está en estado "pending" */}
-            {status === 'pending' && (
-                <h2 className="text-2xl font-semibold text-white mb-4 text-center">
-                    Ingresa tu número de documento para verificar acceso
-                </h2>
-            )}
-
-            {/* Contenido principal */}
-            <div className="relative">
-                <h1 className="text-4xl font-bold text-white text-center mb-6">
-                    {status === 'authorized'
-                        ? 'ACCESO PERMITIDO'
-                        : status === 'unauthorized'
-                        ? 'ACCESO DENEGADO'
-                        : status === 'error'
-                        ? 'ERROR'
-                        : ''}
-                </h1>
-
-                {/* Modal más grande */}
-                <Card
-                    className={`w-[600px] bg-white rounded-3xl p-8 flex flex-col items-center space-y-6 
-                    ${
-                        status === 'authorized'
-                            ? 'bg-emerald-400'
+            {/* Título de estado */}
+            <div className="relative z-10 h-16 mb-6">
+                {status === 'pending' && (
+                    <h2 className="text-2xl font-medium text-white/90 text-center">
+                        Ingresa tu número de documento para verificar acceso
+                    </h2>
+                )}
+                {status !== 'pending' && (
+                    <h1
+                        className={`text-4xl font-bold text-center ${
+                            status === 'authorized'
+                                ? 'text-emerald-400'
+                                : 'text-red-400'
+                        }`}>
+                        {status === 'authorized'
+                            ? 'ACCESO PERMITIDO'
                             : status === 'unauthorized'
-                            ? 'bg-red-500'
-                            : status === 'error'
-                            ? 'bg-red-700'
-                            : 'bg-gray-300'
-                    }`}>
-                    {/* Logo */}
-                    <div className="w-32 h-16 relative">
-                        <Image
-                            src="/favicon.ico"
-                            alt="VITA fitness"
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
+                            ? 'ACCESO DENEGADO'
+                            : 'ERROR'}
+                    </h1>
+                )}
+            </div>
 
-                    {/* Input solo si está en estado "pending" */}
-                    {status === 'pending' && (
-                        <div className="w-full space-y-4">
-                            <label className="block text-black text-lg">
-                                Número de Documento
-                            </label>
-                            <input
-                                type="text"
-                                className="w-full p-2 rounded-md text-black border border-gray-300"
-                                placeholder="Ej: 12345678"
-                                value={documentNumber || ''} // Asegura que siempre tenga un valor
-                                onChange={e => {
-                                    // Solo permitir números
-                                    const value = e.target.value
-                                    if (/^\d*$/.test(value)) {
-                                        setDocumentNumber(value)
-                                    }
-                                }}
-                                inputMode="numeric" // Para dispositivos móviles
-                                maxLength={8} // Limitar a 8 caracteres (ajustar según el formato)
-                            />
-                        </div>
-                    )}
+            {/* Tarjeta principal */}
+            <Card
+                className={`w-[600px] rounded-2xl p-8 flex flex-col items-center space-y-6 shadow-2xl backdrop-blur-sm border-2 transition-all duration-300 ${
+                    status === 'authorized'
+                        ? 'bg-emerald-500/90 border-emerald-400'
+                        : status === 'unauthorized' || status === 'error'
+                        ? 'bg-red-500/90 border-red-400'
+                        : 'bg-white/90 border-slate-200'
+                }`}>
+                {/* Logo */}
+                <div className="w-24 h-24 relative bg-white rounded-full p-2 shadow-md">
+                    <Image
+                        src="/favicon.ico"
+                        alt="VITA fitness"
+                        fill
+                        className="object-contain p-2"
+                        priority
+                    />
+                </div>
 
-                    {/* Estado de acceso */}
-                    {status !== 'pending' && (
-                        <p
-                            className={`text-xl font-medium ${
+                {/* Campo de documento */}
+                <div className="w-full space-y-3">
+                    <label
+                        className={`block text-lg text-center font-medium ${
+                            status === 'authorized' ||
+                            status === 'unauthorized' ||
+                            status === 'error'
+                                ? 'text-white'
+                                : 'text-slate-700'
+                        }`}>
+                        Número de Documento
+                    </label>
+                    <div className="relative">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            className={`w-full p-4 pr-12 rounded-xl text-slate-800 border-2 text-center text-2xl font-bold shadow-sm focus:outline-none focus:ring-2 transition-all ${
                                 status === 'authorized'
-                                    ? 'text-white'
-                                    : 'text-black'
-                            }`}>
+                                    ? 'border-emerald-300 focus:ring-emerald-300'
+                                    : status === 'unauthorized' ||
+                                      status === 'error'
+                                    ? 'border-red-300 focus:ring-red-300'
+                                    : 'border-slate-200 focus:ring-emerald-500'
+                            }`}
+                            placeholder="Ej: 12345678"
+                            value={documentNumber || ''}
+                            onChange={e => {
+                                const value = e.target.value
+                                if (/^\d*$/.test(value)) {
+                                    setDocumentNumber(value)
+                                }
+                            }}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    inputRef.current?.blur()
+                                }
+                            }}
+                            inputMode="numeric"
+                            maxLength={8}
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <Search size={20} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mensaje de estado */}
+                {status !== 'pending' && (
+                    <div
+                        className={`flex items-center justify-center gap-2 text-xl font-medium ${
+                            status === 'authorized' ||
+                            status === 'unauthorized' ||
+                            status === 'error'
+                                ? 'text-white'
+                                : 'text-slate-700'
+                        }`}>
+                        {status === 'authorized' ? (
+                            <Check className="text-white" size={24} />
+                        ) : (
+                            <X className="text-white" size={24} />
+                        )}
+                        <p>
                             {status === 'authorized'
                                 ? 'ACCESO PERMITIDO'
                                 : status === 'unauthorized'
                                 ? `ACCESO DENEGADO ${errorMessage}`
                                 : errorMessage}
                         </p>
-                    )}
+                    </div>
+                )}
 
-                    {/* Nombre del miembro */}
-                    {status === 'authorized' && (
-                        <h2 className="text-4xl font-black tracking-wide text-center">
-                            {name}
-                        </h2>
-                    )}
+                {/* Nombre del estudiante */}
+                {status === 'authorized' && (
+                    <h2 className="text-4xl font-black tracking-wide text-center text-white mt-2">
+                        {name}
+                    </h2>
+                )}
 
-                    {/* Fecha de pago */}
-                    {status === 'authorized' && (
-                        <div className="text-center space-y-1">
-                            <p className="text-lg font-medium">
-                                FECHA DE PAGO:
-                            </p>
-                            <p className="text-lg font-medium">{paymentDate}</p>
-                        </div>
-                    )}
-                </Card>
-            </div>
+                {/* Fecha de pago */}
+                {status === 'authorized' && (
+                    <div className="text-center space-y-1 bg-white/20 px-6 py-3 rounded-xl backdrop-blur-sm">
+                        <p className="text-lg font-medium text-white">
+                            FECHA DE PAGO:
+                        </p>
+                        <p className="text-lg font-bold text-white">
+                            {paymentDate}
+                        </p>
+                    </div>
+                )}
+            </Card>
+
+            {/* Instrucciones adicionales */}
+            {status === 'pending' && (
+                <div className="mt-8 text-white/60 text-center max-w-md">
+                    <p>
+                        Ingresa tu DNI y presiona Enter para verificar tu acceso
+                    </p>
+                </div>
+            )}
         </div>
     )
 }
+
 interface access {
     student_id: string
     has_class_now?: boolean
@@ -163,7 +289,7 @@ interface access {
     expiration_date: string
     access_granted: boolean
 }
-// Componente principal
+
 export default function AccessPage() {
     const [documentNumber, setDocumentNumber] = useState<string>('')
     const [status, setStatus] = useState<AccessStatus>('pending')
@@ -178,14 +304,16 @@ export default function AccessPage() {
         access_granted: false,
     })
 
-    // Validación del documento (debe tener 8 dígitos)
+    const validateDocument = (docNumber: string): boolean =>
+        /^\d{8}$/.test(docNumber)
+
     const handleValidation = useCallback(async (dni: string) => {
         if (!validateDocument(dni)) {
             setStatus('error')
             setErrorMessage(
                 'Número de documento inválido. Debe tener 8 dígitos.',
             )
-            resetAfterDelay()
+
             return
         }
 
@@ -201,7 +329,7 @@ export default function AccessPage() {
             if (!studentData) {
                 setStatus('error')
                 setErrorMessage('Estudiante no encontrado.')
-                resetAfterDelay()
+
                 return
             }
 
@@ -222,24 +350,42 @@ export default function AccessPage() {
                     setErrorMessage('El pago está vencido o no es válido.')
                 }
             }
-
-            resetAfterDelay()
         } catch (error) {
             console.error(error)
             setStatus('error')
             setErrorMessage('Error al buscar el estudiante o su acceso.')
-            resetAfterDelay()
         }
-    }, []) // <---- Poné dependencias si usás variables externas
-
-    const validateDocument = (docNumber: string): boolean =>
-        /^\d{8}$/.test(docNumber)
+    }, [])
 
     useEffect(() => {
+        // Si el input está vacío, resetea todo
         if (documentNumber === '') {
             setStatus('pending')
+            setErrorMessage('')
+            setStudent(undefined)
+            setAccess({
+                student_id: '',
+                has_class_now: false,
+                is_payment_valid: false,
+                payment_date: '',
+                expiration_date: '',
+                access_granted: false,
+            })
             return
         }
+
+        // Al cambiar el DNI, también resetea todo antes de validar
+        setStatus('pending')
+        setErrorMessage('')
+        setStudent(undefined)
+        setAccess({
+            student_id: '',
+            has_class_now: false,
+            is_payment_valid: false,
+            payment_date: '',
+            expiration_date: '',
+            access_granted: false,
+        })
 
         const timeout = setTimeout(() => {
             handleValidation(documentNumber)
@@ -248,13 +394,86 @@ export default function AccessPage() {
         return () => clearTimeout(timeout)
     }, [documentNumber, handleValidation])
 
-    const resetAfterDelay = () => {
-        setTimeout(() => {
-            setDocumentNumber('')
-            setStatus('pending')
-            setErrorMessage('')
-        }, 2000)
-    }
+    useEffect(() => {
+        // Intentar entrar en pantalla completa después de un pequeño retraso
+        const enterFullScreen = () => {
+            if (document.fullscreenElement === null) {
+                try {
+                    // Intentar con el método estándar
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.warn(
+                            'No se pudo entrar en fullscreen con método estándar:',
+                            err,
+                        )
+
+                        // Intentar con métodos específicos de navegadores
+                        const docEl =
+                            document.documentElement as HTMLElement & {
+                                mozRequestFullScreen?: () => Promise<void>
+                                webkitRequestFullscreen?: () => Promise<void>
+                                msRequestFullscreen?: () => Promise<void>
+                            }
+
+                        if (docEl.mozRequestFullScreen) {
+                            docEl.mozRequestFullScreen()
+                        } else if (docEl.webkitRequestFullscreen) {
+                            docEl.webkitRequestFullscreen()
+                        } else if (docEl.msRequestFullscreen) {
+                            docEl.msRequestFullscreen()
+                        }
+                    })
+                } catch (error) {
+                    console.warn(
+                        'Error al intentar entrar en pantalla completa:',
+                        error,
+                    )
+                }
+            }
+        }
+        const fullscreenTimeout = setTimeout(() => {
+            enterFullScreen()
+        }, 500)
+
+        // También intentar cuando el usuario interactúe con la página
+        const handleUserInteraction = () => {
+            enterFullScreen()
+            // Eliminar el event listener después de la primera interacción
+            document.removeEventListener('click', handleUserInteraction)
+            document.removeEventListener('keydown', handleUserInteraction)
+        }
+
+        document.addEventListener('click', handleUserInteraction)
+        document.addEventListener('keydown', handleUserInteraction)
+
+        const keepInputFocused = (e: KeyboardEvent) => {
+            const isNumberKey = e.key >= '0' && e.key <= '9'
+            const isEnterKey = e.key === 'Enter'
+
+            if (!isNumberKey && !isEnterKey) return
+
+            const active = document.activeElement
+            const input = document.querySelector('input') as HTMLInputElement
+
+            if (active?.tagName !== 'INPUT') {
+                input?.focus()
+            }
+
+            if (isEnterKey && input) {
+                input.value = ''
+                setDocumentNumber('')
+            }
+        }
+
+        window.addEventListener('keydown', keepInputFocused)
+
+        return () => {
+            clearTimeout(fullscreenTimeout)
+            window.removeEventListener('keydown', keepInputFocused)
+            document.removeEventListener('click', handleUserInteraction)
+            document.removeEventListener('keydown', handleUserInteraction)
+        }
+    }, [])
+
     return (
         <AccessCard
             name={student ? `${student.name} ${student.last_name}` : ''}
