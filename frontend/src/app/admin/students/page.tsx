@@ -137,6 +137,7 @@ export default function StudentManagement() {
                             // Get the latest unpaid or upcoming payment
                             const relevantPayment = student.payments
                                 .filter((p: any) => p.expiration_date)
+                                .filter((p:any) => p.status === 'pagado')
                                 .sort((a: any, b: any) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime()).reverse()[0];
 
                             if (relevantPayment) {
