@@ -29,6 +29,7 @@ interface Student {
     status: 'activo' | 'inactivo' | 'pendiente'
     paymentDueDate: string
     daysOverdue: number
+    daysUntilDue: number
     remainingClasses: number
     canAttend: boolean
     branch: string
@@ -76,83 +77,14 @@ const formatDate = (dateString: string) => {
 }
 
 // Helper function to determine row color based on payment status
-const getRowColor = (daysOverdue: number) => {
+const getRowColor = (daysOverdue: number, daysUntilDue: number) => {
     if (daysOverdue > 0)
         return 'bg-red-100/70 dark:bg-red-900/30 text-red-900 dark:text-red-100'
-    if (daysOverdue === 0)
+    if (daysUntilDue === 0 && daysOverdue === 0)
         return 'bg-yellow-100/70 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100'
     return 'dark:text-gray-100'
 }
 
-// Mock student data
-// const mockStudents: Student[] = [
-//     {
-//         id: '1',
-//         name: 'Eliana',
-//         last_name: 'Aguirre',
-//         phone: '+54 11 5555-1234',
-//         dni: '32456789',
-//         status: 'activo',
-//         paymentDueDate: '2025-04-18',
-//         daysOverdue: 4,
-//         remainingClasses: 25,
-//         canAttend: true,
-//         branch: 'Principal',
-//         address: 'Av. Corrientes 1234, CABA',
-//         birthDate: '1990-05-15',
-//         memberSince: '2023-01-10',
-//         lastPaymentAmount: 25000,
-//         paymentHistory: [
-//             { date: '2025-03-18', amount: 25000, concept: 'FUNCIONAL 21hs' },
-//             { date: '2025-02-18', amount: 25000, concept: 'FUNCIONAL 21hs' },
-//             { date: '2025-01-18', amount: 23000, concept: 'FUNCIONAL 21hs' },
-//         ],
-//         attendanceHistory: [
-//             { date: '2025-04-15', className: 'Funcional 21hs' },
-//             { date: '2025-04-13', className: 'Funcional 21hs' },
-//             { date: '2025-04-10', className: 'Funcional 21hs' },
-//             { date: '2025-04-08', className: 'Funcional 21hs' },
-//         ],
-//     },
-//     {
-//         id: '10',
-//         name: 'Gladys',
-//         last_name: 'Kurylo',
-//         phone: '+54 11 5555-5678',
-//         dni: '28765432',
-//         status: 'activo',
-//         paymentDueDate: '2025-04-23',
-//         daysOverdue: 0,
-//         remainingClasses: 15,
-//         canAttend: true,
-//         branch: 'Principal',
-//         address: 'Av. Santa Fe 4321, CABA',
-//         birthDate: '1985-08-22',
-//         memberSince: '2024-02-15',
-//         lastPaymentAmount: 29000,
-//         paymentHistory: [
-//             { date: '2025-03-23', amount: 29000, concept: 'FUNCIONAL 21hs' },
-//             { date: '2025-02-23', amount: 29000, concept: 'FUNCIONAL 21hs' },
-//         ],
-//         attendanceHistory: [
-//             { date: '2025-04-20', className: 'Funcional 21hs' },
-//             { date: '2025-04-18', className: 'Funcional 21hs' },
-//             { date: '2025-04-16', className: 'Funcional 21hs' },
-//         ],
-//     },
-// ]
-const getDaysRemaining = (dateString: string): number => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const targetDate = new Date(dateString)
-    targetDate.setHours(0, 0, 0, 0)
-
-    const diffTime = targetDate.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    return diffDays
-}
 export default function StudentManagement() {
     const [students, setStudents] = useState<Student[]>([])
     const [loading, setLoading] = useState<boolean>(true)
@@ -193,7 +125,47 @@ export default function StudentManagement() {
             try {
                 const response = await getStudents()
                 if (isMounted) {
-                    setStudents(response.students)
+
+                    const now = new Date();
+                    
+                    const processedStudents = response.students.map((student: any) => {
+                        let paymentDueDate: string | null = null;
+                        let daysUntilDue = 0;
+                        let daysOverdue = 0;
+
+                        if (student.payments && student.payments.length > 0) {
+                            // Get the latest unpaid or upcoming payment
+                            const relevantPayment = student.payments
+                                .filter((p: any) => p.expiration_date)
+                                .sort((a: any, b: any) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime()).reverse()[0];
+
+                            if (relevantPayment) {
+                                const dueDate = new Date(relevantPayment.expiration_date);
+                                paymentDueDate = dueDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+                                daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+                                const timeDiff = dueDate.getTime() - now.getTime();
+                                const dayDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+                                if (dayDiff < 0) {
+                                    daysOverdue = Math.abs(dayDiff);
+                                    daysUntilDue = 0;
+                                } else {
+                                    daysUntilDue = dayDiff;
+                                    daysOverdue = 0;
+                                }
+                            }
+                        }
+                        
+
+                        return {
+                            ...student,
+                            paymentDueDate,
+                            daysUntilDue,
+                            daysOverdue
+                        };
+                    });
+                    setStudents(processedStudents)
                     setLoading(false)
                 }
             } catch (err) {
@@ -212,6 +184,7 @@ export default function StudentManagement() {
             isMounted = false
         }
     }, [getStudents])
+    console.log(students);
 
     // Handle sorting
     const handleSort = (key: keyof Student) => {
@@ -510,7 +483,7 @@ export default function StudentManagement() {
                                             <tr
                                                 key={student.id}
                                                 className={`${getRowColor(
-                                                    student.daysOverdue,
+                                                    student.daysOverdue, student.daysUntilDue,
                                                 )} hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
                                                     selectedStudent?.id ===
                                                     student.id
@@ -548,16 +521,12 @@ export default function StudentManagement() {
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     {formatDate(
-                                                        student.payments?.[0]
-                                                            ?.expiration_date || "",
+                                                        student.paymentDueDate || "",
                                                     )}
                                                 </td>
 
                                                 <td className="px-4 py-3 text-center">
-                                                    {getDaysRemaining(
-                                                        student.payments?.[0]
-                                                            ?.expiration_date || "",
-                                                    )}
+                                                    {student.daysOverdue || 0}
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
                                                     <div className="flex justify-end gap-2">
@@ -781,7 +750,7 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             <span>
-                                                {accountInfo?.lastPaymentDate}
+                                                {formatDate(accountInfo?.lastPaymentDate) || ""}
                                             </span>
                                             <span>
                                                 {accountInfo?.lastPaymentPlan}
