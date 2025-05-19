@@ -14,9 +14,11 @@ import {
     Trash2
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/app/admin/components/ui/button'
 import { useStudents } from '@/hooks/students'
 import { Payment } from '@/hooks/payments'
+
 
 // Types for our student data
 interface Student {
@@ -86,6 +88,7 @@ const getRowColor = (daysOverdue: number, daysUntilDue: number) => {
 }
 
 export default function StudentManagement() {
+    const router = useRouter()
     const [students, setStudents] = useState<Student[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
@@ -534,6 +537,10 @@ export default function StudentManagement() {
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
+                                                            onClick={e => {
+                                                                e.stopPropagation()
+                                                                router.push(`/admin/students/edit/${student.id}`)
+                                                            }}
                                                             className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                                                             <Edit2 className="h-4 w-4" />
                                                         </Button>
