@@ -11,7 +11,7 @@ import {
     Phone,
     Plus,
     Edit2,
-    Trash2
+    Trash2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/app/admin/components/ui/button'
@@ -49,7 +49,6 @@ interface Student {
 interface Attendances {
     date: string
     classSchedule: ClassSchedule
-
 }
 interface ClassSchedule {
     id: string
@@ -234,16 +233,29 @@ export default function StudentManagement() {
             setSelectedStudent(null) // Deselect if clicking the same student
             setAccountInfo(null)
         } else {
-            const sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
-            const sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
+            const sortedDates = student.payments
+                ?.sort(
+                    (a, b) =>
+                        new Date(a.payment_date).getTime() -
+                        new Date(b.payment_date).getTime(),
+                )
+                .reverse()
+            const sortedAttendances = student.attendances
+                ?.sort(
+                    (a, b) =>
+                        new Date(a.date).getTime() - new Date(b.date).getTime(),
+                )
+                .reverse()
             console.log(sortedDates)
-            
+
             const accountInfo = {
                 balance: 0,
                 lastEntryDate: String(sortedAttendances?.[0]?.date),
                 lastEntryTime: '',
-                lastPaymentDate: String(sortedDates?.[0]?.payment_date), 
-                lastPaymentPlan: String(sortedDates?.[0]?.classSchedule.class.name),
+                lastPaymentDate: String(sortedDates?.[0]?.payment_date),
+                lastPaymentPlan: String(
+                    sortedDates?.[0]?.classSchedule.class.name,
+                ),
                 lastPaymentAmount: Number(sortedDates?.[0]?.amount),
             }
             setSelectedStudent(student) // Select the clicked student
@@ -507,80 +519,82 @@ export default function StudentManagement() {
                                     </tr>
                                 ) : (
                                     paginatedStudents.map(student => (
-                                            <tr
-                                                key={student.id}
-                                                className={`${getRowColor(
-                                                    student.daysOverdue,
-                                                )} hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
-                                                    selectedStudent?.id ===
-                                                    student.id
-                                                        ? 'ring-2 ring-inset ring-purple-500'
-                                                        : ''
-                                                }`}
-                                                onClick={() =>
-                                                    handleStudentClick(student)
-                                                }>
-                                                <td className="px-4 py-3">
-                                                    {student.dni}
-                                                </td>
-                                                <td className="px-4 py-3 font-medium">
-                                                    {student.name}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {student.last_name}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {student.phone}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <span
-                                                        className={`px-2 py-1 text-xs rounded-full ${
-                                                            student.status ===
-                                                            'activo'
-                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                                                                : student.status ===
-                                                                  'inactivo'
-                                                                ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
-                                                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
-                                                        }`}>
-                                                        {student.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {formatDate(
-                                                        student.payments?.[0]
-                                                            ?.expiration_date || "",
-                                                    )}
-                                                </td>
+                                        <tr
+                                            key={student.id}
+                                            className={`${getRowColor(
+                                                student.daysOverdue,
+                                            )} hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
+                                                selectedStudent?.id ===
+                                                student.id
+                                                    ? 'ring-2 ring-inset ring-purple-500'
+                                                    : ''
+                                            }`}
+                                            onClick={() =>
+                                                handleStudentClick(student)
+                                            }>
+                                            <td className="px-4 py-3">
+                                                {student.dni}
+                                            </td>
+                                            <td className="px-4 py-3 font-medium">
+                                                {student.name}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {student.last_name}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {student.phone}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span
+                                                    className={`px-2 py-1 text-xs rounded-full ${
+                                                        student.status ===
+                                                        'activo'
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                                                            : student.status ===
+                                                              'inactivo'
+                                                            ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
+                                                    }`}>
+                                                    {student.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {formatDate(
+                                                    student.payments?.[0]
+                                                        ?.expiration_date || '',
+                                                )}
+                                            </td>
 
-                                                <td className="px-4 py-3 text-center">
-                                                    {getDaysRemaining(
-                                                        student.payments?.[0]
-                                                            ?.expiration_date || "",
-                                                    )}
-                                                </td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <div className="flex justify-end gap-2">
+                                            <td className="px-4 py-3 text-center">
+                                                {getDaysRemaining(
+                                                    student.payments?.[0]
+                                                        ?.expiration_date || '',
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Link href="admin/students/edit/${student.id}">
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
                                                             className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                                                             <Edit2 className="h-4 w-4" />
                                                         </Button>
-                                                    </div>
-                                                    <Button
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        onClick={e => {
-                                                            e.stopPropagation()
-                                                            handleDeleteStudent(
-                                                                student.id,
-                                                            )
-                                                        }}
-                                                        className="h-8 w-8 p-0">
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </td>
+                                                    </Link>
+                                                </div>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={e => {
+                                                        e.stopPropagation()
+                                                        handleDeleteStudent(
+                                                            student.id,
+                                                        )
+                                                    }}
+                                                    className="h-8 w-8 p-0">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
@@ -673,91 +687,90 @@ export default function StudentManagement() {
                                         </div>
                                     </div>
                                 </div>
-
-                                
                             </div>
                             {/* Attendance History */}
-                                <div className="space-y-4">
-                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                        Historial de Asistencias
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStudent.attendanceHistory &&
-                                        selectedStudent.attendanceHistory.length >
-                                            0 ? (
-                                            selectedStudent.attendanceHistory.map(
-                                                (attendance, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                    Historial de Asistencias
+                                </h4>
+                                <div className="space-y-2">
+                                    {selectedStudent.attendanceHistory &&
+                                    selectedStudent.attendanceHistory.length >
+                                        0 ? (
+                                        selectedStudent.attendanceHistory.map(
+                                            (attendance, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                                                    <p className="text-sm font-medium dark:text-white">
+                                                        {formatDate(
+                                                            attendance.date,
+                                                        )}
+                                                    </p>
+                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
+                                                        {attendance.className}
+                                                    </span>
+                                                </div>
+                                            ),
+                                        )
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400 italic">
+                                            No hay historial de asistencias
+                                            disponible
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                            {/* Payment History */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                    Historial de Pagos
+                                </h4>
+                                <div className="space-y-2">
+                                    {selectedStudent.payments &&
+                                    selectedStudent.payments.length > 0 ? (
+                                        selectedStudent.payments.map(
+                                            (payment, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                                                    <div>
                                                         <p className="text-sm font-medium dark:text-white">
                                                             {formatDate(
-                                                                attendance.date,
+                                                                payment.payment_date,
                                                             )}
                                                         </p>
-                                                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
-                                                            {attendance.className}
-                                                        </span>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {
+                                                                payment
+                                                                    .classSchedule
+                                                                    .class.name
+                                                            }
+                                                        </p>
                                                     </div>
-                                                ),
-                                            )
-                                        ) : (
-                                            <p className="text-gray-500 dark:text-gray-400 italic">
-                                                No hay historial de asistencias
-                                                disponible
-                                            </p>
-                                        )}
-                                    </div>
+                                                    <span className="font-medium dark:text-white">
+                                                        {formatCurrency(
+                                                            Number(
+                                                                payment.amount,
+                                                            ),
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            ),
+                                        )
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400 italic">
+                                            No hay historial de pagos disponible
+                                        </p>
+                                    )}
                                 </div>
-                            {/* Payment History */}
-                                <div className="space-y-4">
-                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                        Historial de Pagos
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStudent.payments &&
-                                        selectedStudent.payments.length >
-                                            0 ? (
-                                            selectedStudent.payments.map(
-                                                (payment, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
-                                                        <div>
-                                                            <p className="text-sm font-medium dark:text-white">
-                                                                {formatDate(
-                                                                    payment.payment_date,
-                                                                )}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {
-                                                                    payment.classSchedule.class.name
-                                                                }
-                                                            </p>
-                                                        </div>
-                                                        <span className="font-medium dark:text-white">
-                                                            {formatCurrency(
-                                                                Number(payment.amount),
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                ),
-                                            )
-                                        ) : (
-                                            <p className="text-gray-500 dark:text-gray-400 italic">
-                                                No hay historial de pagos
-                                                disponible
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
+                            </div>
 
                             {/* Account info and actions */}
                             <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur md:col-span-3">
                                 <div className="grid grid-cols-1 gap-4">
                                     {/* Account balance */}
                                     <div className="flex flex-col">
-                                        
                                         <div className="mt-2">
                                             <span className="text-sm text-gray-600 dark:text-gray-400">
                                                 Promoción Principal:
@@ -768,7 +781,6 @@ export default function StudentManagement() {
                                         </div>
                                     </div>
 
-                                    
                                     {/* Last payment */}
                                     <div className="flex flex-col">
                                         <div className="flex justify-between items-center mb-2">
@@ -788,30 +800,37 @@ export default function StudentManagement() {
                                             </span>
                                             <span className="font-semibold">
                                                 {formatCurrency(
-                                                    accountInfo?.lastPaymentAmount || 0,
+                                                    accountInfo?.lastPaymentAmount ||
+                                                        0,
                                                 )}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                            {/* Action buttons */}
-                            <div className="flex justify-end mt-4 gap-2">
-                                <p className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
-                                    <DollarSign className="h-5 w-5" />
-                                    Cobrar Cuota
-                                </p>
-                                <p className="bg-purple-600 hover:bg-purple-700 text-white">
-                                    Otros Abonos
-                                </p>
+                                {/* Action buttons */}
+                                <div className="flex justify-end mt-4 gap-2">
+                                    <Link
+                                        href={`/admin/students/payments/create`}>
+                                        <button className="bg-green-600 rounded-md items-center h-12 p-2 hover:bg-green-700 text-white flex">
+                                            <DollarSign className="h-5 w-5" />
+                                            Cobrar Cuota
+                                        </button>
+                                    </Link>
+                                    <Link href={`/admin/students/create`}>
+                                        <button className="bg-purple-600 rounded-md items-center h-12 p-2 hover:bg-purple-700 text-white">
+                                            Otros Abonos
+                                        </button>
+                                    </Link>
+                                </div>
                             </div>
-                        </div>
-
                         </div>
 
                         {/* Mobile new student button */}
                         <div className="sm:hidden flex justify-center mt-6">
-                            <Link href="/admin/students/create" className="w-full">
+                            <Link
+                                href="/admin/students/create"
+                                className="w-full">
                                 <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                                     <Plus className="mr-2 h-4 w-4" />
                                     Nuevo Alumno
