@@ -758,7 +758,7 @@ export default function StudentManagement() {
                                                 Promoción Principal:
                                             </span>
                                             <span className="ml-2 font-medium dark:text-white">
-                                                {accountInfo?.lastPaymentPlan == "" || accountInfo?.lastPaymentPlan == undefined || accountInfo?.lastPaymentPlan == null ? "Sin plan" : accountInfo?.lastPaymentPlan}
+                                                {accountInfo?.lastPaymentPlan == "" || accountInfo?.lastPaymentPlan == "undefined" || accountInfo?.lastPaymentPlan == undefined || accountInfo?.lastPaymentPlan == null ? "Sin plan" : accountInfo?.lastPaymentPlan}
                                             </span>
                                         </div>
                                     </div>
@@ -788,7 +788,7 @@ export default function StudentManagement() {
                                                     </span>
                                                 )}
                                             <span>
-                                                {accountInfo?.lastPaymentPlan == "" || accountInfo?.lastPaymentPlan == undefined || accountInfo?.lastPaymentPlan == null ? "Sin plan" : accountInfo?.lastPaymentPlan}
+                                                {accountInfo?.lastPaymentPlan == "" || accountInfo?.lastPaymentPlan == "undefined" || accountInfo?.lastPaymentPlan == undefined || accountInfo?.lastPaymentPlan == null ? "Sin plan" : accountInfo?.lastPaymentPlan}
                                             </span>
                                             <span className="font-semibold">
                                                 {formatCurrency(
