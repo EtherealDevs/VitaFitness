@@ -702,8 +702,14 @@ export default function StudentManagement() {
                                                         className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
                                                         <div>
                                                             <p className="text-sm font-medium dark:text-white">
-                                                                {formatDate(
-                                                                    payment.payment_date,
+                                                                {payment.payment_date ? (
+                                                                    formatDate(
+                                                                        payment.payment_date,
+                                                                    )
+                                                                ) : (
+                                                                    <span className="text-gray-500 dark:text-gray-400">
+                                                                        Sin fecha
+                                                                    </span>
                                                                 )}
                                                             </p>
                                                             <p className="text-xs text-gray-500 dark:text-gray-400">
