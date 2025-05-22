@@ -222,6 +222,7 @@ export default function StudentManagement() {
                 lastPaymentPlan: String(sortedDates?.[0]?.classSchedule.class.name),
                 lastPaymentAmount: Number(sortedDates?.[0]?.amount),
             }
+            console.log(accountInfo)
             setSelectedStudent(student) // Select the clicked student
             setAccountInfo(accountInfo)
         }
@@ -776,7 +777,7 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             
-                                                {accountInfo && accountInfo?.lastPaymentDate == undefined || accountInfo?.lastPaymentDate == null ? (
+                                                {accountInfo?.lastPaymentDate == undefined || accountInfo?.lastPaymentDate == null ? (
                                                     <span className="text-gray-500 dark:text-gray-400">
                                                         Sin fecha
                                                     </span>
