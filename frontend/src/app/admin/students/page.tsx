@@ -140,7 +140,6 @@ export default function StudentManagement() {
                             // Get the latest unpaid or upcoming payment
                             const relevantPayment = student.payments
                                 .filter((p: Payment) => p.expiration_date)
-                                .filter((p:Payment) => p.status === 'pagado')
                                 .sort((a: Payment, b: Payment) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime()).reverse()[0];
 
                             if (relevantPayment) {
@@ -708,7 +707,20 @@ export default function StudentManagement() {
                                                                     )
                                                                 ) : (
                                                                     <span className="text-gray-500 dark:text-gray-400">
-                                                                        Sin fecha
+                                                                        Sin fecha de inicio
+                                                                    </span>
+                                                                )} {" - "}
+                                                                {payment.expiration_date ? (
+                                                                    <span className="text-gray-500 dark:text-gray-400">
+                                                                        {payment.expiration_date
+                                                                            ? formatDate(
+                                                                                  payment.expiration_date,
+                                                                              )
+                                                                            : ""}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-gray-500 dark:text-gray-400">
+                                                                        Sin fecha de vencimiento
                                                                     </span>
                                                                 )}
                                                             </p>
@@ -764,7 +776,15 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             <span>
-                                                {accountInfo ? formatDate(accountInfo?.lastPaymentDate) || "" : ""}
+                                                {accountInfo?.lastPaymentDate == null ? (
+                                                    <span className="text-gray-500 dark:text-gray-400">
+                                                        Sin fecha
+                                                    </span>
+                                                ) : (
+                                                    formatDate(
+                                                        accountInfo?.lastPaymentDate,
+                                                    )
+                                                )}
                                             </span>
                                             <span>
                                                 {accountInfo?.lastPaymentPlan}
