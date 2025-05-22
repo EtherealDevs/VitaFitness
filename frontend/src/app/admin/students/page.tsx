@@ -173,7 +173,7 @@ export default function StudentManagement() {
                 }
             } catch (err) {
                 if (isMounted) {
-                    setError('Error al cargar los datos de estudiantes')
+                    setError('Error al cargar los datos de alumnos')
                     console.error(err)
                     setLoading(false)
                 }
@@ -329,7 +329,7 @@ export default function StudentManagement() {
                         <div className="relative w-full md:w-64">
                             <input
                                 type="text"
-                                placeholder="Buscar estudiantes..."
+                                placeholder="Buscar alumnos..."
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50  dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
@@ -478,7 +478,7 @@ export default function StudentManagement() {
                                         <td
                                             colSpan={9}
                                             className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                                            No se encontraron estudiantes
+                                            No se encontraron alumnos
                                         </td>
                                     </tr>
                                 ) : (
@@ -602,7 +602,7 @@ export default function StudentManagement() {
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                             <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                                 <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                                Detalles del Estudiante: {selectedStudent.name}{' '}
+                                Detalles del Alumno: {selectedStudent.name}{' '}
                                 {selectedStudent.last_name}
                             </h3>
                             <Button
@@ -775,17 +775,18 @@ export default function StudentManagement() {
                                             </button>
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
-                                            <span>
-                                                {accountInfo?.lastPaymentDate ? (
-                                                        formatDate(
-                                                            accountInfo?.lastPaymentDate,
-                                                        )
-                                                ) : (
+                                            
+                                                {accountInfo && accountInfo?.lastPaymentDate == undefined || accountInfo?.lastPaymentDate == null ? (
                                                     <span className="text-gray-500 dark:text-gray-400">
                                                         Sin fecha
                                                     </span>
+                                                ) : (
+                                                    <span>
+                                                {formatDate(
+                                                        accountInfo?.lastPaymentDate,
+                                                    )}
+                                                    </span>
                                                 )}
-                                            </span>
                                             <span>
                                                 {accountInfo?.lastPaymentPlan}
                                             </span>
