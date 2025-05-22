@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import {
     BookOpen,
     Building,
@@ -46,7 +46,7 @@ export default function EditClassPage() {
     const [selectedBranch, setSelectedBranch] = useState('')
     const [price, setPrice] = useState('')
     const [maxStudents, setMaxStudents] = useState('')
-    const [isLoading, setIsLoading] = useState(true)
+    // const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [plans, setPlans] = useState<Plan[]>([])
     const [branches, setBranches] = useState<Branch[]>([])
@@ -73,7 +73,7 @@ export default function EditClassPage() {
 
         async function loadData() {
             try {
-                setIsLoading(true)
+                // setIsLoading(true)
 
                 // Cargar datos de la clase
                 const classData = await getClass(classId)
@@ -109,11 +109,12 @@ export default function EditClassPage() {
                         variant: 'destructive',
                     })
                 // }
-            } finally {
-                // if (!signal.aborted) {
-                    setIsLoading(false)
-                // }
-            }
+            } 
+            // finally {
+            //     // if (!signal.aborted) {
+            //         // setIsLoading(false)
+            //     // }
+            // }
         }
 
         loadData()

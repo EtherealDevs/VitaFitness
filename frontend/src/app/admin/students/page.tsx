@@ -131,7 +131,7 @@ export default function StudentManagement() {
 
                     const now = new Date();
                     
-                    const processedStudents = response.students.map((student: any) => {
+                    const processedStudents = response.students.map((student: Student) => {
                         let paymentDueDate: string | null = null;
                         let daysUntilDue = 0;
                         let daysOverdue = 0;
@@ -139,9 +139,9 @@ export default function StudentManagement() {
                         if (student.payments && student.payments.length > 0) {
                             // Get the latest unpaid or upcoming payment
                             const relevantPayment = student.payments
-                                .filter((p: any) => p.expiration_date)
-                                .filter((p:any) => p.status === 'pagado')
-                                .sort((a: any, b: any) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime()).reverse()[0];
+                                .filter((p: Payment) => p.expiration_date)
+                                .filter((p:Payment) => p.status === 'pagado')
+                                .sort((a: Payment, b: Payment) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime()).reverse()[0];
 
                             if (relevantPayment) {
                                 const dueDate = new Date(relevantPayment.expiration_date);
@@ -758,7 +758,7 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             <span>
-                                                {formatDate(accountInfo?.lastPaymentDate) || ""}
+                                                {accountInfo ? formatDate(accountInfo?.lastPaymentDate) || "" : ""}
                                             </span>
                                             <span>
                                                 {accountInfo?.lastPaymentPlan}
