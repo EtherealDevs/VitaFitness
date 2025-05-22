@@ -776,14 +776,14 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             <span>
-                                                {accountInfo?.lastPaymentDate == null ? (
+                                                {accountInfo?.lastPaymentDate ? (
+                                                        formatDate(
+                                                            accountInfo?.lastPaymentDate,
+                                                        )
+                                                ) : (
                                                     <span className="text-gray-500 dark:text-gray-400">
                                                         Sin fecha
                                                     </span>
-                                                ) : (
-                                                    formatDate(
-                                                        accountInfo?.lastPaymentDate,
-                                                    )
                                                 )}
                                             </span>
                                             <span>
