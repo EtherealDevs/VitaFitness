@@ -524,9 +524,13 @@ export default function StudentManagement() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    {formatDate(
+                                                    {student.paymentDueDate == "" || student.paymentDueDate == undefined || student.paymentDueDate == null ? (
+                                                        <span className="text-gray-500 dark:text-gray-400">
+                                                            Sin fecha
+                                                        </span>
+                                                    ) : (formatDate(
                                                         student.paymentDueDate || "",
-                                                    )}
+                                                    ))}
                                                 </td>
 
                                                 <td className="px-4 py-3 text-center">
@@ -777,7 +781,7 @@ export default function StudentManagement() {
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             
-                                                {accountInfo?.lastPaymentDate == undefined || accountInfo?.lastPaymentDate == null ? (
+                                                {accountInfo?.lastPaymentDate == "undefined" || accountInfo?.lastPaymentDate == "null" || accountInfo?.lastPaymentDate == "" || accountInfo?.lastPaymentDate == null || accountInfo?.lastPaymentDate == undefined ? (
                                                     <span className="text-gray-500 dark:text-gray-400">
                                                         Sin fecha
                                                     </span>
