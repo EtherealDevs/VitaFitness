@@ -187,7 +187,6 @@ export default function StudentManagement() {
             isMounted = false
         }
     }, [getStudents])
-    console.log(students);
 
     // Handle sorting
     const handleSort = (key: keyof Student) => {
@@ -212,7 +211,6 @@ export default function StudentManagement() {
         } else {
             const sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
             const sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
-            console.log(sortedDates)
             
             const accountInfo = {
                 balance: 0,
@@ -222,7 +220,6 @@ export default function StudentManagement() {
                 lastPaymentPlan: String(sortedDates?.[0]?.classSchedule.class.name),
                 lastPaymentAmount: Number(sortedDates?.[0]?.amount),
             }
-            console.log(accountInfo)
             setSelectedStudent(student) // Select the clicked student
             setAccountInfo(accountInfo)
         }
@@ -730,9 +727,7 @@ export default function StudentManagement() {
                                                                 )}
                                                             </p>
                                                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {
-                                                                    payment.classSchedule.class.name
-                                                                }
+                                                                { payment.classSchedule.class.name ? payment.classSchedule.class.name : "Sin clase" }
                                                             </p>
                                                         </div>
                                                         <span className="font-medium dark:text-white">
