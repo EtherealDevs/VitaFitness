@@ -24,6 +24,10 @@ class Teacher extends Model
             'schedule_id' // Local key on ClassSchedule
         );
     }
+    public function classScheduleTimeslotTeachers()
+    {
+        return $this->hasMany(ClassScheduleTimeslotTeacher::class, 'teacher_id');
+    }
 
     public function classes()
     {

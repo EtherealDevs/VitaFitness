@@ -16,9 +16,7 @@ class TeacherSchedulesResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'start_time' => $this->start_time,
-            'end_time' => $this->end_time,
-            'day' => $this->day,
+            'days' => $this->days,
             'teacher' => new TeacherResource($this->whenLoaded('teacher')),
             'classes' => ClasseResource::collection($this->whenLoaded('classes'))
         ];
