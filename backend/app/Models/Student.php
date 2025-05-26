@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
@@ -16,6 +17,14 @@ class Student extends Model
         'status',
         'registration_date',
     ];
+    protected function lastName(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => ucfirst($value),
+            // set: fn($value) => ucfirst(strtolower($value)),
+        );
+    }
+
     public function scopeSearch(Builder $query, string $searchTerm, ?string $field = null): Builder
     {
         $allowedFields = ['name', 'last_name', 'id', 'phone', 'email', 'dni'];

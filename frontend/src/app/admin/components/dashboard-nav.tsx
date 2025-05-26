@@ -39,7 +39,7 @@ const navigation = [
     { name: 'Sucursales', href: '/admin/branches', icon: Building },
     { name: 'Permisos', href: '/admin/permissions', icon: FileText },
     { name: 'Estadísticas', href: '/admin/statistics', icon: BarChart2 },
-    { name: 'Configuración', href: '/admin/configuration', icon: Settings },
+    // { name: 'Configuración', href: '/admin/configuration', icon: Settings },
 ]
 
 export function DashboardNav() {

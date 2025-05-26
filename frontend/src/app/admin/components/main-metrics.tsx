@@ -22,9 +22,9 @@ export function DashboardMetrics({
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">{total_students}</div>
-                    <p className="text-xs text-muted-foreground">
+                    {/* <p className="text-xs text-muted-foreground">
                         +4 desde el último mes
-                    </p>
+                    </p> */}
                 </CardContent>
             </Card>
             <Card>
@@ -36,9 +36,9 @@ export function DashboardMetrics({
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">{total_classes}</div>
-                    <p className="text-xs text-muted-foreground">
+                    {/* <p className="text-xs text-muted-foreground">
                         3 más que ayer
-                    </p>
+                    </p> */}
                 </CardContent>
             </Card>
             <Card>
@@ -50,9 +50,9 @@ export function DashboardMetrics({
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">${total_income}</div>
-                    <p className="text-xs text-muted-foreground">
+                    {/* <p className="text-xs text-muted-foreground">
                         +15% este mes
-                    </p>
+                    </p> */}
                 </CardContent>
             </Card>
             <Card>
@@ -64,9 +64,9 @@ export function DashboardMetrics({
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">85%</div>
-                    <p className="text-xs text-muted-foreground">
+                    {/* <p className="text-xs text-muted-foreground">
                         +2% desde la semana pasada
-                    </p>
+                    </p> */}
                 </CardContent>
             </Card>
         </div>

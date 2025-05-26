@@ -14,25 +14,19 @@ const quickActions = [
         title: 'Nuevo Alumno',
         description: 'Registrar alumnos en el sistema',
         icon: UserPlus,
-        href: '/admin/students/new',
+        href: '/admin/students/create',
     },
     {
         title: 'Nueva Clase',
         description: 'Programar una nueva clase',
         icon: Plus,
-        href: '/admin/classes/new',
+        href: '/admin/classes/create',
     },
     {
         title: 'Permisos',
         description: 'Gestionar permisos de usuarios',
         icon: FileText,
         href: '/admin/permissions',
-    },
-    {
-        title: 'Configuración',
-        description: 'Ajustes del sistema',
-        icon: Settings,
-        href: '/admin/configuration',
     },
 ]
 
