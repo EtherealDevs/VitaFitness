@@ -529,7 +529,7 @@ export default function TeacherIndex() {
                     </div>
                 </div>
 
-                {/* Student details section - only visible when a student is selected */}
+                {/* Teacher details section - only visible when a teacher is selected */}
                 {selectedTeacher && (
                     <div className="mt-6 bg-white/80 dark:bg-[#1f2122] backdrop-blur shadow-lg rounded-lg border border-opacity-50 dark:border-gray-700 overflow-hidden">
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -683,7 +683,6 @@ export default function TeacherIndex() {
                                 <div className="grid grid-cols-1 gap-4">
                                     {/* Account balance */}
                                     <div className="flex flex-col">
-                                        
                                         <div className="mt-2">
                                             <span className="text-sm text-gray-600 dark:text-gray-400">
                                                 Promoción Principal:
@@ -694,7 +693,6 @@ export default function TeacherIndex() {
                                         </div>
                                     </div>
 
-                                    
                                     {/* Last payment */}
                                     <div className="flex flex-col">
                                         <div className="flex justify-between items-center mb-2">
@@ -706,7 +704,6 @@ export default function TeacherIndex() {
                                             </button>
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
-                                            
                                                 {accountInfo?.lastPaymentDate == "undefined" || accountInfo?.lastPaymentDate == "null" || accountInfo?.lastPaymentDate == "" || accountInfo?.lastPaymentDate == null || accountInfo?.lastPaymentDate == undefined ? (
                                                     <span className="text-gray-500 dark:text-gray-400">
                                                         Sin fecha
@@ -746,10 +743,10 @@ export default function TeacherIndex() {
 
                         {/* Mobile new student button */}
                         <div className="sm:hidden flex justify-center mt-6">
-                            <Link href="/admin/students/create" className="w-full">
+                            <Link href="/admin/teachers/create" className="w-full">
                                 <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                                     <Plus className="mr-2 h-4 w-4" />
-                                    Nuevo Alumno
+                                    Nuevo Profe
                                 </Button>
                             </Link>
                         </div>
