@@ -28,8 +28,7 @@ interface Teacher {
     email: string
     phone: string
     dni: string
-    schedules: Schedule[]
-    timeslots: Timeslot[]
+    schedules: ScheduleData[]
     classes: Class[]
     created_at: string
     updated_at: string
@@ -58,6 +57,13 @@ interface TeacherSchedules {
 interface Schedule {
     schedule_id: string
     days: string[]
+    timeslots: Timeslot[]
+}
+interface ScheduleData {
+    schedule_id: string
+    schedule_days: string[]
+    timeslot_id: string
+    timeslot_hour: string
 }
 interface Timeslot {
     id: string
@@ -138,29 +144,32 @@ export default function TeacherIndex() {
 
                 const processedTeachers = response.teachers.map((teacher: Teacher) => {
 
-                    // teacher.schedules.forEach((schedule: Schedule) => {
-                    //     let days: string[] = [];
-                    //     schedule.days.forEach((day: string) => {
-                    //         if (day.includes('2022')) {
-                    //             days.push(day);
-                    //         }
-                    //     });
-                    //     schedule.timeslots.forEach((timeslot: Timeslot) => {
-                    //         if (timeslot.start_time.includes('2022')) {
-                    //             timeslots.push(timeslot);
-                    //         }
-                    //     });
-                    //     schedules.push({
-                    //         ...schedule,
-                    //         days,
-                    //         timeslots
-                    //     });
-                    // });
+                    const schedules: Schedule[] = [];
+                    const timeslots: Timeslot[] = [];
+                    const classes: Class[] = [];
+                    teacher.schedules.forEach((schedule: ScheduleData) => {
+                        let newSchedule = schedules.find(s => s.schedule_id === schedule.schedule_id);
+                        if (newSchedule === undefined) {
+                            newSchedule = {
+                                schedule_id: schedule.schedule_id,
+                                days: schedule.schedule_days,
+                                timeslots: []
+                            };
+                            schedules.push(newSchedule);
+                        }
+                        const newTimeslot: Timeslot = {
+                            id: schedule.timeslot_id,
+                            hour: schedule.timeslot_hour
+                        };
+                        newSchedule?.timeslots.push(newTimeslot);
+                        });
 
-                    return {
-                        ...teacher,
-                    };
-                });
+                        return {
+                            ...teacher,
+                            schedules
+                        };
+                    });
+                    console.log(processedTeachers)
                 setTeachers(processedTeachers)
             } catch (err) {
                 setError('Error al cargar los datos de profes')
