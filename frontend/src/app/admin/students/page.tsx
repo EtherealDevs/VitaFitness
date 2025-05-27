@@ -11,14 +11,13 @@ import {
     Phone,
     Plus,
     Edit2,
-    Trash2
+    Trash2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/app/admin/components/ui/button'
 import { useStudents } from '@/hooks/students'
 import { Payment } from '@/hooks/payments'
-
 
 // Types for our student data
 interface Student {
@@ -52,7 +51,6 @@ interface Student {
 interface Attendances {
     date: string
     classSchedule: ClassSchedule
-
 }
 interface ClassSchedule {
     id: string
@@ -83,7 +81,7 @@ const getRowColor = (daysOverdue: number, daysUntilDue: number) => {
     if (daysOverdue > 0)
         return 'bg-red-100/70 dark:bg-red-900/30 text-red-900 dark:text-red-100'
     if (daysUntilDue === 0 && daysOverdue === 0)
-        return 'bg-yellow-100/70 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100'
+        return 'bg-green-3G00/70 dark:bg-green-900/30 text-yellow-900 dark:text-yellow-100'
     return 'dark:text-gray-100'
 }
 
@@ -128,46 +126,68 @@ export default function StudentManagement() {
             try {
                 const response = await getStudents()
                 if (isMounted) {
+                    const now = new Date()
 
-                    const now = new Date();
-                    
-                    const processedStudents = response.students.map((student: Student) => {
-                        let paymentDueDate: string | null = null;
-                        let daysUntilDue = 0;
-                        let daysOverdue = 0;
+                    const processedStudents = response.students.map(
+                        (student: Student) => {
+                            let paymentDueDate: string | null = null
+                            let daysUntilDue = 0
+                            let daysOverdue = 0
 
-                        if (student.payments && student.payments.length > 0) {
-                            // Get the latest unpaid or upcoming payment
-                            const relevantPayment = student.payments
-                                .filter((p: Payment) => p.expiration_date)
-                                .sort((a: Payment, b: Payment) => new Date(a.expiration_date).getTime() - new Date(b.expiration_date).getTime()).reverse()[0];
+                            if (
+                                student.payments &&
+                                student.payments.length > 0
+                            ) {
+                                // Get the latest unpaid or upcoming payment
+                                const relevantPayment = student.payments
+                                    .filter((p: Payment) => p.expiration_date)
+                                    .sort(
+                                        (a: Payment, b: Payment) =>
+                                            new Date(
+                                                a.expiration_date,
+                                            ).getTime() -
+                                            new Date(
+                                                b.expiration_date,
+                                            ).getTime(),
+                                    )
+                                    .reverse()[0]
 
-                            if (relevantPayment) {
-                                const dueDate = new Date(relevantPayment.expiration_date);
-                                paymentDueDate = dueDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
-                                daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                                if (relevantPayment) {
+                                    const dueDate = new Date(
+                                        relevantPayment.expiration_date,
+                                    )
+                                    paymentDueDate = dueDate
+                                        .toISOString()
+                                        .split('T')[0] // 'YYYY-MM-DD'
+                                    daysUntilDue = Math.ceil(
+                                        (dueDate.getTime() - now.getTime()) /
+                                            (1000 * 60 * 60 * 24),
+                                    )
 
-                                const timeDiff = dueDate.getTime() - now.getTime();
-                                const dayDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                                    const timeDiff =
+                                        dueDate.getTime() - now.getTime()
+                                    const dayDiff = Math.ceil(
+                                        timeDiff / (1000 * 60 * 60 * 24),
+                                    )
 
-                                if (dayDiff < 0) {
-                                    daysOverdue = Math.abs(dayDiff);
-                                    daysUntilDue = 0;
-                                } else {
-                                    daysUntilDue = dayDiff;
-                                    daysOverdue = 0;
+                                    if (dayDiff < 0) {
+                                        daysOverdue = Math.abs(dayDiff)
+                                        daysUntilDue = 0
+                                    } else {
+                                        daysUntilDue = dayDiff
+                                        daysOverdue = 0
+                                    }
                                 }
                             }
-                        }
-                        
 
-                        return {
-                            ...student,
-                            paymentDueDate,
-                            daysUntilDue,
-                            daysOverdue
-                        };
-                    });
+                            return {
+                                ...student,
+                                paymentDueDate,
+                                daysUntilDue,
+                                daysOverdue,
+                            }
+                        },
+                    )
                     setStudents(processedStudents)
                     setLoading(false)
                 }
@@ -209,15 +229,28 @@ export default function StudentManagement() {
             setSelectedStudent(null) // Deselect if clicking the same student
             setAccountInfo(null)
         } else {
-            const sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
-            const sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
-            
+            const sortedDates = student.payments
+                ?.sort(
+                    (a, b) =>
+                        new Date(a.payment_date).getTime() -
+                        new Date(b.payment_date).getTime(),
+                )
+                .reverse()
+            const sortedAttendances = student.attendances
+                ?.sort(
+                    (a, b) =>
+                        new Date(a.date).getTime() - new Date(b.date).getTime(),
+                )
+                .reverse()
+
             const accountInfo = {
                 balance: 0,
                 lastEntryDate: String(sortedAttendances?.[0]?.date),
                 lastEntryTime: '',
-                lastPaymentDate: String(sortedDates?.[0]?.payment_date), 
-                lastPaymentPlan: String(sortedDates?.[0]?.classSchedule.class.name),
+                lastPaymentDate: String(sortedDates?.[0]?.payment_date),
+                lastPaymentPlan: String(
+                    sortedDates?.[0]?.classSchedule.class.name,
+                ),
                 lastPaymentAmount: Number(sortedDates?.[0]?.amount),
             }
             setSelectedStudent(student) // Select the clicked student
@@ -481,84 +514,94 @@ export default function StudentManagement() {
                                     </tr>
                                 ) : (
                                     paginatedStudents.map(student => (
-                                            <tr
-                                                key={student.id}
-                                                className={`${getRowColor(
-                                                    student.daysOverdue, student.daysUntilDue,
-                                                )} hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
-                                                    selectedStudent?.id ===
-                                                    student.id
-                                                        ? 'ring-2 ring-inset ring-purple-500'
-                                                        : ''
-                                                }`}
-                                                onClick={() =>
-                                                    handleStudentClick(student)
-                                                }>
-                                                <td className="px-4 py-3">
-                                                    {student.dni}
-                                                </td>
-                                                <td className="px-4 py-3 font-medium">
-                                                    {student.name}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {student.last_name}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {student.phone}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <span
-                                                        className={`px-2 py-1 text-xs rounded-full ${
-                                                            student.status ===
-                                                            'activo'
-                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                                                                : student.status ===
-                                                                  'inactivo'
-                                                                ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
-                                                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
-                                                        }`}>
-                                                        {student.status}
+                                        <tr
+                                            key={student.id}
+                                            className={`${getRowColor(
+                                                student.daysOverdue,
+                                                student.daysUntilDue,
+                                            )} hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
+                                                selectedStudent?.id ===
+                                                student.id
+                                                    ? 'ring-2 ring-inset ring-purple-500'
+                                                    : ''
+                                            }`}
+                                            onClick={() =>
+                                                handleStudentClick(student)
+                                            }>
+                                            <td className="px-4 py-3">
+                                                {student.dni}
+                                            </td>
+                                            <td className="px-4 py-3 font-medium">
+                                                {student.name}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {student.last_name}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {student.phone}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span
+                                                    className={`px-2 py-1 text-xs rounded-full ${
+                                                        student.status ===
+                                                        'activo'
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                                                            : student.status ===
+                                                              'inactivo'
+                                                            ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
+                                                    }`}>
+                                                    {student.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {student.paymentDueDate == '' ||
+                                                student.paymentDueDate ==
+                                                    undefined ||
+                                                student.paymentDueDate ==
+                                                    null ? (
+                                                    <span className="text-gray-500 dark:text-gray-400">
+                                                        Sin fecha
                                                     </span>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {student.paymentDueDate == "" || student.paymentDueDate == undefined || student.paymentDueDate == null ? (
-                                                        <span className="text-gray-500 dark:text-gray-400">
-                                                            Sin fecha
-                                                        </span>
-                                                    ) : (formatDate(
-                                                        student.paymentDueDate || "",
-                                                    ))}
-                                                </td>
+                                                ) : (
+                                                    formatDate(
+                                                        student.paymentDueDate ||
+                                                            '',
+                                                    )
+                                                )}
+                                            </td>
 
-                                                <td className="px-4 py-3 text-center">
-                                                    {student.daysOverdue || 0}
-                                                </td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={e => {
-                                                                e.stopPropagation()
-                                                                router.push(`/admin/students/edit/${student.id}`)
-                                                            }}
-                                                            className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                                                            <Edit2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
+                                            <td className="px-4 py-3 text-center">
+                                                {student.daysOverdue || 0}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <div className="flex justify-end gap-2">
                                                     <Button
-                                                        variant="destructive"
+                                                        variant="outline"
                                                         size="sm"
                                                         onClick={e => {
                                                             e.stopPropagation()
-                                                            handleDeleteStudent(
-                                                                student.id,
+                                                            router.push(
+                                                                `/admin/students/edit/${student.id}`,
                                                             )
                                                         }}
-                                                        className="h-8 w-8 p-0">
-                                                        <Trash2 className="h-4 w-4" />
+                                                        className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                                                        <Edit2 className="h-4 w-4" />
                                                     </Button>
-                                                </td>
+                                                </div>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={e => {
+                                                        e.stopPropagation()
+                                                        handleDeleteStudent(
+                                                            student.id,
+                                                        )
+                                                    }}
+                                                    className="h-8 w-8 p-0">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
@@ -651,119 +694,134 @@ export default function StudentManagement() {
                                         </div>
                                     </div>
                                 </div>
-
-                                
                             </div>
                             {/* Attendance History */}
-                                <div className="space-y-4">
-                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                        Historial de Asistencias
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStudent.attendanceHistory &&
-                                        selectedStudent.attendanceHistory.length >
-                                            0 ? (
-                                            selectedStudent.attendanceHistory.map(
-                                                (attendance, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                    Historial de Asistencias
+                                </h4>
+                                <div className="space-y-2">
+                                    {selectedStudent.attendanceHistory &&
+                                    selectedStudent.attendanceHistory.length >
+                                        0 ? (
+                                        selectedStudent.attendanceHistory.map(
+                                            (attendance, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                                                    <p className="text-sm font-medium dark:text-white">
+                                                        {formatDate(
+                                                            attendance.date,
+                                                        )}
+                                                    </p>
+                                                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
+                                                        {attendance.className}
+                                                    </span>
+                                                </div>
+                                            ),
+                                        )
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400 italic">
+                                            No hay historial de asistencias
+                                            disponible
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                            {/* Payment History */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                    Historial de Pagos
+                                </h4>
+                                <div className="space-y-2">
+                                    {selectedStudent.payments &&
+                                    selectedStudent.payments.length > 0 ? (
+                                        selectedStudent.payments.map(
+                                            (payment, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
+                                                    <div>
                                                         <p className="text-sm font-medium dark:text-white">
-                                                            {formatDate(
-                                                                attendance.date,
+                                                            {payment.payment_date ? (
+                                                                formatDate(
+                                                                    payment.payment_date,
+                                                                )
+                                                            ) : (
+                                                                <span className="text-gray-500 dark:text-gray-400">
+                                                                    Sin fecha de
+                                                                    inicio
+                                                                </span>
+                                                            )}{' '}
+                                                            {' - '}
+                                                            {payment.expiration_date ? (
+                                                                <span className="text-gray-500 dark:text-gray-400">
+                                                                    {payment.expiration_date
+                                                                        ? formatDate(
+                                                                              payment.expiration_date,
+                                                                          )
+                                                                        : ''}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-gray-500 dark:text-gray-400">
+                                                                    Sin fecha de
+                                                                    vencimiento
+                                                                </span>
                                                             )}
                                                         </p>
-                                                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
-                                                            {attendance.className}
-                                                        </span>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {payment
+                                                                .classSchedule
+                                                                .class.name
+                                                                ? payment
+                                                                      .classSchedule
+                                                                      .class
+                                                                      .name
+                                                                : 'Sin clase'}
+                                                        </p>
                                                     </div>
-                                                ),
-                                            )
-                                        ) : (
-                                            <p className="text-gray-500 dark:text-gray-400 italic">
-                                                No hay historial de asistencias
-                                                disponible
-                                            </p>
-                                        )}
-                                    </div>
+                                                    <span className="font-medium dark:text-white">
+                                                        {formatCurrency(
+                                                            Number(
+                                                                payment.amount,
+                                                            ),
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            ),
+                                        )
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400 italic">
+                                            No hay historial de pagos disponible
+                                        </p>
+                                    )}
                                 </div>
-                            {/* Payment History */}
-                                <div className="space-y-4">
-                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                        Historial de Pagos
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStudent.payments &&
-                                        selectedStudent.payments.length >
-                                            0 ? (
-                                            selectedStudent.payments.map(
-                                                (payment, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
-                                                        <div>
-                                                            <p className="text-sm font-medium dark:text-white">
-                                                                {payment.payment_date ? (
-                                                                    formatDate(
-                                                                        payment.payment_date,
-                                                                    )
-                                                                ) : (
-                                                                    <span className="text-gray-500 dark:text-gray-400">
-                                                                        Sin fecha de inicio
-                                                                    </span>
-                                                                )} {" - "}
-                                                                {payment.expiration_date ? (
-                                                                    <span className="text-gray-500 dark:text-gray-400">
-                                                                        {payment.expiration_date
-                                                                            ? formatDate(
-                                                                                  payment.expiration_date,
-                                                                              )
-                                                                            : ""}
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="text-gray-500 dark:text-gray-400">
-                                                                        Sin fecha de vencimiento
-                                                                    </span>
-                                                                )}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                { payment.classSchedule.class.name ? payment.classSchedule.class.name : "Sin clase" }
-                                                            </p>
-                                                        </div>
-                                                        <span className="font-medium dark:text-white">
-                                                            {formatCurrency(
-                                                                Number(payment.amount),
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                ),
-                                            )
-                                        ) : (
-                                            <p className="text-gray-500 dark:text-gray-400 italic">
-                                                No hay historial de pagos
-                                                disponible
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
+                            </div>
 
                             {/* Account info and actions */}
                             <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur md:col-span-3">
                                 <div className="grid grid-cols-1 gap-4">
                                     {/* Account balance */}
                                     <div className="flex flex-col">
-                                        
                                         <div className="mt-2">
                                             <span className="text-sm text-gray-600 dark:text-gray-400">
                                                 Promoción Principal:
                                             </span>
                                             <span className="ml-2 font-medium dark:text-white">
-                                                {accountInfo?.lastPaymentPlan == "" || accountInfo?.lastPaymentPlan == "undefined" || accountInfo?.lastPaymentPlan == undefined || accountInfo?.lastPaymentPlan == null ? "Sin plan" : accountInfo?.lastPaymentPlan}
+                                                {accountInfo?.lastPaymentPlan ==
+                                                    '' ||
+                                                accountInfo?.lastPaymentPlan ==
+                                                    'undefined' ||
+                                                accountInfo?.lastPaymentPlan ==
+                                                    undefined ||
+                                                accountInfo?.lastPaymentPlan ==
+                                                    null
+                                                    ? 'Sin plan'
+                                                    : accountInfo?.lastPaymentPlan}
                                             </span>
                                         </div>
                                     </div>
 
-                                    
                                     {/* Last payment */}
                                     <div className="flex flex-col">
                                         <div className="flex justify-between items-center mb-2">
@@ -775,47 +833,66 @@ export default function StudentManagement() {
                                             </button>
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
-                                            
-                                                {accountInfo?.lastPaymentDate == "undefined" || accountInfo?.lastPaymentDate == "null" || accountInfo?.lastPaymentDate == "" || accountInfo?.lastPaymentDate == null || accountInfo?.lastPaymentDate == undefined ? (
-                                                    <span className="text-gray-500 dark:text-gray-400">
-                                                        Sin fecha
-                                                    </span>
-                                                ) : (
-                                                    <span>
-                                                {formatDate(
+                                            {accountInfo?.lastPaymentDate ==
+                                                'undefined' ||
+                                            accountInfo?.lastPaymentDate ==
+                                                'null' ||
+                                            accountInfo?.lastPaymentDate ==
+                                                '' ||
+                                            accountInfo?.lastPaymentDate ==
+                                                null ||
+                                            accountInfo?.lastPaymentDate ==
+                                                undefined ? (
+                                                <span className="text-gray-500 dark:text-gray-400">
+                                                    Sin fecha
+                                                </span>
+                                            ) : (
+                                                <span>
+                                                    {formatDate(
                                                         accountInfo?.lastPaymentDate,
                                                     )}
-                                                    </span>
-                                                )}
+                                                </span>
+                                            )}
                                             <span>
-                                                {accountInfo?.lastPaymentPlan == "" || accountInfo?.lastPaymentPlan == "undefined" || accountInfo?.lastPaymentPlan == undefined || accountInfo?.lastPaymentPlan == null ? "Sin plan" : accountInfo?.lastPaymentPlan}
+                                                {accountInfo?.lastPaymentPlan ==
+                                                    '' ||
+                                                accountInfo?.lastPaymentPlan ==
+                                                    'undefined' ||
+                                                accountInfo?.lastPaymentPlan ==
+                                                    undefined ||
+                                                accountInfo?.lastPaymentPlan ==
+                                                    null
+                                                    ? 'Sin plan'
+                                                    : accountInfo?.lastPaymentPlan}
                                             </span>
                                             <span className="font-semibold">
                                                 {formatCurrency(
-                                                    accountInfo?.lastPaymentAmount || 0,
+                                                    accountInfo?.lastPaymentAmount ||
+                                                        0,
                                                 )}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                            {/* Action buttons */}
-                            <div className="flex justify-end mt-4 gap-2">
-                                <p className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
-                                    <DollarSign className="h-5 w-5" />
-                                    Cobrar Cuota
-                                </p>
-                                <p className="bg-purple-600 hover:bg-purple-700 text-white">
-                                    Otros Abonos
-                                </p>
+                                {/* Action buttons */}
+                                <div className="flex justify-end mt-4 gap-2">
+                                    <p className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
+                                        <DollarSign className="h-5 w-5" />
+                                        Cobrar Cuota
+                                    </p>
+                                    <p className="bg-purple-600 hover:bg-purple-700 text-white">
+                                        Otros Abonos
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-
                         </div>
 
                         {/* Mobile new student button */}
                         <div className="sm:hidden flex justify-center mt-6">
-                            <Link href="/admin/students/create" className="w-full">
+                            <Link
+                                href="/admin/students/create"
+                                className="w-full">
                                 <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                                     <Plus className="mr-2 h-4 w-4" />
                                     Nuevo Alumno
