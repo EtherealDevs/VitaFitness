@@ -20,14 +20,7 @@ import {
 } from '../../../components/ui/table'
 import { Input } from '../../../components/ui/input'
 import { Label } from '../../../components/ui/label'
-import { Mail, Phone, Edit2 } from 'lucide-react'
-// import {
-//     Dialog,
-//     DialogContent,
-//     DialogHeader,
-//     DialogTitle,
-//     DialogFooter,
-// } from '../../../components/ui/dialog'
+import { Mail, Phone, Edit2, User } from 'lucide-react'
 import { useParams } from 'next/navigation'
 
 export default function TeacherProfile() {
@@ -42,8 +35,8 @@ export default function TeacherProfile() {
     const [teacher, setTeacher] = useState<Teacher | null>(null)
     const [isEditingEmail, setIsEditingEmail] = useState(false)
     const [isEditingPhone, setIsEditingPhone] = useState(false)
-    // const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
-
+    const [isEditingName, setIsEditingName] = useState(false)
+    const [isEditingLastName, setIsEditingLastName] = useState(false)
     const { getTeacher, updateTeacher } = useTeachers()
     const { getTeacherSchedules } = useTeacherSchedules()
 
@@ -75,33 +68,23 @@ export default function TeacherProfile() {
                     (formData.get('phone') as string | null) ??
                     teacher?.phone ??
                     '',
+                name:
+                    (formData.get('name') as string | null) ??
+                    teacher?.name ??
+                    '',
+                last_name:
+                    (formData.get('last_name') as string | null) ??
+                    teacher?.last_name ??
+                    '',
             })
             setIsEditingEmail(false)
             setIsEditingPhone(false)
+            setIsEditingName(false)
+            setIsEditingLastName(false)
         } catch (error) {
             console.error('Error updating teacher:', error)
         }
     }
-
-    // const handleAddSchedule = async (e: React.FormEvent<HTMLFormElement>) => {
-    //     e.preventDefault()
-    //     const formData = new FormData(e.currentTarget)
-    //     formData.append('teacher_id', id)
-
-    //     try {
-    //         await createTeacherSchedule(formData)
-    //         // setIsScheduleModalOpen(false)
-    //         // Recargar horarios
-    //         const response = await getTeacherSchedules()
-    //         const teacherSchedules = response.teacher_schedules.filter(
-    //             (schedule: { teacher: { id: number } }) =>
-    //                 schedule.teacher.id === Number.parseInt(id),
-    //         )
-    //         setTeacherSchedules(teacherSchedules)
-    //     } catch (error) {
-    //         console.error('Error creating schedule:', error)
-    //     }
-    // }
 
     if (!teacher) {
         return <div className="p-6">Cargando...</div>
@@ -125,6 +108,87 @@ export default function TeacherProfile() {
                         <CardTitle>Información de Contacto</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        {/* Name and Last Name Form - Side by side */}
+                        <form onSubmit={handleUpdateTeacher}>
+                            <div className="flex items-start space-x-4">
+                                <User className="h-4 w-4 text-muted-foreground mt-8" />
+                                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Nombre */}
+                                    <div>
+                                        <Label>Nombre</Label>
+                                        <div className="flex items-center gap-2">
+                                            {isEditingName ? (
+                                                <Input
+                                                    name="name"
+                                                    defaultValue={teacher.name}
+                                                    autoFocus
+                                                />
+                                            ) : (
+                                                <Input
+                                                    value={teacher.name}
+                                                    readOnly
+                                                />
+                                            )}
+                                            {isEditingName ? (
+                                                <Button type="submit" size="sm">
+                                                    Guardar
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        setIsEditingName(true)
+                                                    }>
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Apellido */}
+                                    <div>
+                                        <Label>Apellido</Label>
+                                        <div className="flex items-center gap-2">
+                                            {isEditingLastName ? (
+                                                <Input
+                                                    name="last_name"
+                                                    defaultValue={
+                                                        teacher.last_name
+                                                    }
+                                                    autoFocus
+                                                />
+                                            ) : (
+                                                <Input
+                                                    value={teacher.last_name}
+                                                    readOnly
+                                                />
+                                            )}
+                                            {isEditingLastName ? (
+                                                <Button type="submit" size="sm">
+                                                    Guardar
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        setIsEditingLastName(
+                                                            true,
+                                                        )
+                                                    }>
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        {/* Email Form */}
                         <form onSubmit={handleUpdateTeacher}>
                             <div className="flex items-center space-x-4">
                                 <Mail className="h-4 w-4 text-muted-foreground" />
@@ -163,6 +227,7 @@ export default function TeacherProfile() {
                             </div>
                         </form>
 
+                        {/* Phone Form */}
                         <form onSubmit={handleUpdateTeacher}>
                             <div className="flex items-center space-x-4">
                                 <Phone className="h-4 w-4 text-muted-foreground" />
@@ -221,69 +286,6 @@ export default function TeacherProfile() {
                     </Table>
                 </CardContent>
             </Card>
-
-            {/* Modal para agregar horario
-            <Dialog
-                open={isScheduleModalOpen}
-                onOpenChange={setIsScheduleModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Agregar Nuevo Horario</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleAddSchedule} className="space-y-4">
-                        <div className="grid gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="day">Día</Label>
-                                <select
-                                    id="day"
-                                    name="day"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    required>
-                                    <option value="">Seleccione un día</option>
-                                    <option value="LUN">Lunes</option>
-                                    <option value="MAR">Martes</option>
-                                    <option value="MIE">Miércoles</option>
-                                    <option value="JUE">Jueves</option>
-                                    <option value="VIE">Viernes</option>
-                                    <option value="SAB">Sábado</option>
-                                    <option value="DOM">Domingo</option>
-                                </select>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="start_time">
-                                    Horario de Inicio
-                                </Label>
-                                <Input
-                                    id="start_time"
-                                    name="start_time"
-                                    type="time"
-                                    required
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="end_time">
-                                    Horario de Finalización
-                                </Label>
-                                <Input
-                                    id="end_time"
-                                    name="end_time"
-                                    type="time"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setIsScheduleModalOpen(false)}>
-                                Cancelar
-                            </Button>
-                            <Button type="submit">Guardar Horario</Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog> */}
         </div>
     )
 }
