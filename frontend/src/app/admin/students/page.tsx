@@ -12,12 +12,14 @@ import {
     Plus,
     Edit2,
     Trash2,
+    X,
+    Clock,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/app/admin/components/ui/button'
 import { useStudents } from '@/hooks/students'
-import { Payment } from '@/hooks/payments'
+import type { Payment } from '@/hooks/payments'
 
 // Types for our student data
 interface Student {
@@ -104,6 +106,8 @@ export default function StudentManagement() {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
     const [showDetails, setShowDetails] = useState<boolean>(false)
     const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
+    const [showPaymentHistoryModal, setShowPaymentHistoryModal] =
+        useState<boolean>(false)
 
     const { getStudents } = useStudents()
 
@@ -119,6 +123,16 @@ export default function StudentManagement() {
     // Toggle details view for mobile
     const toggleDetails = () => {
         setShowDetails(!showDetails)
+    }
+
+    // Open payment history modal
+    const openPaymentHistoryModal = () => {
+        setShowPaymentHistoryModal(true)
+    }
+
+    // Close payment history modal
+    const closePaymentHistoryModal = () => {
+        setShowPaymentHistoryModal(false)
     }
 
     // Fetch student data
@@ -333,6 +347,132 @@ export default function StudentManagement() {
 
     return (
         <div className="min-h-screen w-full p-4">
+            {/* Payment History Modal */}
+            {showPaymentHistoryModal && selectedStudent && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white/95 dark:bg-[#1f2122]/95 backdrop-blur rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
+                                <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                Historial Completo de Pagos -{' '}
+                                {selectedStudent.name}{' '}
+                                {selectedStudent.last_name}
+                            </h3>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={closePaymentHistoryModal}
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-4 overflow-y-auto max-h-[60vh]">
+                            {selectedStudent.payments &&
+                            selectedStudent.payments.length > 0 ? (
+                                <div className="space-y-3">
+                                    {selectedStudent.payments
+                                        .sort(
+                                            (a, b) =>
+                                                new Date(
+                                                    b.payment_date,
+                                                ).getTime() -
+                                                new Date(
+                                                    a.payment_date,
+                                                ).getTime(),
+                                        )
+                                        .map((payment, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex justify-between items-center p-4 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-white/70 dark:hover:bg-slate-800/70 transition-colors">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                            Fecha de Pago:{' '}
+                                                            {payment.payment_date
+                                                                ? formatDate(
+                                                                      payment.payment_date,
+                                                                  )
+                                                                : 'Sin fecha'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                            Vencimiento:{' '}
+                                                            {payment.expiration_date
+                                                                ? formatDate(
+                                                                      payment.expiration_date,
+                                                                  )
+                                                                : 'Sin fecha de vencimiento'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <User className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                            Plan:{' '}
+                                                            {payment
+                                                                .classSchedule
+                                                                ?.class?.name ||
+                                                                'Sin plan especificado'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                                                        {formatCurrency(
+                                                            Number(
+                                                                payment.amount,
+                                                            ),
+                                                        )}
+                                                    </span>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                        #{index + 1}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <DollarSign className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                                    <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">
+                                        No hay historial de pagos disponible
+                                    </p>
+                                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+                                        Este alumno aún no ha realizado ningún
+                                        pago
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50">
+                            <div className="flex justify-between items-center">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    Total de pagos:{' '}
+                                    {selectedStudent.payments?.length || 0}
+                                </div>
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                    Total pagado:{' '}
+                                    {formatCurrency(
+                                        selectedStudent.payments?.reduce(
+                                            (total, payment) =>
+                                                total + Number(payment.amount),
+                                            0,
+                                        ) || 0,
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Main container */}
             <div className="w-full max-w-6xl mx-auto relative z-10">
                 {/* Header with title and actions */}
@@ -834,7 +974,11 @@ export default function StudentManagement() {
                                             <span className="font-medium dark:text-white">
                                                 Último Pago Cuota
                                             </span>
-                                            <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                            <button
+                                                onClick={
+                                                    openPaymentHistoryModal
+                                                }
+                                                className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
                                                 Ver Historial
                                             </button>
                                         </div>
