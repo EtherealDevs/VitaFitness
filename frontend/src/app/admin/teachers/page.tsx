@@ -17,7 +17,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/app/admin/components/ui/button'
 import { useTeachers } from '@/hooks/teachers'
-import { get } from 'http'
 
 
 // Types for our student data
@@ -32,20 +31,6 @@ interface Teacher {
     classes: Class[]
     created_at: string
     updated_at: string
-    // schedules: TeacherSchedules[]
-    // schedules?: [ClassScheduleTimeslot] 
-    // attendances?: Attendances[]
-    // accountInfo?: AccountInfo
-    // // Additional details for the expanded view
-    // address?: string
-    // birthDate?: string
-    // memberSince?: string
-    // lastPaymentAmount?: number
-    // paymentHistory?: Payment[]
-    // attendanceHistory?: {
-    //     date: string
-    //     className: string
-    // }[]
 }
 interface TeacherSchedules {
     id: string
@@ -120,18 +105,13 @@ export default function TeacherIndex() {
 
     const { getTeachers, deleteTeacher } = useTeachers()
 
-    // const deleteTeacher = useCallback(async (id: string) => {
-    //     // Simulate API delay
-    //     await new Promise(resolve => setTimeout(resolve, 500))
-    //     // Use id in a comment to avoid the unused parameter warning
-    //     console.log(`Deleting teacher with ID: ${id}`)
-    //     // Return success
-    //     return { success: true }
-    // }, [])
-
     // Toggle details view for mobile
     const toggleDetails = () => {
         setShowDetails(!showDetails)
+    }
+    
+    const capitalize = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     const fetchTeachers = async () => {
@@ -145,8 +125,7 @@ export default function TeacherIndex() {
                 const processedTeachers = response.teachers.map((teacher: Teacher) => {
 
                     const schedules: Schedule[] = [];
-                    const timeslots: Timeslot[] = [];
-                    const classes: Class[] = [];
+                    teacher.last_name = capitalize(teacher.last_name);
                     teacher.schedules.forEach((schedule: ScheduleData) => {
                         let newSchedule = schedules.find(s => s.schedule_id === schedule.schedule_id);
                         if (newSchedule === undefined) {
@@ -245,7 +224,6 @@ export default function TeacherIndex() {
             await deleteTeacher(id)
             alert('Profe eliminado correctamente')
             setSelectedTeacher(prev => (prev?.id === id ? null : prev))
-        
             setTeachers(prev => prev.filter(teacher => teacher.id !== id))
             // Re-fetch the latest teacher list
             await fetchTeachers()
