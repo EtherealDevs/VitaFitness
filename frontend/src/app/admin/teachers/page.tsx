@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback} from 'react'
 import {
     Search,
     ChevronDown,
@@ -32,13 +32,6 @@ interface Teacher {
     created_at: string
     updated_at: string
 }
-interface TeacherSchedules {
-    id: string
-    class: Class
-    class_schedule: ClassSchedule
-    days: string[]
-    timeslots: Timeslot[]
-}
 interface Schedule {
     schedule_id: string
     days: string[]
@@ -53,9 +46,6 @@ interface ScheduleData {
 interface Timeslot {
     id: string
     hour: string
-}
-interface ClassSchedule {
-    id: string
 }
 interface Class {
     class_id: string
@@ -81,13 +71,13 @@ const formatDate = (dateString: string) => {
 }
 
 // Helper function to determine row color based on payment status
-const getRowColor = (daysOverdue: number, daysUntilDue: number) => {
-    if (daysOverdue > 0)
-        return 'bg-red-100/70 dark:bg-red-900/30 text-red-900 dark:text-red-100'
-    if (daysUntilDue === 0 && daysOverdue === 0)
-        return 'bg-yellow-100/70 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100'
-    return 'dark:text-gray-100'
-}
+// const getRowColor = (daysOverdue: number, daysUntilDue: number) => {
+//     if (daysOverdue > 0)
+//         return 'bg-red-100/70 dark:bg-red-900/30 text-red-900 dark:text-red-100'
+//     if (daysUntilDue === 0 && daysOverdue === 0)
+//         return 'bg-yellow-100/70 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100'
+//     return 'dark:text-gray-100'
+// }
 
 export default function TeacherIndex() {
     const router = useRouter()
@@ -114,13 +104,12 @@ export default function TeacherIndex() {
     return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    const fetchTeachers = async () => {
+    const fetchTeachers = useCallback(async () => {
             setLoading(true)
             setError(null)
 
             try {
                 const response = await getTeachers()
-                const now = new Date();
 
                 const processedTeachers = response.teachers.map((teacher: Teacher) => {
 
@@ -148,7 +137,6 @@ export default function TeacherIndex() {
                             schedules
                         };
                     });
-                    console.log(processedTeachers)
                 setTeachers(processedTeachers)
             } catch (err) {
                 setError('Error al cargar los datos de profes')
@@ -156,9 +144,8 @@ export default function TeacherIndex() {
             }
             finally {
                 setLoading(false)
-                console.log(teachers)
             }
-        }
+        }, [getTeachers])
 
     // Fetch teacher data
     useEffect(() => {
@@ -174,7 +161,7 @@ export default function TeacherIndex() {
         return () => {
             isMounted = false
         }
-    }, [getTeachers])
+    }, [fetchTeachers])
 
     // Handle sorting
     const handleSort = (key: keyof Teacher) => {

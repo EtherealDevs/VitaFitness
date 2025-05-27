@@ -6,7 +6,6 @@ import { cn } from '../lib/utils'
 import {
     Home,
     UserCheck,
-    Settings,
     Users,
     FileText,
     BarChart2,

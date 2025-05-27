@@ -7,7 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from './ui/card'
-import { Plus, UserPlus, FileText, Settings } from 'lucide-react'
+import { Plus, UserPlus, FileText} from 'lucide-react'
 
 const quickActions = [
     {
