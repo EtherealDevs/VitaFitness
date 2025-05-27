@@ -12,12 +12,8 @@ import {
     CardTitle,
 } from '../../../components/ui/card'
 import { Button } from '../../../components/ui/button'
-import { Badge } from '../../../components/ui/badge'
-import { Calendar } from '../../../components/ui/calendar'
 import {
     Table,
-    TableBody,
-    TableCell,
     TableHead,
     TableHeader,
     TableRow,
@@ -44,12 +40,6 @@ export default function TeacherProfile() {
     }
     const { id } = useParams() as { id: string }
     const [teacher, setTeacher] = useState<Teacher | null>(null)
-    const [teacherSchedules, setTeacherSchedules] = useState<
-        { id: number; day: string; start_time: string; end_time: string }[]
-    >([])
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-        new Date(),
-    )
     const [isEditingEmail, setIsEditingEmail] = useState(false)
     const [isEditingPhone, setIsEditingPhone] = useState(false)
     // const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
@@ -64,18 +54,6 @@ export default function TeacherProfile() {
                 setTeacher(response.teacher)
             } catch (error) {
                 console.error('Error fetching teacher:', error)
-            }
-
-            try {
-                const response = await getTeacherSchedules()
-                // Filtrar horarios para este profesor
-                const teacherSchedules = response.teacher_schedules.filter(
-                    (schedule: { teacher: { id: number } }) =>
-                        schedule.teacher.id === Number.parseInt(id),
-                )
-                setTeacherSchedules(teacherSchedules)
-            } catch (error) {
-                console.error('Error fetching schedules:', error)
             }
         }
 
@@ -129,22 +107,6 @@ export default function TeacherProfile() {
         return <div className="p-6">Cargando...</div>
     }
 
-    // Crear un array de fechas con clases para el calendario
-    const scheduleDates = teacherSchedules.map((schedule: { day: string }) => {
-        // Convertir el día de la semana a un número de fecha para visualización
-        // Esto es simplificado, en una app real necesitarías mapear los días correctamente
-        const dayMap: { [key: string]: number } = {
-            LUN: 1,
-            MAR: 2,
-            MIE: 3,
-            JUE: 4,
-            VIE: 5,
-            SAB: 6,
-            DOM: 7,
-        }
-        return dayMap[schedule.day] || 1
-    })
-
     return (
         <div className="space-y-6 p-6">
             {/* Header */}
@@ -153,18 +115,11 @@ export default function TeacherProfile() {
                     <h1 className="text-3xl font-bold">
                         {teacher.name} {teacher.last_name}
                     </h1>
-                    <Badge variant="success" className="mt-2">
-                        AL DIA
-                    </Badge>
-                </div>
-                <div className="flex gap-2">
-                    <Button>Generar Pago</Button>
-                    <Button variant="outline">Horarios Nuevos</Button>
                 </div>
             </div>
 
             {/* Contact Info */}
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className=" gap-4 md:grid-cols-2">
                 <Card>
                     <CardHeader>
                         <CardTitle>Información de Contacto</CardTitle>
@@ -247,30 +202,6 @@ export default function TeacherProfile() {
                         </form>
                     </CardContent>
                 </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Calendario de Clases</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={setSelectedDate}
-                            className="rounded-md border"
-                            modifiers={{
-                                booked: date =>
-                                    scheduleDates.includes(date.getDate()),
-                            }}
-                            modifiersStyles={{
-                                booked: {
-                                    backgroundColor: 'hsl(var(--primary))',
-                                    color: 'white',
-                                },
-                            }}
-                        />
-                    </CardContent>
-                </Card>
             </div>
 
             {/* Upcoming Classes */}
@@ -287,35 +218,6 @@ export default function TeacherProfile() {
                                 <TableHead>Horario de finalización</TableHead>
                             </TableRow>
                         </TableHeader>
-                        <TableBody>
-                            {teacherSchedules.map(
-                                (schedule: {
-                                    id: number
-                                    day: string
-                                    start_time: string
-                                    end_time: string
-                                }) => (
-                                    <TableRow key={schedule.id}>
-                                        <TableCell>{schedule.day}</TableCell>
-                                        <TableCell>
-                                            {schedule.start_time}
-                                        </TableCell>
-                                        <TableCell>
-                                            {schedule.end_time}
-                                        </TableCell>
-                                    </TableRow>
-                                ),
-                            )}
-                            {teacherSchedules.length === 0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={3}
-                                        className="text-center py-4">
-                                        No hay horarios programados
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
                     </Table>
                 </CardContent>
             </Card>

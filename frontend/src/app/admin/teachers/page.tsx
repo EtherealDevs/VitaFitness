@@ -1,23 +1,23 @@
 'use client'
 
-import { useState, useEffect, useCallback} from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
     Search,
     ChevronDown,
     ChevronUp,
-    DollarSign,
     User,
     Calendar,
     Phone,
     Plus,
     Edit2,
-    Trash2
+    Trash2,
+    Clock,
+    BookOpen,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/app/admin/components/ui/button'
 import { useTeachers } from '@/hooks/teachers'
-
 
 // Types for our student data
 interface Teacher {
@@ -27,7 +27,8 @@ interface Teacher {
     email: string
     phone: string
     dni: string
-    schedules: ScheduleData[]
+    schedules: Schedule[]
+    originalScheduleData: ScheduleData[] // Datos originales del servidor
     classes: Class[]
     created_at: string
     updated_at: string
@@ -49,19 +50,21 @@ interface Timeslot {
 }
 interface Class {
     class_id: string
-    plan: [
-        plan_id: string,
-        name: string
-    ]
+    plan: [plan_id: string, name: string]
 }
 
-interface AccountInfo {
-    balance: number
-    lastEntryDate: string
-    lastEntryTime: string
-    lastPaymentDate: string
-    lastPaymentPlan: string
-    lastPaymentAmount: number
+// Interface for teacher data as it comes from the server
+interface TeacherFromServer {
+    id: string
+    name: string
+    last_name: string
+    email: string
+    phone: string
+    dni: string
+    schedules: ScheduleData[] // Raw schedule data from server
+    classes: Class[]
+    created_at: string
+    updated_at: string
 }
 
 // Helper function to format date
@@ -70,14 +73,19 @@ const formatDate = (dateString: string) => {
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
 }
 
-// Helper function to determine row color based on payment status
-// const getRowColor = (daysOverdue: number, daysUntilDue: number) => {
-//     if (daysOverdue > 0)
-//         return 'bg-red-100/70 dark:bg-red-900/30 text-red-900 dark:text-red-100'
-//     if (daysUntilDue === 0 && daysOverdue === 0)
-//         return 'bg-yellow-100/70 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100'
-//     return 'dark:text-gray-100'
-// }
+// Helper function to get day name in Spanish
+const getDayName = (day: string) => {
+    const dayNames: { [key: string]: string } = {
+        monday: 'Lunes',
+        tuesday: 'Martes',
+        wednesday: 'Miércoles',
+        thursday: 'Jueves',
+        friday: 'Viernes',
+        saturday: 'Sábado',
+        sunday: 'Domingo',
+    }
+    return dayNames[day.toLowerCase()] || day
+}
 
 export default function TeacherIndex() {
     const router = useRouter()
@@ -91,7 +99,6 @@ export default function TeacherIndex() {
     } | null>(null)
     const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null)
     const [showDetails, setShowDetails] = useState<boolean>(false)
-    const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
 
     const { getTeachers, deleteTeacher } = useTeachers()
 
@@ -99,60 +106,71 @@ export default function TeacherIndex() {
     const toggleDetails = () => {
         setShowDetails(!showDetails)
     }
-    
+
     const capitalize = (str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+        return str.charAt(0).toUpperCase() + str.slice(1)
     }
 
     const fetchTeachers = useCallback(async () => {
-            setLoading(true)
-            setError(null)
+        setLoading(true)
+        setError(null)
 
-            try {
-                const response = await getTeachers()
+        try {
+            const response = await getTeachers()
 
-                const processedTeachers = response.teachers.map((teacher: Teacher) => {
+            const processedTeachers = response.teachers.map(
+                (teacher: TeacherFromServer) => {
+                    const schedules: Schedule[] = []
+                    teacher.last_name = capitalize(teacher.last_name)
 
-                    const schedules: Schedule[] = [];
-                    teacher.last_name = capitalize(teacher.last_name);
-                    teacher.schedules.forEach((schedule: ScheduleData) => {
-                        let newSchedule = schedules.find(s => s.schedule_id === schedule.schedule_id);
-                        if (newSchedule === undefined) {
-                            newSchedule = {
-                                schedule_id: schedule.schedule_id,
-                                days: schedule.schedule_days,
-                                timeslots: []
-                            };
-                            schedules.push(newSchedule);
-                        }
-                        const newTimeslot: Timeslot = {
-                            id: schedule.timeslot_id,
-                            hour: schedule.timeslot_hour
-                        };
-                        newSchedule?.timeslots.push(newTimeslot);
-                        });
+                    // Guardar los datos originales
+                    const originalScheduleData: ScheduleData[] =
+                        teacher.schedules || []
 
-                        return {
-                            ...teacher,
-                            schedules
-                        };
-                    });
-                setTeachers(processedTeachers)
-            } catch (err) {
-                setError('Error al cargar los datos de profes')
-                console.error(err)
-            }
-            finally {
-                setLoading(false)
-            }
-        }, [getTeachers])
+                    // Procesar los datos originales para crear Schedule[]
+                    originalScheduleData.forEach(
+                        (scheduleData: ScheduleData) => {
+                            let newSchedule = schedules.find(
+                                s => s.schedule_id === scheduleData.schedule_id,
+                            )
+                            if (newSchedule === undefined) {
+                                newSchedule = {
+                                    schedule_id: scheduleData.schedule_id,
+                                    days: scheduleData.schedule_days,
+                                    timeslots: [],
+                                }
+                                schedules.push(newSchedule)
+                            }
+                            const newTimeslot: Timeslot = {
+                                id: scheduleData.timeslot_id,
+                                hour: scheduleData.timeslot_hour,
+                            }
+                            newSchedule?.timeslots.push(newTimeslot)
+                        },
+                    )
+
+                    return {
+                        ...teacher,
+                        schedules, // Schedule[] procesados
+                        originalScheduleData, // ScheduleData[] originales
+                    }
+                },
+            )
+            setTeachers(processedTeachers)
+        } catch (err) {
+            setError('Error al cargar los datos de profes')
+            console.error(err)
+        } finally {
+            setLoading(false)
+        }
+    }, [getTeachers])
 
     // Fetch teacher data
     useEffect(() => {
         let isMounted = true
 
         const safeFetch = async () => {
-        if (isMounted) await fetchTeachers()
+            if (isMounted) await fetchTeachers()
         }
 
         safeFetch()
@@ -182,21 +200,8 @@ export default function TeacherIndex() {
     const handleTeacherClick = (teacher: Teacher) => {
         if (selectedTeacher?.id === teacher.id) {
             setSelectedTeacher(null) // Deselect if clicking the same teacher
-            setAccountInfo(null)
         } else {
-            // const sortedDates = student.payments?.sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()).reverse()
-            // const sortedAttendances = student.attendances?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
-            
-            // const accountInfo = {
-            //     balance: 0,
-            //     lastEntryDate: String(sortedAttendances?.[0]?.date),
-            //     lastEntryTime: '',
-            //     lastPaymentDate: String(sortedDates?.[0]?.payment_date), 
-            //     lastPaymentPlan: String(sortedDates?.[0]?.classSchedule.class.name),
-            //     lastPaymentAmount: Number(sortedDates?.[0]?.amount),
-            // }
             setSelectedTeacher(teacher) // Select the clicked student
-            // setAccountInfo(accountInfo)
         }
     }
 
@@ -247,14 +252,200 @@ export default function TeacherIndex() {
             return 0
         })
 
-    // Format currency
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0,
-        }).format(amount)
+    // Function to render quick overview of classes and schedules
+    const renderQuickClassOverview = (teacher: Teacher) => {
+        if (!teacher.classes || teacher.classes.length === 0) {
+            return (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    Sin clases asignadas
+                </div>
+            )
+        }
+
+        return (
+            <div className="space-y-3">
+                {teacher.classes.map(classItem => (
+                    <div
+                        key={classItem.class_id}
+                        className="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                            <BookOpen className="h-4 w-4 text-blue-500" />
+                            <h6 className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {classItem.plan[1] || 'Plan sin nombre'}
+                            </h6>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                            {teacher.schedules.length > 0 ? (
+                                teacher.schedules.map(schedule => (
+                                    <div
+                                        key={schedule.schedule_id}
+                                        className="flex flex-wrap gap-1">
+                                        {schedule.days.map(day => (
+                                            <span
+                                                key={day}
+                                                className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">
+                                                {getDayName(day)}
+                                            </span>
+                                        ))}
+                                    </div>
+                                ))
+                            ) : (
+                                <span>Sin horarios asignados</span>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )
     }
+
+    // Function to render detailed schedule table for all plans
+    const renderDetailedScheduleTable = (teacher: Teacher) => {
+        if (!teacher.classes || teacher.classes.length === 0) {
+            return (
+                <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                        Sin planes asignados
+                    </p>
+                    {teacher.schedules && teacher.schedules.length > 0 && (
+                        <div>
+                            <h5 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+                                Horarios generales
+                            </h5>
+                            {renderScheduleTableForPlan(
+                                teacher.schedules,
+                                'Horarios generales',
+                            )}
+                        </div>
+                    )}
+                </div>
+            )
+        }
+
+        return (
+            <div className="space-y-6">
+                {teacher.classes.map(classItem => (
+                    <div key={classItem.class_id}>
+                        {renderScheduleTableForPlan(
+                            teacher.schedules,
+                            classItem.plan[1] || 'Plan sin nombre',
+                        )}
+                    </div>
+                ))}
+            </div>
+        )
+    }
+
+    // Function to render schedule table for a specific plan
+    const renderScheduleTableForPlan = (
+        schedules: Schedule[],
+        planName: string,
+    ) => {
+        if (!schedules || schedules.length === 0) {
+            return (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    Sin horarios asignados
+                </div>
+            )
+        }
+
+        // Get all unique days from all schedules
+        const allDays = [
+            'monday',
+            'tuesday',
+            'wednesday',
+            'thursday',
+            'friday',
+            'saturday',
+            'sunday',
+        ]
+        const daysWithSchedules = new Set()
+
+        schedules.forEach(schedule => {
+            schedule.days.forEach(day =>
+                daysWithSchedules.add(day.toLowerCase()),
+            )
+        })
+
+        const activeDays = allDays.filter(day => daysWithSchedules.has(day))
+
+        if (activeDays.length === 0) {
+            return (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    Sin horarios asignados
+                </div>
+            )
+        }
+
+        return (
+            <div className="mb-6">
+                <h5 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    {planName}
+                </h5>
+                <div className="overflow-x-auto">
+                    <table className="w-full border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <thead>
+                            <tr className="bg-gray-50 dark:bg-gray-700">
+                                {activeDays.map(day => (
+                                    <th
+                                        key={day}
+                                        className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
+                                        {getDayName(day)}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                {activeDays.map(day => {
+                                    // Find schedules for this day
+                                    const daySchedules = schedules.filter(
+                                        schedule =>
+                                            schedule.days.some(
+                                                scheduleDay =>
+                                                    scheduleDay.toLowerCase() ===
+                                                    day,
+                                            ),
+                                    )
+
+                                    return (
+                                        <td
+                                            key={day}
+                                            className="px-4 py-6 text-center border-r border-gray-200 dark:border-gray-600 last:border-r-0 align-top">
+                                            {daySchedules.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {daySchedules.map(
+                                                        schedule =>
+                                                            schedule.timeslots.map(
+                                                                timeslot => (
+                                                                    <div
+                                                                        key={`${schedule.schedule_id}-${timeslot.id}`}
+                                                                        className="text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
+                                                                        {
+                                                                            timeslot.hour
+                                                                        }
+                                                                    </div>
+                                                                ),
+                                                            ),
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">
+                                                    -
+                                                </span>
+                                            )}
+                                        </td>
+                                    )
+                                })}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        )
+    }
+
     const [currentPage, setCurrentPage] = useState(1)
     const teachersPerPage = 20
     const totalPages = Math.ceil(
@@ -406,55 +597,57 @@ export default function TeacherIndex() {
                                     </tr>
                                 ) : (
                                     paginatedTeachers.map(teacher => (
-                                            <tr
-                                                key={teacher.id}
-                                                className={`hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
-                                                    selectedTeacher?.id ===
-                                                    teacher.id
-                                                        ? 'ring-2 ring-inset ring-purple-500'
-                                                        : ''
-                                                }`}
-                                                onClick={() =>
-                                                    handleTeacherClick(teacher)
-                                                }>
-                                                <td className="px-4 py-3">
-                                                    {teacher.dni}
-                                                </td>
-                                                <td className="px-4 py-3 font-medium">
-                                                    {teacher.name}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {teacher.last_name}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {teacher.phone}
-                                                </td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={e => {
-                                                                e.stopPropagation()
-                                                                router.push(`/admin/teachers/edit/${teacher.id}`)
-                                                            }}
-                                                            className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                                                            <Edit2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
+                                        <tr
+                                            key={teacher.id}
+                                            className={`hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
+                                                selectedTeacher?.id ===
+                                                teacher.id
+                                                    ? 'ring-2 ring-inset ring-purple-500'
+                                                    : ''
+                                            }`}
+                                            onClick={() =>
+                                                handleTeacherClick(teacher)
+                                            }>
+                                            <td className="px-4 py-3">
+                                                {teacher.dni}
+                                            </td>
+                                            <td className="px-4 py-3 font-medium">
+                                                {teacher.name}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {teacher.last_name}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {teacher.phone}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <div className="flex justify-end gap-2">
                                                     <Button
-                                                        variant="destructive"
+                                                        variant="outline"
                                                         size="sm"
                                                         onClick={e => {
                                                             e.stopPropagation()
-                                                            handleDeleteTeacher(
-                                                                teacher.id,
+                                                            router.push(
+                                                                `/admin/teachers/edit/${teacher.id}`,
                                                             )
                                                         }}
-                                                        className="h-8 w-8 p-0">
-                                                        <Trash2 className="h-4 w-4" />
+                                                        className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                                                        <Edit2 className="h-4 w-4" />
                                                     </Button>
-                                                </td>
+                                                </div>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={e => {
+                                                        e.stopPropagation()
+                                                        handleDeleteTeacher(
+                                                            teacher.id,
+                                                        )
+                                                    }}
+                                                    className="h-8 w-8 p-0">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
@@ -512,13 +705,13 @@ export default function TeacherIndex() {
                             </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
                             {/* Personal Information */}
                             <div className="space-y-4">
                                 <h4 className="font-medium text-gray-700 dark:text-gray-300">
                                     Información Personal
                                 </h4>
-                                <div className="space-y-2">
+                                <div className="space-y-4">
                                     <div className="flex items-start gap-2">
                                         <Phone className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
                                         <div>
@@ -529,186 +722,54 @@ export default function TeacherIndex() {
                                                 {selectedTeacher.phone}
                                             </p>
                                         </div>
+                                    </div>
 
-                                        <div className="flex items-start gap-2">
-                                            <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
-                                            <div>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    Registrado desde
-                                                </p>
-                                                <p className="dark:text-white">
-                                                    {selectedTeacher.created_at
-                                                        ? formatDate(
-                                                              selectedTeacher.created_at,
-                                                          )
-                                                        : 'No disponible'}
-                                                </p>
-                                            </div>
+                                    <div className="flex items-start gap-2">
+                                        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                Registrado desde
+                                            </p>
+                                            <p className="dark:text-white">
+                                                {selectedTeacher.created_at
+                                                    ? formatDate(
+                                                          selectedTeacher.created_at,
+                                                      )
+                                                    : 'No disponible'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
-
-                                
                             </div>
-                            {/* Attendance History */}
-                                {/* <div className="space-y-4">
-                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                        Historial de Asistencias
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStudent.attendanceHistory &&
-                                        selectedStudent.attendanceHistory.length >
-                                            0 ? (
-                                            selectedStudent.attendanceHistory.map(
-                                                (attendance, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
-                                                        <p className="text-sm font-medium dark:text-white">
-                                                            {formatDate(
-                                                                attendance.date,
-                                                            )}
-                                                        </p>
-                                                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
-                                                            {attendance.className}
-                                                        </span>
-                                                    </div>
-                                                ),
-                                            )
-                                        ) : (
-                                            <p className="text-gray-500 dark:text-gray-400 italic">
-                                                No hay historial de asistencias
-                                                disponible
-                                            </p>
-                                        )}
-                                    </div>
-                                </div> */}
-                            {/* Payment History */}
-                                {/* <div className="space-y-4">
-                                    <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                        Historial de Pagos
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {selectedStudent.payments &&
-                                        selectedStudent.payments.length >
-                                            0 ? (
-                                            selectedStudent.payments.map(
-                                                (payment, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
-                                                        <div>
-                                                            <p className="text-sm font-medium dark:text-white">
-                                                                {payment.payment_date ? (
-                                                                    formatDate(
-                                                                        payment.payment_date,
-                                                                    )
-                                                                ) : (
-                                                                    <span className="text-gray-500 dark:text-gray-400">
-                                                                        Sin fecha de inicio
-                                                                    </span>
-                                                                )} {" - "}
-                                                                {payment.expiration_date ? (
-                                                                    <span className="text-gray-500 dark:text-gray-400">
-                                                                        {payment.expiration_date
-                                                                            ? formatDate(
-                                                                                  payment.expiration_date,
-                                                                              )
-                                                                            : ""}
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="text-gray-500 dark:text-gray-400">
-                                                                        Sin fecha de vencimiento
-                                                                    </span>
-                                                                )}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                { payment.classSchedule.class.name ? payment.classSchedule.class.name : "Sin clase" }
-                                                            </p>
-                                                        </div>
-                                                        <span className="font-medium dark:text-white">
-                                                            {formatCurrency(
-                                                                Number(payment.amount),
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                ),
-                                            )
-                                        ) : (
-                                            <p className="text-gray-500 dark:text-gray-400 italic">
-                                                No hay historial de pagos
-                                                disponible
-                                            </p>
-                                        )}
-                                    </div>
-                                </div> */}
 
-                            {/* Account info and actions */}
-                            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur md:col-span-3">
-                                <div className="grid grid-cols-1 gap-4">
-                                    {/* Account balance */}
-                                    <div className="flex flex-col">
-                                        <div className="mt-2">
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                Promoción Principal:
-                                            </span>
-                                            <span className="ml-2 font-medium dark:text-white">
-                                                {accountInfo?.lastPaymentPlan == "" || accountInfo?.lastPaymentPlan == "undefined" || accountInfo?.lastPaymentPlan == undefined || accountInfo?.lastPaymentPlan == null ? "Sin plan" : accountInfo?.lastPaymentPlan}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Last payment */}
-                                    <div className="flex flex-col">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="font-medium dark:text-white">
-                                                Último Pago Cuota
-                                            </span>
-                                            <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
-                                                Ver Historial
-                                            </button>
-                                        </div>
-                                        <div className="flex items-center justify-between dark:text-white">
-                                                {accountInfo?.lastPaymentDate == "undefined" || accountInfo?.lastPaymentDate == "null" || accountInfo?.lastPaymentDate == "" || accountInfo?.lastPaymentDate == null || accountInfo?.lastPaymentDate == undefined ? (
-                                                    <span className="text-gray-500 dark:text-gray-400">
-                                                        Sin fecha
-                                                    </span>
-                                                ) : (
-                                                    <span>
-                                                {formatDate(
-                                                        accountInfo?.lastPaymentDate,
-                                                    )}
-                                                    </span>
-                                                )}
-                                            <span>
-                                                {accountInfo?.lastPaymentPlan == "" || accountInfo?.lastPaymentPlan == "undefined" || accountInfo?.lastPaymentPlan == undefined || accountInfo?.lastPaymentPlan == null ? "Sin plan" : accountInfo?.lastPaymentPlan}
-                                            </span>
-                                            <span className="font-semibold">
-                                                {formatCurrency(
-                                                    accountInfo?.lastPaymentAmount || 0,
-                                                )}
-                                            </span>
-                                        </div>
-                                    </div>
+                            {/* Quick Class Overview */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    Clases Asignadas
+                                </h4>
+                                <div className="bg-gray-50/50 dark:bg-gray-800/50 p-4 rounded-lg max-h-80 overflow-y-auto">
+                                    {renderQuickClassOverview(selectedTeacher)}
                                 </div>
-
-                            {/* Action buttons */}
-                            <div className="flex justify-end mt-4 gap-2">
-                                <p className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
-                                    <DollarSign className="h-5 w-5" />
-                                    Cobrar Cuota
-                                </p>
-                                <p className="bg-purple-600 hover:bg-purple-700 text-white">
-                                    Otros Abonos
-                                </p>
                             </div>
                         </div>
 
+                        {/* Detailed Schedule Table Section - Replaces payment info */}
+                        <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur">
+                            <div className="p-6">
+                                <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2">
+                                    <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                    Horarios Detallados
+                                </h4>
+                                {renderDetailedScheduleTable(selectedTeacher)}
+                            </div>
                         </div>
 
                         {/* Mobile new student button */}
-                        <div className="sm:hidden flex justify-center mt-6">
-                            <Link href="/admin/teachers/create" className="w-full">
+                        <div className="sm:hidden flex justify-center p-4 border-t border-gray-200 dark:border-gray-700">
+                            <Link
+                                href="/admin/teachers/create"
+                                className="w-full">
                                 <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                                     <Plus className="mr-2 h-4 w-4" />
                                     Nuevo Profe
