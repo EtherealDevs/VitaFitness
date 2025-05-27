@@ -78,10 +78,16 @@ const formatDate = (dateString: string) => {
 
 // Helper function to determine row color based on payment status
 const getRowColor = (daysOverdue: number, daysUntilDue: number) => {
-    if (daysOverdue > 0)
+    if (daysOverdue > 31)
         return 'bg-red-100/70 dark:bg-red-900/30 text-red-900 dark:text-red-100'
-    if (daysUntilDue === 0 && daysOverdue === 0)
-        return 'bg-green-3G00/70 dark:bg-green-900/30 text-yellow-900 dark:text-yellow-100'
+    if (daysOverdue > 0 && daysOverdue <= 31)
+        return 'bg-yellow-100/70 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100'
+    if (daysUntilDue > 0 && daysUntilDue <= 7)
+        return 'bg-orange-100/70 dark:bg-orange-900/30 text-orange-900 dark:text-orange-100'
+    if (daysUntilDue > 7 && daysUntilDue <= 30)
+        return 'bg-blue-100/70 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100'
+    if (daysUntilDue > 30)
+        return 'bg-green-100/70 dark:bg-green-900/30 text-green-900 dark:text-green-100'
     return 'dark:text-gray-100'
 }
 
