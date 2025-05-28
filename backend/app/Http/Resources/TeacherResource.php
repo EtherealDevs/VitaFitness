@@ -46,10 +46,7 @@ class TeacherResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'dni' => $this->dni,
-            // 'schedules' => $schedules,
             'schedules' => $classScheduleTimeslotTeachers,
-            // 'classes' => $classes,
-            // 'timeslots' => $timeslots,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
