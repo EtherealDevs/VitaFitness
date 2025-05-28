@@ -29,7 +29,7 @@ interface Teacher {
     dni: string
     schedules: Schedule[]
     originalScheduleData: ScheduleData[] // Datos originales del servidor
-    classes: Class[]
+    // classes: Class[]
     created_at: string
     updated_at: string
 }
@@ -37,12 +37,16 @@ interface Schedule {
     schedule_id: string
     days: string[]
     timeslots: Timeslot[]
+    class: Class | null
 }
 interface ScheduleData {
     schedule_id: string
     schedule_days: string[]
     timeslot_id: string
     timeslot_hour: string
+    class_id: string
+    plan_id: string
+    plan_name: string
 }
 interface Timeslot {
     id: string
@@ -138,6 +142,7 @@ export default function TeacherIndex() {
                                     schedule_id: scheduleData.schedule_id,
                                     days: scheduleData.schedule_days,
                                     timeslots: [],
+                                    class: null
                                 }
                                 schedules.push(newSchedule)
                             }
@@ -145,7 +150,12 @@ export default function TeacherIndex() {
                                 id: scheduleData.timeslot_id,
                                 hour: scheduleData.timeslot_hour,
                             }
-                            newSchedule?.timeslots.push(newTimeslot)
+                            const newClass: Class = {
+                                class_id: scheduleData.class_id,
+                                plan: [scheduleData.plan_id, scheduleData.plan_name]
+                            }
+                            newSchedule.timeslots.push(newTimeslot)
+                            newSchedule.class = newClass
                         },
                     )
 
@@ -156,6 +166,7 @@ export default function TeacherIndex() {
                     }
                 },
             )
+            console.log(processedTeachers)
             setTeachers(processedTeachers)
         } catch (err) {
             setError('Error al cargar los datos de profes')
@@ -254,54 +265,103 @@ export default function TeacherIndex() {
 
     // Function to render quick overview of classes and schedules
     const renderQuickClassOverview = (teacher: Teacher) => {
-        if (!teacher.classes || teacher.classes.length === 0) {
+        if (teacher.schedules.length === 0) {
             return (
                 <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                     Sin clases asignadas
                 </div>
             )
         }
+        teacher.schedules.forEach(schedule => {
+        });
 
+        function hasValidClass(
+            schedule: typeof teacher.schedules[number]
+        ): schedule is typeof schedule & { class: NonNullable<typeof schedule.class> } {
+            return schedule.class !== null && schedule.class !== undefined
+        }
+        // return (
+        //     <div className="space-y-3">
+        //         {teacher.schedules
+        //         .filter(hasValidClass)
+        //         .map(schedule => (
+        //             <div
+        //                 key={schedule.class.class_id}
+        //                 className="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+        //                 <div className="flex items-center gap-2 mb-2">
+        //                     <BookOpen className="h-4 w-4 text-blue-500" />
+        //                     <h6 className="font-medium text-sm text-gray-700 dark:text-gray-300">
+        //                         {schedule.class.plan[1] || 'Plan sin nombre'}
+        //                     </h6>
+        //                 </div>
+        //                 <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+        //                     {teacher.schedules.length > 0 ? (
+        //                         teacher.schedules.map(schedule => (
+        //                             <div
+        //                                 key={schedule.schedule_id}
+        //                                 className="flex flex-wrap gap-1">
+        //                                 {schedule.days.map(day => (
+        //                                     <span
+        //                                         key={day}
+        //                                         className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">
+        //                                         {getDayName(day)}
+        //                                     </span>
+        //                                 ))}
+        //                             </div>
+        //                         ))
+        //                     ) : (
+        //                         <span>Sin horarios asignados</span>
+        //                     )}
+        //                 </div>
+        //             </div>
+        //         ))}
+        //     </div>
+        // )
         return (
             <div className="space-y-3">
-                {teacher.classes.map(classItem => (
-                    <div
-                        key={classItem.class_id}
-                        className="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-2">
-                            <BookOpen className="h-4 w-4 text-blue-500" />
-                            <h6 className="font-medium text-sm text-gray-700 dark:text-gray-300">
-                                {classItem.plan[1] || 'Plan sin nombre'}
-                            </h6>
+                {teacher.schedules
+                    .filter(hasValidClass) // ✅ Type-safe filtering
+                    .map(schedule => (
+                        <div
+                            key={schedule.class.class_id}
+                            className="border border-gray-200 dark:border-gray-600 rounded-lg p-3"
+                        >
+                            <div className="flex items-center gap-2 mb-2">
+                                <BookOpen className="h-4 w-4 text-blue-500" />
+                                <h6 className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                                    {schedule.class.plan?.[1] || 'Plan sin nombre'}
+                                </h6>
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                                <div className="flex flex-wrap gap-1">
+                                    {schedule.days.map(day => (
+                                        <span
+                                            key={day}
+                                            className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs"
+                                        >
+                                            {capitalize(getDayName(day))}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                            {teacher.schedules.length > 0 ? (
-                                teacher.schedules.map(schedule => (
-                                    <div
-                                        key={schedule.schedule_id}
-                                        className="flex flex-wrap gap-1">
-                                        {schedule.days.map(day => (
-                                            <span
-                                                key={day}
-                                                className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">
-                                                {getDayName(day)}
-                                            </span>
-                                        ))}
-                                    </div>
-                                ))
-                            ) : (
-                                <span>Sin horarios asignados</span>
-                            )}
-                        </div>
-                    </div>
-                ))}
+                    ))}
+
+                {teacher.schedules.filter(hasValidClass).length === 0 && (
+                    <span>Sin horarios asignados</span>
+                )}
             </div>
         )
     }
 
     // Function to render detailed schedule table for all plans
     const renderDetailedScheduleTable = (teacher: Teacher) => {
-        if (!teacher.classes || teacher.classes.length === 0) {
+        function hasValidClass(
+            schedule: typeof teacher.schedules[number]
+        ): schedule is typeof schedule & { class: NonNullable<typeof schedule.class> } {
+            return schedule.class !== null && schedule.class !== undefined
+        }
+        if (!teacher.schedules || teacher.schedules.length === 0) {
             return (
                 <div className="text-center py-8">
                     <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -324,11 +384,13 @@ export default function TeacherIndex() {
 
         return (
             <div className="space-y-6">
-                {teacher.classes.map(classItem => (
-                    <div key={classItem.class_id}>
+                {teacher.schedules
+                .filter(hasValidClass)
+                .map(schedule => (
+                    <div key={schedule.class.class_id}>
                         {renderScheduleTableForPlan(
                             teacher.schedules,
-                            classItem.plan[1] || 'Plan sin nombre',
+                            schedule.class.plan[1] || 'Plan sin nombre',
                         )}
                     </div>
                 ))}
@@ -351,13 +413,13 @@ export default function TeacherIndex() {
 
         // Get all unique days from all schedules
         const allDays = [
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday',
-            'sunday',
+            'lunes',
+            'martes',
+            'miercoles',
+            'jueves',
+            'viernes',
+            'sabado',
+            'domingo',
         ]
         const daysWithSchedules = new Set()
 
@@ -391,7 +453,7 @@ export default function TeacherIndex() {
                                     <th
                                         key={day}
                                         className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
-                                        {getDayName(day)}
+                                        {capitalize(getDayName(day))} 
                                     </th>
                                 ))}
                             </tr>
