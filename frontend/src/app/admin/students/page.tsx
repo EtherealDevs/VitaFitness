@@ -1278,14 +1278,46 @@ export default function StudentManagement() {
 
                                 {/* Action buttons */}
                                 <div className="flex justify-end mt-4 gap-2">
-                                    <Link
-                                        href={`/admin/payments/create/${selectedStudent.id}`}>
-                                        <button className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 rounded-md px-2 py-2">
-                                            <DollarSign className="h-5 w-5" />
-                                            Cobrar Cuota
-                                        </button>
-                                    </Link>
-                                    <button className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 rounded-md px-2 py-2">
+                                    <button
+                                        onClick={() => {
+                                            // Guardar toda la información del estudiante en localStorage
+                                            localStorage.setItem(
+                                                'selectedStudentForPayment',
+                                                JSON.stringify({
+                                                    id: selectedStudent.id,
+                                                    name: selectedStudent.name,
+                                                    last_name:
+                                                        selectedStudent.last_name,
+                                                    phone: selectedStudent.phone,
+                                                    dni: selectedStudent.dni,
+                                                    registration_date:
+                                                        selectedStudent.registration_date,
+                                                    status: selectedStudent.status,
+                                                    payments:
+                                                        selectedStudent.payments,
+                                                    attendances:
+                                                        selectedStudent.attendances,
+                                                    accountInfo: accountInfo,
+                                                    // Información adicional que pueda ser útil
+                                                    paymentDueDate:
+                                                        selectedStudent.paymentDueDate,
+                                                    daysOverdue:
+                                                        selectedStudent.daysOverdue,
+                                                    daysUntilDue:
+                                                        selectedStudent.daysUntilDue,
+                                                }),
+                                            )
+
+                                            // Navegar a la página de creación de pagos
+                                            router.push(
+                                                '/admin/payments/create',
+                                            )
+                                        }}
+                                        className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 rounded-md px-2 py-2 transition-colors">
+                                        <DollarSign className="h-5 w-5" />
+                                        Cobrar Cuota
+                                    </button>
+                                    <button className="bg-purple-600 hover:bg-purple-700 text-white rounded-md px-2 py-2">
                                         Otros Abonos
                                     </button>
                                 </div>
