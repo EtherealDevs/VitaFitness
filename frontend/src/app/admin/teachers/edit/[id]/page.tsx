@@ -1,7 +1,4 @@
 'use client'
-
-import type React from 'react'
-
 import { useState, useEffect } from 'react'
 import { useTeachers } from '@/hooks/teachers'
 import { useTeacherSchedules } from '@/hooks/teacherSchedules'
@@ -12,16 +9,18 @@ import {
     CardTitle,
 } from '../../../components/ui/card'
 import { Button } from '../../../components/ui/button'
-import {
-    Table,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '../../../components/ui/table'
 import { Input } from '../../../components/ui/input'
 import { Label } from '../../../components/ui/label'
-import { Mail, Phone, Edit2, User, AlertCircle } from 'lucide-react'
-import { useParams } from 'next/navigation'
+import {
+    Mail,
+    Phone,
+    User,
+    AlertCircle,
+    Newspaper,
+    Save,
+    X,
+} from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
 import { AxiosError } from 'axios'
 
 export default function TeacherProfile() {
@@ -41,22 +40,23 @@ export default function TeacherProfile() {
     }
 
     const { id } = useParams() as { id: string }
+    const router = useRouter()
     const [teacher, setTeacher] = useState<Teacher | null>(null)
     const [originalTeacher, setOriginalTeacher] = useState<Teacher | null>(null)
-    const [isEditingEmail, setIsEditingEmail] = useState(false)
-    const [isEditingPhone, setIsEditingPhone] = useState(false)
-    const [isEditingName, setIsEditingName] = useState(false)
-    const [isEditingLastName, setIsEditingLastName] = useState(false)
 
-    // Estados para los valores de edición
-    const [editName, setEditName] = useState('')
-    const [editLastName, setEditLastName] = useState('')
-    const [editEmail, setEditEmail] = useState('')
-    const [editPhone, setEditPhone] = useState('')
+    // Estados para los valores del formulario
+    const [formData, setFormData] = useState({
+        name: '',
+        last_name: '',
+        dni: '',
+        email: '',
+        phone: '',
+    })
 
     // Estados para loading y errores
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [hasChanges, setHasChanges] = useState(false)
 
     const { getTeacher, updateTeacher } = useTeachers()
     const { getTeacherSchedules } = useTeacherSchedules()
@@ -71,11 +71,15 @@ export default function TeacherProfile() {
                 setTeacher(response.teacher)
                 setOriginalTeacher(response.teacher)
 
-                // Inicializar los valores de edición
-                setEditName(response.teacher.name || '')
-                setEditLastName(response.teacher.last_name || '')
-                setEditEmail(response.teacher.email || '')
-                setEditPhone(response.teacher.phone || '')
+                // Inicializar los valores del formulario
+                const initialData = {
+                    name: response.teacher.name || '',
+                    last_name: response.teacher.last_name || '',
+                    dni: response.teacher.dni || '',
+                    email: response.teacher.email || '',
+                    phone: response.teacher.phone || '',
+                }
+                setFormData(initialData)
             } catch (error) {
                 console.error('Error fetching teacher:', error)
                 setError('Error al cargar los datos del profesor')
@@ -85,25 +89,95 @@ export default function TeacherProfile() {
         fetchData()
     }, [id, getTeacher, getTeacherSchedules])
 
-    const handleUpdateField = async (field: string, value: string) => {
-        // Validar que realmente hay un cambio antes de proceder
-        const currentValue = teacher?.[field as keyof Teacher]?.toString() || ''
-        if (value === currentValue) {
-            // Si no hay cambios, solo cerrar el modo de edición
-            switch (field) {
-                case 'name':
-                    setIsEditingName(false)
-                    break
-                case 'last_name':
-                    setIsEditingLastName(false)
-                    break
-                case 'email':
-                    setIsEditingEmail(false)
-                    break
-                case 'phone':
-                    setIsEditingPhone(false)
-                    break
+    // Detectar cambios en el formulario
+    useEffect(() => {
+        if (originalTeacher) {
+            const originalData = {
+                name: originalTeacher.name || '',
+                last_name: originalTeacher.last_name || '',
+                dni: originalTeacher.dni || '',
+                email: originalTeacher.email || '',
+                phone: originalTeacher.phone || '',
             }
+
+            const hasChanged = Object.keys(formData).some(
+                key =>
+                    formData[key as keyof typeof formData] !==
+                    originalData[key as keyof typeof originalData],
+            )
+
+            setHasChanges(hasChanged)
+        }
+    }, [formData, originalTeacher])
+
+    const handleInputChange = (field: string, value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value,
+        }))
+        setError(null) // Limpiar errores al escribir
+    }
+
+    const validateForm = () => {
+        const errors: string[] = []
+
+        if (!formData.name.trim()) {
+            errors.push('El nombre es requerido')
+        } else if (formData.name.trim().length < 2) {
+            errors.push('El nombre debe tener al menos 2 caracteres')
+        }
+
+        if (!formData.last_name.trim()) {
+            errors.push('El apellido es requerido')
+        } else if (formData.last_name.trim().length < 2) {
+            errors.push('El apellido debe tener al menos 2 caracteres')
+        }
+
+        // Email es opcional, pero si se proporciona debe ser válido
+        if (formData.email.trim() && formData.email.trim() !== '') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (!emailRegex.test(formData.email)) {
+                errors.push('Por favor ingresa un email válido')
+            }
+        }
+
+        // Teléfono es opcional, pero si se proporciona debe ser válido
+        if (formData.phone.trim() && formData.phone.trim() !== '') {
+            const phoneRegex = /^[\d\s\-()+]+$/
+            if (!phoneRegex.test(formData.phone)) {
+                errors.push(
+                    'El teléfono solo puede contener números, espacios, guiones y paréntesis',
+                )
+            }
+        }
+
+        // DNI validaciones específicas
+        if (formData.dni.trim() && formData.dni.trim() !== '') {
+            const dniRegex = /^\d+$/
+            if (!dniRegex.test(formData.dni)) {
+                errors.push('El DNI solo puede contener números')
+            } else if (formData.dni.length < 6) {
+                errors.push('El DNI debe tener al menos 6 números')
+            } else if (formData.dni.length > 10) {
+                errors.push('El DNI no puede tener más de 10 números')
+            }
+        }
+
+        return errors
+    }
+
+    const handleDniChange = (value: string) => {
+        // Solo permitir números
+        const numericValue = value.replace(/\D/g, '')
+        // Limitar a 10 caracteres máximo
+        const limitedValue = numericValue.slice(0, 10)
+        handleInputChange('dni', limitedValue)
+    }
+
+    const handleSave = async () => {
+        const validationErrors = validateForm()
+        if (validationErrors.length > 0) {
+            setError(validationErrors.join(', '))
             return
         }
 
@@ -111,78 +185,50 @@ export default function TeacherProfile() {
         setError(null)
 
         try {
-            // Crear objeto con solo los campos que necesitamos enviar
-            const dataToSend: Record<string, string | number> = {}
+            // Enfoque simplificado: enviar solo los datos del formulario
+            const formDataToSend = new FormData()
 
-            // Agregar todos los campos básicos del profesor
-            if (originalTeacher?.name) dataToSend.name = originalTeacher.name
-            if (originalTeacher?.last_name)
-                dataToSend.last_name = originalTeacher.last_name
-            if (originalTeacher?.email) dataToSend.email = originalTeacher.email
-            if (originalTeacher?.phone) dataToSend.phone = originalTeacher.phone
-            if (originalTeacher?.dni) dataToSend.dni = originalTeacher.dni
+            // Agregar todos los campos del formulario
+            formDataToSend.append('name', formData.name)
+            formDataToSend.append('last_name', formData.last_name)
 
-            // Sobrescribir el campo que se está actualizando
-            dataToSend[field] = value
-
-            console.log('Original teacher data:', originalTeacher)
-            console.log('Field being updated:', field, 'New value:', value)
-            console.log('Complete data being sent:', dataToSend)
-
-            // Crear FormData con los campos necesarios
-            const formData = new FormData()
-            Object.entries(dataToSend).forEach(([key, val]) => {
-                if (val !== null && val !== undefined) {
-                    formData.append(key, val.toString())
-                }
-            })
-
-            // Log para debug
-            console.log('FormData contents:')
-            for (const [key, value] of formData.entries()) {
-                console.log(key, value)
+            // Solo agregar DNI si tiene valor
+            if (formData.dni) {
+                formDataToSend.append('dni', formData.dni)
             }
 
-            await updateTeacher(id, formData)
+            // Solo agregar email si tiene valor
+            if (formData.email) {
+                formDataToSend.append('email', formData.email)
+            }
 
-            // Actualizar el estado local solo si la actualización fue exitosa
-            setTeacher(prev => (prev ? { ...prev, [field]: value } : null))
+            // Solo agregar phone si tiene valor
+            if (formData.phone) {
+                formDataToSend.append('phone', formData.phone)
+            }
 
-            // También actualizar los datos originales
-            setOriginalTeacher(prev =>
-                prev ? { ...prev, [field]: value } : null,
+            console.log(
+                'Enviando datos del profesor:',
+                Object.fromEntries(formDataToSend),
             )
 
-            // Resetear estados de edición
-            switch (field) {
-                case 'name':
-                    setIsEditingName(false)
-                    break
-                case 'last_name':
-                    setIsEditingLastName(false)
-                    break
-                case 'email':
-                    setIsEditingEmail(false)
-                    break
-                case 'phone':
-                    setIsEditingPhone(false)
-                    break
-            }
+            await updateTeacher(id, formDataToSend)
 
-            console.log('Update successful for field:', field)
+            // Actualizar el estado local
+            setTeacher(prev => (prev ? { ...prev, ...formData } : null))
+            setOriginalTeacher(prev => (prev ? { ...prev, ...formData } : null))
+            setHasChanges(false)
+
+            console.log('Profesor actualizado correctamente')
         } catch (error) {
-            console.error(`Error updating teacher ${field}:`, error)
+            console.error('Error completo al actualizar profesor:', error)
 
-            // Log detallado del error
             if (error instanceof AxiosError) {
-                console.log('Error response:', error.response?.data)
-                console.log('Error status:', error.response?.status)
-                console.log('Error headers:', error.response?.headers)
+                console.log('Error response data:', error.response?.data)
+                console.log('Error response status:', error.response?.status)
 
                 if (error.response?.status === 422) {
                     const errorData = error.response.data as ValidationError
-                    console.log('Validation errors:', errorData)
-
                     if (errorData.errors) {
                         const errorMessages = Object.values(
                             errorData.errors,
@@ -200,478 +246,222 @@ export default function TeacherProfile() {
                 } else if (error.response?.status === 404) {
                     setError('Profesor no encontrado')
                 } else if (error.response?.status === 500) {
-                    setError('Error interno del servidor')
+                    setError(
+                        'Error interno del servidor. Por favor, contacta al administrador.',
+                    )
+                    console.error('Error 500 detalles:', error.response?.data)
                 } else {
-                    setError(`Error al actualizar ${field}: ${error.message}`)
+                    setError(`Error al actualizar: ${error.message}`)
                 }
             } else if (error instanceof Error) {
-                setError(`Error al actualizar ${field}: ${error.message}`)
+                setError(`Error al actualizar: ${error.message}`)
             } else {
-                setError(`Error desconocido al actualizar ${field}`)
+                setError('Error desconocido al actualizar')
             }
         } finally {
             setIsLoading(false)
         }
     }
 
-    const handleStartEdit = (field: string) => {
-        setError(null)
-        switch (field) {
-            case 'name':
-                setIsEditingName(true)
-                break
-            case 'last_name':
-                setIsEditingLastName(true)
-                break
-            case 'email':
-                setIsEditingEmail(true)
-                break
-            case 'phone':
-                setIsEditingPhone(true)
-                break
+    const handleCancel = () => {
+        if (originalTeacher) {
+            const originalData = {
+                name: originalTeacher.name || '',
+                last_name: originalTeacher.last_name || '',
+                dni: originalTeacher.dni || '',
+                email: originalTeacher.email || '',
+                phone: originalTeacher.phone || '',
+            }
+            setFormData(originalData)
+            setHasChanges(false)
+            setError(null)
         }
     }
 
-    const handleUpdateName = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const trimmedName = editName.trim()
-
-        if (trimmedName === '') {
-            setError('El nombre no puede estar vacío')
-            return
-        }
-
-        if (trimmedName.length < 2) {
-            setError('El nombre debe tener al menos 2 caracteres')
-            return
-        }
-
-        await handleUpdateField('name', trimmedName)
-    }
-
-    const handleUpdateLastName = async (
-        e: React.FormEvent<HTMLFormElement>,
-    ) => {
-        e.preventDefault()
-        const trimmedLastName = editLastName.trim()
-
-        if (trimmedLastName === '') {
-            setError('El apellido no puede estar vacío')
-            return
-        }
-
-        if (trimmedLastName.length < 2) {
-            setError('El apellido debe tener al menos 2 caracteres')
-            return
-        }
-
-        await handleUpdateField('last_name', trimmedLastName)
-    }
-
-    const handleUpdateEmail = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const trimmedEmail = editEmail.trim()
-
-        if (trimmedEmail === '') {
-            setError('El email no puede estar vacío')
-            return
-        }
-
-        // Validación básica de email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(trimmedEmail)) {
-            setError('Por favor ingresa un email válido')
-            return
-        }
-
-        await handleUpdateField('email', trimmedEmail)
-    }
-
-    const handleUpdatePhone = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const trimmedPhone = editPhone.trim()
-
-        if (trimmedPhone === '') {
-            setError('El teléfono no puede estar vacío')
-            return
-        }
-
-        // Validación básica de teléfono (solo números, espacios, guiones y paréntesis)
-        const phoneRegex = /^[\d\s\-()+]+$/
-        if (!phoneRegex.test(trimmedPhone)) {
-            setError(
-                'El teléfono solo puede contener números, espacios, guiones y paréntesis',
+    const handleGoBack = () => {
+        if (hasChanges) {
+            const confirmLeave = confirm(
+                'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?',
             )
-            return
+            if (!confirmLeave) return
         }
-
-        await handleUpdateField('phone', trimmedPhone)
-    }
-
-    const handleCancelEdit = (field: string) => {
-        setError(null)
-        switch (field) {
-            case 'name':
-                setEditName(teacher?.name || '')
-                setIsEditingName(false)
-                break
-            case 'last_name':
-                setEditLastName(teacher?.last_name || '')
-                setIsEditingLastName(false)
-                break
-            case 'email':
-                setEditEmail(teacher?.email || '')
-                setIsEditingEmail(false)
-                break
-            case 'phone':
-                setEditPhone(teacher?.phone || '')
-                setIsEditingPhone(false)
-                break
-        }
+        router.back()
     }
 
     if (!teacher) {
-        return <div className="p-6">Cargando...</div>
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            </div>
+        )
     }
 
     return (
-        <div className="space-y-6 p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">
+        <div className="min-h-screen w-full p-4">
+            <div className="w-full max-w-2xl mx-auto">
+                {/* Header */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-2">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                            Editar Profesor
+                        </h1>
+                        <Button
+                            variant="outline"
+                            onClick={handleGoBack}
+                            className="dark:text-white dark:border-gray-600">
+                            <X className="mr-2 h-4 w-4" />
+                            Cerrar
+                        </Button>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                         {teacher.name} {teacher.last_name}
-                    </h1>
-                    {teacher.dni && (
-                        <p className="text-sm text-gray-500">
-                            DNI: {teacher.dni}
-                        </p>
-                    )}
+                    </p>
                 </div>
-            </div>
 
-            {/* Error Message */}
-            {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2 text-red-700">
-                    <AlertCircle className="h-4 w-4" />
-                    <span>{error}</span>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setError(null)}
-                        className="ml-auto">
-                        ×
-                    </Button>
-                </div>
-            )}
+                {/* Error Message */}
+                {error && (
+                    <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4 flex items-center gap-2 text-red-700">
+                        <AlertCircle className="h-4 w-4" />
+                        <span>{error}</span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setError(null)}
+                            className="ml-auto">
+                            ×
+                        </Button>
+                    </div>
+                )}
 
-            {/* Contact Info */}
-            <div className=" gap-4 md:grid-cols-2">
-                <Card>
+                {/* Form Card */}
+                <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur shadow-lg border border-opacity-50 dark:border-gray-700">
                     <CardHeader>
-                        <CardTitle>Información de Contacto</CardTitle>
+                        <CardTitle className="flex items-center gap-2">
+                            <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                            Información de Contacto
+                        </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-6">
                         {/* Name and Last Name - Side by side */}
-                        <div className="flex items-start space-x-4">
-                            <User className="h-4 w-4 text-muted-foreground mt-8" />
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Nombre */}
-                                <div>
-                                    <Label>Nombre</Label>
-                                    <form onSubmit={handleUpdateName}>
-                                        <div className="flex items-center gap-2">
-                                            {isEditingName ? (
-                                                <>
-                                                    <Input
-                                                        value={editName}
-                                                        onChange={e =>
-                                                            setEditName(
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        autoFocus
-                                                        disabled={isLoading}
-                                                        placeholder="Ingresa el nombre"
-                                                    />
-                                                    <Button
-                                                        type="submit"
-                                                        size="sm"
-                                                        disabled={
-                                                            isLoading ||
-                                                            editName.trim() ===
-                                                                ''
-                                                        }>
-                                                        {isLoading
-                                                            ? '...'
-                                                            : 'Guardar'}
-                                                    </Button>
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() =>
-                                                            handleCancelEdit(
-                                                                'name',
-                                                            )
-                                                        }
-                                                        disabled={isLoading}>
-                                                        Cancelar
-                                                    </Button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Input
-                                                        value={
-                                                            teacher.name || ''
-                                                        }
-                                                        readOnly
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        onClick={() =>
-                                                            handleStartEdit(
-                                                                'name',
-                                                            )
-                                                        }
-                                                        disabled={isLoading}>
-                                                        <Edit2 className="h-4 w-4" />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </form>
-                                </div>
-
-                                {/* Apellido */}
-                                <div>
-                                    <Label>Apellido</Label>
-                                    <form onSubmit={handleUpdateLastName}>
-                                        <div className="flex items-center gap-2">
-                                            {isEditingLastName ? (
-                                                <>
-                                                    <Input
-                                                        value={editLastName}
-                                                        onChange={e =>
-                                                            setEditLastName(
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        autoFocus
-                                                        disabled={isLoading}
-                                                        placeholder="Ingresa el apellido"
-                                                    />
-                                                    <Button
-                                                        type="submit"
-                                                        size="sm"
-                                                        disabled={
-                                                            isLoading ||
-                                                            editLastName.trim() ===
-                                                                ''
-                                                        }>
-                                                        {isLoading
-                                                            ? '...'
-                                                            : 'Guardar'}
-                                                    </Button>
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() =>
-                                                            handleCancelEdit(
-                                                                'last_name',
-                                                            )
-                                                        }
-                                                        disabled={isLoading}>
-                                                        Cancelar
-                                                    </Button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Input
-                                                        value={
-                                                            teacher.last_name ||
-                                                            ''
-                                                        }
-                                                        readOnly
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        onClick={() =>
-                                                            handleStartEdit(
-                                                                'last_name',
-                                                            )
-                                                        }
-                                                        disabled={isLoading}>
-                                                        <Edit2 className="h-4 w-4" />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </form>
-                                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="name">Nombre</Label>
+                                <Input
+                                    id="name"
+                                    value={formData.name}
+                                    onChange={e =>
+                                        handleInputChange(
+                                            'name',
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder="Ingresa el nombre"
+                                    disabled={isLoading}
+                                    className="dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="last_name">Apellido</Label>
+                                <Input
+                                    id="last_name"
+                                    value={formData.last_name}
+                                    onChange={e =>
+                                        handleInputChange(
+                                            'last_name',
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder="Ingresa el apellido"
+                                    disabled={isLoading}
+                                    className="dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
+                                />
                             </div>
                         </div>
 
-                        {/* Email Form */}
-                        <div className="flex items-center space-x-4">
-                            <Mail className="h-4 w-4 text-muted-foreground" />
-                            <div className="flex-1">
-                                <Label>Correo elect.</Label>
-                                <form onSubmit={handleUpdateEmail}>
-                                    <div className="flex items-center gap-2">
-                                        {isEditingEmail ? (
-                                            <>
-                                                <Input
-                                                    value={editEmail}
-                                                    onChange={e =>
-                                                        setEditEmail(
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    autoFocus
-                                                    type="email"
-                                                    disabled={isLoading}
-                                                    placeholder="ejemplo@correo.com"
-                                                />
-                                                <Button
-                                                    type="submit"
-                                                    size="sm"
-                                                    disabled={
-                                                        isLoading ||
-                                                        editEmail.trim() === ''
-                                                    }>
-                                                    {isLoading
-                                                        ? '...'
-                                                        : 'Guardar'}
-                                                </Button>
-                                                <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() =>
-                                                        handleCancelEdit(
-                                                            'email',
-                                                        )
-                                                    }
-                                                    disabled={isLoading}>
-                                                    Cancelar
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Input
-                                                    value={teacher.email || ''}
-                                                    readOnly
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    onClick={() =>
-                                                        handleStartEdit('email')
-                                                    }
-                                                    disabled={isLoading}>
-                                                    <Edit2 className="h-4 w-4" />
-                                                </Button>
-                                            </>
-                                        )}
-                                    </div>
-                                </form>
-                            </div>
+                        {/* DNI */}
+                        <div>
+                            <Label
+                                htmlFor="dni"
+                                className="flex items-center gap-2">
+                                <Newspaper className="h-4 w-4" />
+                                DNI
+                            </Label>
+                            <Input
+                                id="dni"
+                                value={formData.dni}
+                                onChange={e => handleDniChange(e.target.value)}
+                                placeholder="Ingresa el DNI (6-10 números)"
+                                disabled={isLoading}
+                                className="dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
+                                maxLength={10}
+                            />
                         </div>
 
-                        {/* Phone Form */}
-                        <div className="flex items-center space-x-4">
-                            <Phone className="h-4 w-4 text-muted-foreground" />
-                            <div className="flex-1">
-                                <Label>Teléfono</Label>
-                                <form onSubmit={handleUpdatePhone}>
-                                    <div className="flex items-center gap-2">
-                                        {isEditingPhone ? (
-                                            <>
-                                                <Input
-                                                    value={editPhone}
-                                                    onChange={e =>
-                                                        setEditPhone(
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    autoFocus
-                                                    disabled={isLoading}
-                                                    placeholder="Ej: +54 11 1234-5678"
-                                                />
-                                                <Button
-                                                    type="submit"
-                                                    size="sm"
-                                                    disabled={
-                                                        isLoading ||
-                                                        editPhone.trim() === ''
-                                                    }>
-                                                    {isLoading
-                                                        ? '...'
-                                                        : 'Guardar'}
-                                                </Button>
-                                                <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() =>
-                                                        handleCancelEdit(
-                                                            'phone',
-                                                        )
-                                                    }
-                                                    disabled={isLoading}>
-                                                    Cancelar
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Input
-                                                    value={teacher.phone || ''}
-                                                    readOnly
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    onClick={() =>
-                                                        handleStartEdit('phone')
-                                                    }
-                                                    disabled={isLoading}>
-                                                    <Edit2 className="h-4 w-4" />
-                                                </Button>
-                                            </>
-                                        )}
-                                    </div>
-                                </form>
-                            </div>
+                        {/* Email */}
+                        <div>
+                            <Label
+                                htmlFor="email"
+                                className="flex items-center gap-2">
+                                <Mail className="h-4 w-4" />
+                                Correo electrónico
+                            </Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={e =>
+                                    handleInputChange('email', e.target.value)
+                                }
+                                placeholder="ejemplo@correo.com (opcional)"
+                                disabled={isLoading}
+                                className="dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
+                            />
+                        </div>
+
+                        {/* Phone */}
+                        <div>
+                            <Label
+                                htmlFor="phone"
+                                className="flex items-center gap-2">
+                                <Phone className="h-4 w-4" />
+                                Teléfono
+                            </Label>
+                            <Input
+                                id="phone"
+                                value={formData.phone}
+                                onChange={e =>
+                                    handleInputChange('phone', e.target.value)
+                                }
+                                placeholder="Ej: +54 11 1234-5678 (opcional)"
+                                disabled={isLoading}
+                                className="dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
+                            />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <Button
+                                variant="outline"
+                                onClick={handleCancel}
+                                disabled={isLoading || !hasChanges}
+                                className="dark:text-white dark:border-gray-600">
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={handleSave}
+                                disabled={isLoading || !hasChanges}
+                                className="bg-purple-600 hover:bg-purple-700 text-white">
+                                {isLoading ? (
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                ) : (
+                                    <Save className="mr-2 h-4 w-4" />
+                                )}
+                                {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
             </div>
-
-            {/* Upcoming Classes */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Clases Próximas</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Día</TableHead>
-                                <TableHead>Horario de inicio</TableHead>
-                                <TableHead>Horario de finalización</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                    </Table>
-                </CardContent>
-            </Card>
         </div>
     )
 }

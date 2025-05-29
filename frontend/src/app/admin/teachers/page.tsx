@@ -142,7 +142,7 @@ export default function TeacherIndex() {
                                     schedule_id: scheduleData.schedule_id,
                                     days: scheduleData.schedule_days,
                                     timeslots: [],
-                                    class: null
+                                    class: null,
                                 }
                                 schedules.push(newSchedule)
                             }
@@ -152,7 +152,10 @@ export default function TeacherIndex() {
                             }
                             const newClass: Class = {
                                 class_id: scheduleData.class_id,
-                                plan: [scheduleData.plan_id, scheduleData.plan_name]
+                                plan: [
+                                    scheduleData.plan_id,
+                                    scheduleData.plan_name,
+                                ],
                             }
                             newSchedule.timeslots.push(newTimeslot)
                             newSchedule.class = newClass
@@ -272,12 +275,13 @@ export default function TeacherIndex() {
                 </div>
             )
         }
-        teacher.schedules.forEach(schedule => {
-        });
+        // teacher.schedules.forEach(schedule => {})
 
         function hasValidClass(
-            schedule: typeof teacher.schedules[number]
-        ): schedule is typeof schedule & { class: NonNullable<typeof schedule.class> } {
+            schedule: (typeof teacher.schedules)[number],
+        ): schedule is typeof schedule & {
+            class: NonNullable<typeof schedule.class>
+        } {
             return schedule.class !== null && schedule.class !== undefined
         }
         // return (
@@ -324,12 +328,12 @@ export default function TeacherIndex() {
                     .map(schedule => (
                         <div
                             key={schedule.class.class_id}
-                            className="border border-gray-200 dark:border-gray-600 rounded-lg p-3"
-                        >
+                            className="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
                             <div className="flex items-center gap-2 mb-2">
                                 <BookOpen className="h-4 w-4 text-blue-500" />
                                 <h6 className="font-medium text-sm text-gray-700 dark:text-gray-300">
-                                    {schedule.class.plan?.[1] || 'Plan sin nombre'}
+                                    {schedule.class.plan?.[1] ||
+                                        'Plan sin nombre'}
                                 </h6>
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
@@ -337,8 +341,7 @@ export default function TeacherIndex() {
                                     {schedule.days.map(day => (
                                         <span
                                             key={day}
-                                            className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs"
-                                        >
+                                            className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">
                                             {capitalize(getDayName(day))}
                                         </span>
                                     ))}
@@ -357,8 +360,10 @@ export default function TeacherIndex() {
     // Function to render detailed schedule table for all plans
     const renderDetailedScheduleTable = (teacher: Teacher) => {
         function hasValidClass(
-            schedule: typeof teacher.schedules[number]
-        ): schedule is typeof schedule & { class: NonNullable<typeof schedule.class> } {
+            schedule: (typeof teacher.schedules)[number],
+        ): schedule is typeof schedule & {
+            class: NonNullable<typeof schedule.class>
+        } {
             return schedule.class !== null && schedule.class !== undefined
         }
         if (!teacher.schedules || teacher.schedules.length === 0) {
@@ -384,9 +389,7 @@ export default function TeacherIndex() {
 
         return (
             <div className="space-y-6">
-                {teacher.schedules
-                .filter(hasValidClass)
-                .map(schedule => (
+                {teacher.schedules.filter(hasValidClass).map(schedule => (
                     <div key={schedule.class.class_id}>
                         {renderScheduleTableForPlan(
                             teacher.schedules,
@@ -442,7 +445,7 @@ export default function TeacherIndex() {
         return (
             <div className="mb-6">
                 <h5 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-violet-500 rounded-full"></div>
                     {planName}
                 </h5>
                 <div className="overflow-x-auto">
@@ -453,7 +456,7 @@ export default function TeacherIndex() {
                                     <th
                                         key={day}
                                         className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
-                                        {capitalize(getDayName(day))} 
+                                        {capitalize(getDayName(day))}
                                     </th>
                                 ))}
                             </tr>
@@ -483,7 +486,7 @@ export default function TeacherIndex() {
                                                                 timeslot => (
                                                                     <div
                                                                         key={`${schedule.schedule_id}-${timeslot.id}`}
-                                                                        className="text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
+                                                                        className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
                                                                         {
                                                                             timeslot.hour
                                                                         }
