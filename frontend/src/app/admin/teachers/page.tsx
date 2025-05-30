@@ -284,43 +284,7 @@ export default function TeacherIndex() {
         } {
             return schedule.class !== null && schedule.class !== undefined
         }
-        // return (
-        //     <div className="space-y-3">
-        //         {teacher.schedules
-        //         .filter(hasValidClass)
-        //         .map(schedule => (
-        //             <div
-        //                 key={schedule.class.class_id}
-        //                 className="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
-        //                 <div className="flex items-center gap-2 mb-2">
-        //                     <BookOpen className="h-4 w-4 text-blue-500" />
-        //                     <h6 className="font-medium text-sm text-gray-700 dark:text-gray-300">
-        //                         {schedule.class.plan[1] || 'Plan sin nombre'}
-        //                     </h6>
-        //                 </div>
-        //                 <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-        //                     {teacher.schedules.length > 0 ? (
-        //                         teacher.schedules.map(schedule => (
-        //                             <div
-        //                                 key={schedule.schedule_id}
-        //                                 className="flex flex-wrap gap-1">
-        //                                 {schedule.days.map(day => (
-        //                                     <span
-        //                                         key={day}
-        //                                         className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">
-        //                                         {getDayName(day)}
-        //                                     </span>
-        //                                 ))}
-        //                             </div>
-        //                         ))
-        //                     ) : (
-        //                         <span>Sin horarios asignados</span>
-        //                     )}
-        //                 </div>
-        //             </div>
-        //         ))}
-        //     </div>
-        // )
+        
         return (
             <div className="space-y-3">
                 {teacher.schedules
@@ -386,7 +350,7 @@ export default function TeacherIndex() {
                 </div>
             )
         }
-
+        console.log(teacher, teacher.schedules, hasValidClass(teacher.schedules[0]))
         return (
             <div className="space-y-6">
                 {teacher.schedules.filter(hasValidClass).map(schedule => (

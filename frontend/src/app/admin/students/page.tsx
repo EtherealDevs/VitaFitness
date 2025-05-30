@@ -40,6 +40,8 @@ interface Student {
     payments?: Payment[]
     attendances?: Attendances[]
     accountInfo?: AccountInfo
+    scheduleData: ScheduleData[]
+    schedules: Schedule[]
     // Additional details for the expanded view
     address?: string
     birthDate?: string
@@ -63,15 +65,50 @@ interface ClassSchedule {
     schedule?: Schedule
 }
 
+interface Schedule {
+    schedule_id: string
+    days: string[]
+    timeslots: Timeslot[]
+    class: Class | null
+}
+interface ScheduleData {
+    schedule_id: string
+    schedule_days: string[]
+    timeslot_id: string
+    timeslot_hour: string
+    class_id: string
+    plan_id: string
+    plan_name: string
+}
+interface Timeslot {
+    id: string
+    hour: string
+}
 interface Class {
+    class_id: string
+    plan: [plan_id: string, name: string]
+}
+interface StudentFromServer {
     id: string
     name: string
-}
-
-interface Schedule {
-    id: string
-    days: string[]
-    timeslots: StudentTimeslot[]
+    last_name: string
+    phone: string
+    dni: string
+    registration_date: string
+    status: 'activo' | 'inactivo' | 'pendiente'
+    paymentDueDate: string
+    daysOverdue: number
+    daysUntilDue: number
+    remainingClasses: number
+    canAttend: boolean
+    branch: string
+    payments?: Payment[]
+    attendances?: Attendances[]
+    accountInfo?: AccountInfo
+    schedules: ScheduleData[] // Raw schedule data from server
+    classes: Class[]
+    created_at: string
+    updated_at: string
 }
 
 // Definir una interfaz específica para los timeslots del estudiante
@@ -160,6 +197,10 @@ export default function StudentManagement() {
         setShowPaymentHistoryModal(false)
     }
 
+    const capitalize = (str: string) => {
+        return str.charAt(0).toUpperCase() + str.slice(1)
+    }
+
     // Fetch student data
     useEffect(() => {
         let isMounted = true
@@ -174,7 +215,7 @@ export default function StudentManagement() {
                     const now = new Date()
 
                     const processedStudents = response.students.map(
-                        (student: Student) => {
+                        (student: StudentFromServer) => {
                             let paymentDueDate: string | null = null
                             let daysUntilDue = 0
                             let daysOverdue = 0
@@ -224,15 +265,55 @@ export default function StudentManagement() {
                                     }
                                 }
                             }
+                            const schedules: Schedule[] = []
+                            student.last_name = capitalize(student.last_name)
+
+                            // Guardar los datos originales
+                            const originalScheduleData: ScheduleData[] =
+                                student.schedules || []
+                            console.log(originalScheduleData)
+                            // Procesar los datos originales para crear Schedule[]
+                            originalScheduleData.forEach(
+                                (scheduleData: ScheduleData) => {
+                                    let newSchedule = schedules.find(
+                                        s => s.schedule_id === scheduleData.schedule_id,
+                                    )
+                                    if (newSchedule === undefined) {
+                                        newSchedule = {
+                                            schedule_id: scheduleData.schedule_id,
+                                            days: scheduleData.schedule_days,
+                                            timeslots: [],
+                                            class: null,
+                                        }
+                                        schedules.push(newSchedule)
+                                    }
+                                    const newTimeslot: Timeslot = {
+                                        id: scheduleData.timeslot_id,
+                                        hour: scheduleData.timeslot_hour,
+                                    }
+                                    const newClass: Class = {
+                                        class_id: scheduleData.class_id,
+                                        plan: [
+                                            scheduleData.plan_id,
+                                            scheduleData.plan_name,
+                                        ],
+                                    }
+                                    newSchedule.timeslots.push(newTimeslot)
+                                    newSchedule.class = newClass
+                                },
+                            )
 
                             return {
                                 ...student,
                                 paymentDueDate,
                                 daysUntilDue,
                                 daysOverdue,
+                                schedules
                             }
                         },
                     )
+                    console.log(processedStudents)
+                    
                     setStudents(processedStudents)
                     setLoading(false)
                 }
@@ -377,61 +458,73 @@ export default function StudentManagement() {
 
     // Function to render student schedule table
     const renderStudentScheduleTable = (student: Student) => {
-        // Extraer horarios de los pagos del estudiante
-        const schedules: ExtractedSchedule[] = []
-
-        if (student.payments && student.payments.length > 0) {
-            student.payments.forEach(payment => {
-                if (payment.classSchedule && payment.classSchedule.schedule) {
-                    const schedule = payment.classSchedule.schedule
-                    const className =
-                        payment.classSchedule.class.name || 'Clase sin nombre'
-
-                    // Convertir los timeslots asegurando que tengan la estructura correcta
-                    const timeslots: StudentTimeslot[] = (
-                        schedule.timeslots || []
-                    ).map(timeslot => ({
-                        id: timeslot.id || '',
-                        hour: Array.isArray(timeslot.hour)
-                            ? timeslot.hour[0] || ''
-                            : timeslot.hour || '',
-                    }))
-
-                    schedules.push({
-                        schedule_id: schedule.id || '',
-                        days: schedule.days || [],
-                        timeslots: timeslots,
-                        className: className,
-                    })
-                }
-            })
+        function hasValidClass(
+            schedule: (typeof student.schedules)[number],
+        ): schedule is typeof schedule & {
+            class: NonNullable<typeof schedule.class>
+        } {
+            return schedule.class !== null && schedule.class !== undefined
         }
-
-        if (schedules.length === 0) {
+        if (!student.schedules || student.schedules.length === 0) {
             return (
                 <div className="text-center py-8">
-                    <Clock className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">
-                        Sin horarios asignados
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                        Sin planes asignados
                     </p>
-                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
-                        Este estudiante aún no tiene clases programadas
-                    </p>
+                    {student.schedules && student.schedules.length > 0 && (
+                        <div>
+                            <h5 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+                                Horarios generales
+                            </h5>
+                            {renderScheduleTableForPlan(
+                                student.schedules,
+                                'Horarios generales',
+                            )}
+                        </div>
+                    )}
+                </div>
+            )
+        }
+        console.log(student, student.schedules, hasValidClass(student.schedules[0]))
+        return (
+            <div className="space-y-6">
+                {student.schedules.filter(hasValidClass).map(schedule => (
+                    <div key={schedule.class.class_id}>
+                        {renderScheduleTableForPlan(
+                            student.schedules,
+                            schedule.class.plan[1] || 'Plan sin nombre',
+                        )}
+                    </div>
+                ))}
+            </div>
+        )
+    }
+
+    // Function to render schedule table for a specific plan
+    const renderScheduleTableForPlan = (
+        schedules: Schedule[],
+        planName: string,
+    ) => {
+        console.log(schedules)
+        if (!schedules || schedules.length === 0) {
+            return (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    Sin horarios asignados
                 </div>
             )
         }
 
         // Get all unique days from all schedules
         const allDays = [
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday',
-            'sunday',
+            'lunes',
+            'martes',
+            'miercoles',
+            'jueves',
+            'viernes',
+            'sabado',
+            'domingo',
         ]
-        const daysWithSchedules = new Set<string>()
+        const daysWithSchedules = new Set()
 
         schedules.forEach(schedule => {
             schedule.days.forEach(day =>
@@ -444,91 +537,76 @@ export default function StudentManagement() {
         if (activeDays.length === 0) {
             return (
                 <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                    Sin horarios configurados
+                    Sin horarios asignados
                 </div>
             )
         }
 
         return (
-            <div className="space-y-6">
-                {/* Render a table for each unique class */}
-                {Array.from(new Set(schedules.map(s => s.className))).map(
-                    className => {
-                        const classSchedules = schedules.filter(
-                            s => s.className === className,
-                        )
+            <div className="mb-6">
+                <h5 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                    <div className="w-3 h-3 bg-violet-500 rounded-full"></div>
+                    {planName}
+                </h5>
+                <div className="overflow-x-auto">
+                    <table className="w-full border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <thead>
+                            <tr className="bg-gray-50 dark:bg-gray-700">
+                                {activeDays.map(day => (
+                                    <th
+                                        key={day}
+                                        className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
+                                        {capitalize(getDayName(day))}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                {activeDays.map(day => {
+                                    // Find schedules for this day
+                                    const daySchedules = schedules.filter(
+                                        schedule =>
+                                            schedule.days.some(
+                                                scheduleDay =>
+                                                    scheduleDay.toLowerCase() ===
+                                                    day,
+                                            ),
+                                    )
 
-                        return (
-                            <div key={className} className="mb-6">
-                                <h5 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
-                                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                    {className}
-                                </h5>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full border border-gray-200 dark:border-gray-600 rounded-lg">
-                                        <thead>
-                                            <tr className="bg-gray-50 dark:bg-gray-700">
-                                                {activeDays.map(day => (
-                                                    <th
-                                                        key={day}
-                                                        className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
-                                                        {getDayName(day)}
-                                                    </th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                {activeDays.map(day => {
-                                                    // Find schedules for this day and class
-                                                    const daySchedules =
-                                                        classSchedules.filter(
-                                                            schedule =>
-                                                                schedule.days.some(
-                                                                    scheduleDay =>
-                                                                        scheduleDay.toLowerCase() ===
-                                                                        day,
+                                    return (
+                                        <td
+                                            key={day}
+                                            className="px-4 py-6 text-center border-r border-gray-200 dark:border-gray-600 last:border-r-0 align-top">
+                                            {daySchedules.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {daySchedules.map(
+                                                        schedule =>
+                                                            schedule.timeslots.map(
+                                                                timeslot => (
+                                                                    <div
+                                                                        key={`${schedule.schedule_id}-${timeslot.id}`}
+                                                                        className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
+                                                                        {
+                                                                            timeslot.hour
+                                                                        }
+                                                                    </div>
                                                                 ),
-                                                        )
-
-                                                    return (
-                                                        <td
-                                                            key={day}
-                                                            className="px-4 py-6 text-center border-r border-gray-200 dark:border-gray-600 last:border-r-0 align-top">
-                                                            {daySchedules.length >
-                                                            0 ? (
-                                                                <div className="space-y-2">
-                                                                    {daySchedules.map(
-                                                                        schedule =>
-                                                                            schedule.timeslots.map(
-                                                                                timeslot => (
-                                                                                    <div
-                                                                                        key={`${schedule.schedule_id}-${timeslot.id}`}
-                                                                                        className="text-sm bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-2 rounded-md font-medium">
-                                                                                        {
-                                                                                            timeslot.hour
-                                                                                        }
-                                                                                    </div>
-                                                                                ),
-                                                                            ),
-                                                                    )}
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-gray-400 text-sm">
-                                                                    -
-                                                                </span>
-                                                            )}
-                                                        </td>
-                                                    )
-                                                })}
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )
-                    },
-                )}
+                                                            ),
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">
+                                                    -
+                                                </span>
+                                            )}
+                                        </td>
+                                    )
+                                })}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         )
     }

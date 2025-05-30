@@ -14,6 +14,30 @@ class StudentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $classScheduleTimeslotStudents = $this->whenLoaded('classScheduleTimeslotStudents');
+        if ($classScheduleTimeslotStudents instanceof \Illuminate\Http\Resources\MissingValue) {
+            $classScheduleTimeslotStudents = [];
+        } else {
+            $classScheduleTimeslotStudents = $classScheduleTimeslotStudents->map(function ($classScheduleTimeslotStudent) {
+                $schedule = $classScheduleTimeslotStudent->scheduleTimeslot->schedule;
+                $timeslot = $classScheduleTimeslotStudent->scheduleTimeslot->timeslot;
+                $class = $classScheduleTimeslotStudent->scheduleTimeslot->classSchedule->class;
+                $array = [
+                    'student_id' => $this->id,
+                    'schedule_id' => $schedule->id,
+                    'timeslot_id' => $timeslot->id,
+                    'classScheduleTimeslot_id' => $classScheduleTimeslotStudent->scheduleTimeslot->id,
+                    'classScheduleTimeslotStudent_id' => $classScheduleTimeslotStudent->id,
+                    'schedule_days' => $schedule->days,
+                    'timeslot_hour' => $timeslot->hour,
+                    'class_id' => $class->id,
+                    'plan_id' => $class->plan->id,
+                    'plan_name' => $class->plan->name
+                ];
+                return $array;
+            });
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -23,6 +47,7 @@ class StudentResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'dni' => $this->dni,
+            'schedules' => $classScheduleTimeslotStudents,
             'branch' => new BranchResource($this->whenLoaded('branch')),
             'classes' => ClasseResource::collection($this->whenLoaded('classes')),
             'attendances' => AttendanceResource::collection($this->whenLoaded('attendances')),
