@@ -87,6 +87,7 @@ export default function AdminClassDetails() {
     const [allTeachers, setAllTeachers] = useState<Teacher[]>([]);
 
     const { getClassSchedule } = useClassSchedules()
+    const { createClassTeacher, updateClassTeacher, deleteClassTeacher } = useClassTeachers()
     const { getStudents } = useStudents()
     const { getTeachers } = useTeachers()
 
@@ -140,7 +141,18 @@ export default function AdminClassDetails() {
     const onRemoveStudent = (id: string, studentId: string) => {
         alert('Esta seguro de que desea eliminar estudiantes?')
     }
-    const onAddTeacher = (id: string, teachers: string[]) => {
+    const onAddTeacher = async (id: string, teachers: string[]) => {
+        // Turn an array of teacher IDs into formData
+        const formData = new FormData()
+        teachers.forEach(teacherId => {
+            formData.append('teachers[]', teacherId)
+        })
+        formData.append('c_sch_ts_id', id)
+
+        // Send the formData to the backend
+        const res = await createClassTeacher(formData)
+        console.log(res)
+
         alert('Esta seguro de que desea agregar profesores?')
     }
     const onRemoveTeacher = (id: string, teacherId: string) => {
