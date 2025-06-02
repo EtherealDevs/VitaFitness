@@ -218,7 +218,7 @@ export default function PaymentsPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Lista de Pagos</CardTitle>
-                    <Link href="/admin/payments/create">
+                    <Link href="/admin/payments/create/new">
                         <Button>
                             <Plus className="mr-2 h-4 w-4" />
                             Cargar un Pago
