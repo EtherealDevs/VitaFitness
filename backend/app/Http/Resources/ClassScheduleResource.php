@@ -3,8 +3,10 @@
 namespace App\Http\Resources;
 
 use Carbon\Carbon;
+use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Log as FacadesLog;
 
 class ClassScheduleResource extends JsonResource
 {
@@ -24,6 +26,38 @@ class ClassScheduleResource extends JsonResource
             $timeslotStartTime = null;
             $timeslotEndTime = null;
         }
+
+        $teachers = $this->whenLoaded('teachers');
+        $teachersArray = [];
+        if ($teachers instanceof \Illuminate\Http\Resources\MissingValue) {
+            $teachers = [];
+        } else {
+            $timeslots = $this->classScheduleTimeslots;
+            if (!$timeslots instanceof \Illuminate\Http\Resources\MissingValue || $timeslots != null) {
+                foreach ($timeslots as $timeslot) {
+                    $teachers = $timeslot->classTeachers;
+                    foreach($teachers as $teacher) {
+                        array_push($teachersArray, $teacher);
+                    }
+                }
+            }
+        }
+
+        $students = $this->whenLoaded('students');
+        $studentsArray = [];
+        if ($students instanceof \Illuminate\Http\Resources\MissingValue) {
+            $students = [];
+        } else {
+            $timeslots = $this->classScheduleTimeslots;
+            if (!$timeslots instanceof \Illuminate\Http\Resources\MissingValue || $timeslots != null) {
+                foreach ($timeslots as $timeslot) {
+                    $students = $timeslot->classStudents;
+                    foreach($students as $student) {
+                        array_push($studentsArray, $student);
+                    }
+                }
+            }
+        }
         return [
             'id' => $this->id,
             'class' => [
@@ -37,8 +71,8 @@ class ClassScheduleResource extends JsonResource
             'time_start' => $timeslotStartTime,
             'time_end' => $timeslotEndTime,
             'timeslots' => ClassScheduleTimeslotResource::collection($this->whenLoaded('classScheduleTimeslots')),
-            'students' => StudentResource::collection($this->whenLoaded('students')),
-            'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
+            'students' => $studentsArray,
+            'teachers' => $teachersArray,
         ];
     }
 }

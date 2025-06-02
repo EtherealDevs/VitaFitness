@@ -10,6 +10,7 @@ use App\Models\Schedule;
 use App\Models\TimeSlot;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ClassScheduleController extends Controller
 {

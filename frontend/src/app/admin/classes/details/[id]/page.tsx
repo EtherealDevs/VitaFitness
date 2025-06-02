@@ -32,6 +32,16 @@ interface Teacher {
     created_at: string
     updated_at: string
 }
+interface ClassStudent {
+  id: string
+  student: Student
+  student_id: string
+}
+interface ClassTeacher {
+  id: string
+  teacher: Teacher
+  teacher_id: string
+}
 interface Student {
     id: string
     name: string
@@ -55,8 +65,8 @@ interface ClassSchedule {
     schedule: Schedule
     selectedDays: string[]
     timeslots: Timeslot[]
-    students: Student[]
-    teachers: Teacher[]
+    students: ClassStudent[]
+    teachers: ClassTeacher[]
 }
 
 export default function AdminClassDetails() {
@@ -82,12 +92,14 @@ export default function AdminClassDetails() {
     const [teacherModal, setTeacherModal] = useState<string | null>(null);
     const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
     const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
+    const [selectedTimeslotId, setSelectedTimeslotId] = useState<string>('');
 
     const [allStudents, setAllStudents] = useState<Student[]>([]);
     const [allTeachers, setAllTeachers] = useState<Teacher[]>([]);
 
     const { getClassSchedule } = useClassSchedules()
     const { createClassTeacher, updateClassTeacher, deleteClassTeacher } = useClassTeachers()
+    const { createClassStudent, updateClassStudent, deleteClassStudent } = useClassStudents()
     const { getStudents } = useStudents()
     const { getTeachers } = useTeachers()
 
@@ -135,11 +147,18 @@ export default function AdminClassDetails() {
     const onDelete = (id: string) => {
         alert('Esta seguro de que desea eliminar esta clase?')
     }
-    const onAddStudent = (id: string, students: string[]) => {
-        alert('Esta seguro de que desea agregar estudiantes?')
-    }
-    const onRemoveStudent = (id: string, studentId: string) => {
-        alert('Esta seguro de que desea eliminar estudiantes?')
+    const onAddStudent = async (id: string, students: string[]) => {
+      // Turn an array of student IDs into formData
+        const formData = new FormData()
+        students.forEach(studentId => {
+            formData.append('students[]', studentId)
+        })
+        formData.append('c_sch_ts_id', selectedTimeslotId)
+
+        // Send the formData to the backend
+        const res = await createClassStudent(formData)
+
+        console.log(res)
     }
     const onAddTeacher = async (id: string, teachers: string[]) => {
         // Turn an array of teacher IDs into formData
@@ -147,19 +166,23 @@ export default function AdminClassDetails() {
         teachers.forEach(teacherId => {
             formData.append('teachers[]', teacherId)
         })
-        formData.append('c_sch_ts_id', id)
+        formData.append('c_sch_ts_id', selectedTimeslotId)
 
         // Send the formData to the backend
         const res = await createClassTeacher(formData)
+
         console.log(res)
-
-        alert('Esta seguro de que desea agregar profesores?')
     }
-    const onRemoveTeacher = (id: string, teacherId: string) => {
-        alert('Esta seguro de que desea eliminar profesores?')
-    }
+    const onRemoveStudent = async (id: string, studentId: string) => {
 
-    
+      const res = await deleteClassStudent(studentId)
+      console.log(res)
+
+    }
+    const onRemoveTeacher = async (id: string, teacherId: string) => {
+      const res = await deleteClassTeacher(teacherId)
+      console.log(res)
+    }
 
   const handleAddStudents = () => {
     if (studentModal && onAddStudent) {
@@ -184,6 +207,10 @@ export default function AdminClassDetails() {
             </div>
         )
     }
+
+    console.log(schedule.students)
+    console.log(schedule.teachers)
+
     return (
     <div className="grid gap-6 p-4">
         <Card className="shadow-lg">
@@ -194,10 +221,10 @@ export default function AdminClassDetails() {
                 <p className="text-sm text-gray-500">ID: {schedule.id}</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => onEdit(schedule.id)}>
+                <Button variant="outline" size="icon" onClick={() => onEdit(schedule.class.id)}>
                   <Pencil className="w-4 h-4" />
                 </Button>
-                <Button variant="destructive" size="icon" onClick={() => onDelete(schedule.id)}>
+                <Button variant="destructive" size="icon" onClick={() => onDelete(schedule.class.id)}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -224,8 +251,8 @@ export default function AdminClassDetails() {
               </div>
               <ul className="list-disc list-inside">
                 {schedule.students.map(student => (
-                  <li key={student.id} className="flex justify-between items-center">
-                    {student.name} {student.last_name} ({student.status})
+                  <li key={student.student.id} className="flex justify-between items-center">
+                    {student.student.name} {student.student.last_name} ({student.student.status})
                     <Button
                       variant="ghost"
                       size="icon"
@@ -247,8 +274,8 @@ export default function AdminClassDetails() {
               </div>
               <ul className="list-disc list-inside">
                 {schedule.teachers.map(teacher => (
-                  <li key={teacher.id} className="flex justify-between items-center">
-                    {teacher.name} {teacher.last_name} - {teacher.email}
+                  <li key={teacher.teacher.id} className="flex justify-between items-center">
+                    {teacher.teacher.name} {teacher.teacher.last_name} - {teacher.teacher.email}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -285,6 +312,18 @@ export default function AdminClassDetails() {
                 </option>
               ))}
             </select>
+            <select
+              className="w-full border p-2 rounded"
+              onChange={(e) => setSelectedTimeslotId(e.target.value)}
+              value={selectedTimeslotId}
+            >
+              <option value="">Selecciona un Timeslot</option>
+              {schedule.timeslots.map((timeslot) => (
+                <option key={timeslot.id} value={timeslot.id}>
+                  {timeslot.hour}
+                </option>
+              ))}
+            </select>
           </div>
           <DialogFooter>
             <Button onClick={handleAddStudents}>Agregar</Button>
@@ -311,6 +350,18 @@ export default function AdminClassDetails() {
               {allTeachers.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name} {t.last_name}
+                </option>
+              ))}
+            </select>
+            <select
+              className="w-full border p-2 rounded"
+              onChange={(e) => setSelectedTimeslotId(e.target.value)}
+              value={selectedTimeslotId}
+            >
+              <option value="">Selecciona un Timeslot</option>
+              {schedule.timeslots.map((timeslot) => (
+                <option key={timeslot.id} value={timeslot.id}>
+                  {timeslot.hour}
                 </option>
               ))}
             </select>
