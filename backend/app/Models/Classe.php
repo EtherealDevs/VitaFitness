@@ -11,6 +11,11 @@ class Classe extends Model
 
     protected $fillable = ['precio', 'max_students', 'branch_id', 'plan_id', 'schedule_id', 'teacher_id', 'student_id', 'timeslot_id'];
 
+
+    // public function classScheduleTimeslots()
+    // {
+    //     return $this->hasMany(ClassScheduleTimeslot::class);
+    // }
     public function branch()
     {
         return $this->belongsTo(Branch::class);

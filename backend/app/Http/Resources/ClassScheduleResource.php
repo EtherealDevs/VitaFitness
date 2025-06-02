@@ -29,6 +29,8 @@ class ClassScheduleResource extends JsonResource
             'class' => [
                 'id' => $this->class->id,
                 'name' => $this->class->plan->name,
+                'branch_id' => $this->class->branch->id,
+                'branch_name' => $this->class->branch->name,
             ],
             'schedule' => new ScheduleResource($this->whenLoaded('schedule')),
             'selectedDays' => $selectedDays,
