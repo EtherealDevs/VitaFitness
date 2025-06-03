@@ -155,65 +155,6 @@ export default function PaymentsPage() {
                 </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-bold">
-                            Ingresos Brutos
-                        </CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">123123</div>
-                        <p className="text-xs text-muted-foreground">
-                            +4 desde el último mes
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-bold">
-                            Cuotas Pendientes
-                        </CardTitle>
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">313</div>
-                        <p className="text-xs text-muted-foreground">
-                            3 más que ayer
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-bold">
-                            Cuotas Pagadas
-                        </CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">$1234</div>
-                        <p className="text-xs text-muted-foreground">
-                            +15% este mes
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-bold">
-                            Alumnos Activos
-                        </CardTitle>
-                        <Activity className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">85%</div>
-                        <p className="text-xs text-muted-foreground">
-                            +2% desde la semana pasada
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
-
             {/* Tabla de Pagos */}
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">

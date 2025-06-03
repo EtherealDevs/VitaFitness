@@ -3,6 +3,7 @@ import axios from '@/lib/axios'
 export interface Roles {
     id: number
     name: string
+    guard_name: string
 }
 
 export interface Users {

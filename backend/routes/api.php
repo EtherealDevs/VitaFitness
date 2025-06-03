@@ -10,6 +10,7 @@ use App\Http\Controllers\ClassScheduleTimeslotTeacherController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\StudentController;
@@ -44,6 +45,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('schedules', ClassScheduleTimeslotController::class)->except(['index', 'show']);
     Route::apiResource('users', UserController::class)->only(['index', 'update']);
     Route::get('users/roles', [UserController::class, 'roles']);
+    Route::apiResource('roles', RoleController::class);
+    Route::post('roles/sync', [RoleController::class, 'syncRoles']);
     Route::apiResource('payments', PaymentController::class);
     Route::get('payments/student/{id}', [PaymentController::class, 'student']);
     Route::put('payments/student/{id}', [PaymentController::class, 'updatestudent']);

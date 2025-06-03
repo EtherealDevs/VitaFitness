@@ -56,6 +56,9 @@ export default function PermissionsPage() {
                 return (
                     <div className="flex flex-col gap-1">
                         {roles.map(role => {
+                            if (role.guard_name !== 'api') {
+                                return null
+                            }
                             const hasRole = user.roles.some(
                                 r => r.id === role.id,
                             )
@@ -65,44 +68,45 @@ export default function PermissionsPage() {
                                     className="flex items-center gap-2">
                                     <Checkbox
                                         checked={hasRole}
-                                        onCheckedChange={async checked => {
-                                            const newRoles = checked
-                                                ? [...user.roles, role]
-                                                : user.roles.filter(
-                                                      r => r.id !== role.id,
-                                                  )
+                                        disabled={true}
+                                        // onCheckedChange={async checked => {
+                                        //     const newRoles = checked
+                                        //         ? [...user.roles, role]
+                                        //         : user.roles.filter(
+                                        //               r => r.id !== role.id,
+                                        //           )
 
-                                            const formdata = new FormData()
-                                            newRoles.forEach(r => {
-                                                formdata.append(
-                                                    'roles[]',
-                                                    String(r.id),
-                                                )
-                                            })
+                                        //     const formdata = new FormData()
+                                        //     newRoles.forEach(r => {
+                                        //         formdata.append(
+                                        //             'roles[]',
+                                        //             String(r.id),
+                                        //         )
+                                        //     })
 
-                                            await update(user.id, formdata)
+                                        //     // await update(user.id, formdata)
 
-                                            setUsers(prev =>
-                                                prev.map(u =>
-                                                    u.id === user.id
-                                                        ? {
-                                                              ...u,
-                                                              roles: newRoles,
-                                                          }
-                                                        : u,
-                                                ),
-                                            )
+                                        //     setUsers(prev =>
+                                        //         prev.map(u =>
+                                        //             u.id === user.id
+                                        //                 ? {
+                                        //                       ...u,
+                                        //                       roles: newRoles,
+                                        //                   }
+                                        //                 : u,
+                                        //         ),
+                                        //     )
 
-                                            toast({
-                                                title: 'Roles actualizados',
-                                                description: `Se actualizaron los roles de ${user.name}.`,
-                                                action: (
-                                                    <ToastAction altText="Cerrar">
-                                                        Cerrar
-                                                    </ToastAction>
-                                                ),
-                                            })
-                                        }}
+                                        //     toast({
+                                        //         title: 'Roles actualizados',
+                                        //         description: `Se actualizaron los roles de ${user.name}.`,
+                                        //         action: (
+                                        //             <ToastAction altText="Cerrar">
+                                        //                 Cerrar
+                                        //             </ToastAction>
+                                        //         ),
+                                        //     })
+                                        // }}
                                     />
                                     <span>{role.name}</span>
                                 </label>
@@ -133,14 +137,12 @@ export default function PermissionsPage() {
                     <CardTitle>Gestión de Permisos</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <Table>
-                        <DataTable
-                            columns={columns}
-                            data={users}
-                            filterColumn="name"
-                            filterPlaceholder="Filtrar permisos..."
-                        />
-                    </Table>
+                    <DataTable
+                        columns={columns}
+                        data={users}
+                        filterColumn="name"
+                        filterPlaceholder="Filtrar permisos..."
+                    />
                 </CardContent>
             </Card>
         </div>
