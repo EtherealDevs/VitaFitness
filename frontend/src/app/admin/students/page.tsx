@@ -112,10 +112,10 @@ interface StudentFromServer {
 }
 
 // Definir una interfaz específica para los timeslots del estudiante
-interface StudentTimeslot {
-    id: string
-    hour: string | string[]
-}
+// interface StudentTimeslot {
+//     id: string
+//     hour: string | string[]
+// }
 
 interface AccountInfo {
     balance: number
@@ -127,12 +127,12 @@ interface AccountInfo {
 }
 
 // Interface for schedule data extracted from payments
-interface ExtractedSchedule {
-    schedule_id: string
-    days: string[]
-    timeslots: StudentTimeslot[]
-    className: string
-}
+// interface ExtractedSchedule {
+//     schedule_id: string
+//     days: string[]
+//     timeslots: StudentTimeslot[]
+//     className: string
+// }
 
 // Helper function to format date
 const formatDate = (dateString: string) => {
@@ -276,11 +276,14 @@ export default function StudentManagement() {
                             originalScheduleData.forEach(
                                 (scheduleData: ScheduleData) => {
                                     let newSchedule = schedules.find(
-                                        s => s.schedule_id === scheduleData.schedule_id,
+                                        s =>
+                                            s.schedule_id ===
+                                            scheduleData.schedule_id,
                                     )
                                     if (newSchedule === undefined) {
                                         newSchedule = {
-                                            schedule_id: scheduleData.schedule_id,
+                                            schedule_id:
+                                                scheduleData.schedule_id,
                                             days: scheduleData.schedule_days,
                                             timeslots: [],
                                             class: null,
@@ -308,12 +311,11 @@ export default function StudentManagement() {
                                 paymentDueDate,
                                 daysUntilDue,
                                 daysOverdue,
-                                schedules
+                                schedules,
                             }
                         },
                     )
                     console.log(processedStudents)
-                    
                     setStudents(processedStudents)
                     setLoading(false)
                 }
@@ -485,7 +487,11 @@ export default function StudentManagement() {
                 </div>
             )
         }
-        console.log(student, student.schedules, hasValidClass(student.schedules[0]))
+        console.log(
+            student,
+            student.schedules,
+            hasValidClass(student.schedules[0]),
+        )
         return (
             <div className="space-y-6">
                 {student.schedules.filter(hasValidClass).map(schedule => (

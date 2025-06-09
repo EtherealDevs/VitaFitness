@@ -6,13 +6,10 @@ import {
     ChevronDown,
     ChevronUp,
     User,
-    Calendar,
-    Phone,
     Plus,
     Edit2,
     Trash2,
     Clock,
-    BookOpen,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -88,7 +85,6 @@ interface Class {
     branch_name: string
     max_students: number
     precio: number
-
     schedules: Schedule[]
 }
 
@@ -126,9 +122,24 @@ export default function ClassPage() {
     const [showDetails, setShowDetails] = useState<boolean>(false)
 
     const { getClasses, createClass, deleteClass, updateClass } = useClasses()
-    const { getClassSchedules, createClassSchedule, updateClassSchedule, deleteClassSchedule } = useClassSchedules()
-    const { getClassStudents, createClassStudent, updateClassStudent, deleteClassStudent } = useClassStudents()
-    const { getClassTeachers, createClassTeacher, updateClassTeacher, deleteClassTeacher } = useClassTeachers()
+    const {
+        getClassSchedules,
+        createClassSchedule,
+        updateClassSchedule,
+        deleteClassSchedule,
+    } = useClassSchedules()
+    const {
+        getClassStudents,
+        createClassStudent,
+        updateClassStudent,
+        deleteClassStudent,
+    } = useClassStudents()
+    const {
+        getClassTeachers,
+        createClassTeacher,
+        updateClassTeacher,
+        deleteClassTeacher,
+    } = useClassTeachers()
 
     // Toggle details view for mobile
     const toggleDetails = () => {
@@ -158,13 +169,17 @@ export default function ClassPage() {
                     originalScheduleData.forEach(
                         (scheduleData: ScheduleData) => {
                             let newSchedule = schedules.find(
-                                s => s.schedule_id === scheduleData.schedule_id && s.class_id === scheduleData.class_id,
+                                s =>
+                                    s.schedule_id ===
+                                        scheduleData.schedule_id &&
+                                    s.class_id === scheduleData.class_id,
                             )
                             if (newSchedule === undefined) {
                                 newSchedule = {
                                     class_id: scheduleData.class_id,
                                     schedule_id: scheduleData.schedule_id,
-                                    classSchedule_id: scheduleData.classSchedule_id,
+                                    classSchedule_id:
+                                        scheduleData.classSchedule_id,
                                     days: scheduleData.schedule_days,
                                     timeslots: [],
                                     students: [],
@@ -180,26 +195,23 @@ export default function ClassPage() {
                         },
                     )
                     let newClass = classes.find(
-                                c => c.class_id === classe.class_id
-                            )
-                            if (newClass === undefined) {
-                                newClass = {
-                                    class_id: classe.class_id,
-                                    plan: [
-                                        classe.plan_id,
-                                        classe.plan_name,
-                                    ],
-                                    plan_id: classe.plan_id,
-                                    plan_name: classe.plan_name,
-                                    plan_status: classe.plan_status,
-                                    branch_id: classe.branch_id,
-                                    branch_name: classe.branch_name,
-                                    max_students: classe.max_students,
-                                    precio: classe.precio,
-                                    schedules: schedules,
-                                }
-                                classes.push(newClass)
-                            }
+                        c => c.class_id === classe.class_id,
+                    )
+                    if (newClass === undefined) {
+                        newClass = {
+                            class_id: classe.class_id,
+                            plan: [classe.plan_id, classe.plan_name],
+                            plan_id: classe.plan_id,
+                            plan_name: classe.plan_name,
+                            plan_status: classe.plan_status,
+                            branch_id: classe.branch_id,
+                            branch_name: classe.branch_name,
+                            max_students: classe.max_students,
+                            precio: classe.precio,
+                            schedules: schedules,
+                        }
+                        classes.push(newClass)
+                    }
 
                     return {
                         ...classe,
@@ -283,10 +295,16 @@ export default function ClassPage() {
     const filteredAndSortedClasses = [...classes]
         .filter(
             classe =>
-                classe.plan_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                classe.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                classe.max_students.toString().includes(searchTerm.toLowerCase()) ||
-                classe.precio.toString().includes(searchTerm.toLowerCase())
+                classe.plan_name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                classe.branch_name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                classe.max_students
+                    .toString()
+                    .includes(searchTerm.toLowerCase()) ||
+                classe.precio.toString().includes(searchTerm.toLowerCase()),
         )
         .sort((a, b) => {
             if (!sortConfig) return 0
@@ -355,17 +373,14 @@ export default function ClassPage() {
         planName: string,
         schedule: Schedule | null | undefined,
     ) => {
-        
         if (!schedules || schedules.length === 0) {
             return (
                 <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                    <p>
-                        Sin horarios asignados
-                    </p>
+                    <p>Sin horarios asignados</p>
                     <div className="hidden sm:flex justify-end gap-2">
                         <Button className="dark:text-white text-black">
                             <Plus className="mr-2 h-4 w-4" />
-                           Agregar horario
+                            Agregar horario
                         </Button>
                     </div>
                 </div>
@@ -445,16 +460,14 @@ export default function ClassPage() {
                                             className="px-4 py-6 text-center border-r border-gray-200 dark:border-gray-600 last:border-r-0 align-top">
                                             {schedule.timeslots.length > 0 ? (
                                                 <div className="space-y-2">
-                                                            {schedule.timeslots.map(
-                                                                timeslot => (
-                                                                    <div
-                                                                        key={`${schedule.schedule_id}-${timeslot.id}`}
-                                                                        className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
-                                                                        {
-                                                                            timeslot.hour
-                                                                        }
-                                                                    </div>
-                                                                ),
+                                                    {schedule.timeslots.map(
+                                                        timeslot => (
+                                                            <div
+                                                                key={`${schedule.schedule_id}-${timeslot.id}`}
+                                                                className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
+                                                                {timeslot.hour}
+                                                            </div>
+                                                        ),
                                                     )}
                                                 </div>
                                             ) : (
@@ -468,12 +481,16 @@ export default function ClassPage() {
                             </tr>
                         </tbody>
                     </table>
-                    <Button onClick={e => {
-                                        e.stopPropagation()
-                                        router.push(
-                                            `/admin/classes/details/${schedule.classSchedule_id}`,
-                                        )
-                                    }}>Ver estudiantes y alumnos</Button>
+                    <Button
+                        className="mt-4 w-full bg-[rgb(152,87,226)] sm:w-auto text-white dark:border-gray-600"
+                        onClick={e => {
+                            e.stopPropagation()
+                            router.push(
+                                `/admin/classes/details/${schedule.classSchedule_id}`,
+                            )
+                        }}>
+                        Ver estudiantes y alumnos
+                    </Button>
                 </div>
             </div>
         )
@@ -540,7 +557,9 @@ export default function ClassPage() {
                                 <tr>
                                     <th className="px-4 py-3 text-left">
                                         <button
-                                            onClick={() => handleSort('plan_name')}
+                                            onClick={() =>
+                                                handleSort('plan_name')
+                                            }
                                             className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
                                             Plan
                                             {sortConfig?.key === 'plan_name' &&
@@ -554,10 +573,13 @@ export default function ClassPage() {
                                     </th>
                                     <th className="px-4 py-3 text-left">
                                         <button
-                                            onClick={() => handleSort('branch_name')}
+                                            onClick={() =>
+                                                handleSort('branch_name')
+                                            }
                                             className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
                                             Sucursal
-                                            {sortConfig?.key === 'branch_name' &&
+                                            {sortConfig?.key ===
+                                                'branch_name' &&
                                                 (sortConfig.direction ===
                                                 'asc' ? (
                                                     <ChevronUp className="h-4 w-4" />
@@ -573,7 +595,8 @@ export default function ClassPage() {
                                             }
                                             className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
                                             Max. Alumnos
-                                            {sortConfig?.key === 'max_students' &&
+                                            {sortConfig?.key ===
+                                                'max_students' &&
                                                 (sortConfig.direction ===
                                                 'asc' ? (
                                                     <ChevronUp className="h-4 w-4" />
@@ -598,10 +621,13 @@ export default function ClassPage() {
                                     </th>
                                     <th className="px-4 py-3 text-left">
                                         <button
-                                            onClick={() => handleSort('plan_status')}
+                                            onClick={() =>
+                                                handleSort('plan_status')
+                                            }
                                             className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
                                             Estado
-                                            {sortConfig?.key === 'plan_status' &&
+                                            {sortConfig?.key ===
+                                                'plan_status' &&
                                                 (sortConfig.direction ===
                                                 'asc' ? (
                                                     <ChevronUp className="h-4 w-4" />
@@ -743,7 +769,8 @@ export default function ClassPage() {
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                             <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                                 <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                                Detalles de la clase: {selectedClass.plan_name}{' | '}
+                                Detalles de la clase: {selectedClass.plan_name}
+                                {' | '}
                                 {selectedClass.branch_name}
                             </h3>
                             <Button

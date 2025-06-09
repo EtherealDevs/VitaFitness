@@ -158,7 +158,11 @@ export default function CreateStudentPage() {
                                 </p>
                             )}
                         </div>
-                        <Button type="submit">Guardar</Button>
+                        <Button
+                            className="mt-4 w-full space-y-4 mx-auto bg-[rgb(152,87,226)] sm:w-auto text-white dark:border-gray-600"
+                            type="submit">
+                            Guardar
+                        </Button>
                     </form>
                 </CardContent>
             </Card>
