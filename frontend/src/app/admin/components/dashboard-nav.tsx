@@ -21,11 +21,12 @@ import {
 
 const navigation = [
     { name: 'Volver a la Pagina', href: '/', icon: ArrowLeft },
+    // Este lo manejamos manualmente
     {
         name: 'Registro de Asistencia',
         href: '/access',
         icon: UserCheck,
-        target: '_blank',
+        customHandler: true,
     },
     { name: 'Inicio', href: '/admin/dashboard', icon: Home },
     { name: 'Alumnos', href: '/admin/students', icon: Users },
@@ -38,11 +39,34 @@ const navigation = [
     { name: 'Sucursales', href: '/admin/branches', icon: Building },
     { name: 'Permisos', href: '/admin/permissions', icon: FileText },
     { name: 'Estadísticas', href: '/admin/statistics', icon: BarChart2 },
-    // { name: 'Configuración', href: '/admin/configuration', icon: Settings },
 ]
 
 export function DashboardNav() {
     const pathname = usePathname()
+
+    const handleOpenExternalWindow = () => {
+        const screenWidth = window.screen.availWidth
+        const screenHeight = window.screen.availHeight
+
+        const screenLeft =
+            window.screenLeft !== undefined ? window.screenLeft : window.screenX
+        const screenTop =
+            window.screenTop !== undefined ? window.screenTop : window.screenY
+
+        const left = screenLeft + screenWidth
+        const top = screenTop
+
+        const features = `popup=yes,left=${left},top=${top},width=${screenWidth},height=${screenHeight},resizable=yes`
+
+        const win = window.open('/access?fullscreen=true', '_blank', features)
+
+        if (!win) {
+            alert('El navegador bloqueó la ventana emergente. Permití pop-ups.')
+            return
+        }
+
+        win.focus()
+    }
 
     return (
         <nav className="space-y-1 p-4">
@@ -52,16 +76,28 @@ export function DashboardNav() {
                     pathname === item.href ||
                     pathname.startsWith(`${item.href}/`)
 
-                return (
+                return item.customHandler ? (
+                    <div
+                        key={item.name}
+                        onClick={handleOpenExternalWindow}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                handleOpenExternalWindow()
+                            }
+                        }}
+                        className={cn(
+                            'group flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800',
+                            'text-gray-700 dark:text-gray-400 cursor-pointer select-none',
+                        )}>
+                        <item.icon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:text-gray-400" />
+                        {item.name}
+                    </div>
+                ) : (
                     <Link
                         key={item.href}
                         href={item.href}
-                        target={item.target || '_self'}
-                        rel={
-                            item.target === '_blank'
-                                ? 'noopener noreferrer'
-                                : undefined
-                        }
                         className={cn(
                             'group flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800',
                             isActive

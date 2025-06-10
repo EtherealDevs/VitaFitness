@@ -395,82 +395,41 @@ export default function AccessPage() {
     }, [documentNumber, handleValidation])
 
     useEffect(() => {
-        // Intentar entrar en pantalla completa después de un pequeño retraso
+        const params = new URLSearchParams(window.location.search)
+        const shouldGoFullscreen = params.get('fullscreen') === 'true'
+
         const enterFullScreen = () => {
-            if (document.fullscreenElement === null) {
-                try {
-                    // Intentar con el método estándar
-                    document.documentElement.requestFullscreen().catch(err => {
-                        console.warn(
-                            'No se pudo entrar en fullscreen con método estándar:',
-                            err,
-                        )
+            const elem = document.documentElement
 
-                        // Intentar con métodos específicos de navegadores
-                        const docEl =
-                            document.documentElement as HTMLElement & {
-                                mozRequestFullScreen?: () => Promise<void>
-                                webkitRequestFullscreen?: () => Promise<void>
-                                msRequestFullscreen?: () => Promise<void>
-                            }
-
-                        if (docEl.mozRequestFullScreen) {
-                            docEl.mozRequestFullScreen()
-                        } else if (docEl.webkitRequestFullscreen) {
-                            docEl.webkitRequestFullscreen()
-                        } else if (docEl.msRequestFullscreen) {
-                            docEl.msRequestFullscreen()
-                        }
-                    })
-                } catch (error) {
-                    console.warn(
-                        'Error al intentar entrar en pantalla completa:',
-                        error,
-                    )
-                }
-            }
-        }
-        const fullscreenTimeout = setTimeout(() => {
-            enterFullScreen()
-        }, 500)
-
-        // También intentar cuando el usuario interactúe con la página
-        const handleUserInteraction = () => {
-            enterFullScreen()
-            // Eliminar el event listener después de la primera interacción
-            document.removeEventListener('click', handleUserInteraction)
-            document.removeEventListener('keydown', handleUserInteraction)
-        }
-
-        document.addEventListener('click', handleUserInteraction)
-        document.addEventListener('keydown', handleUserInteraction)
-
-        const keepInputFocused = (e: KeyboardEvent) => {
-            const isNumberKey = e.key >= '0' && e.key <= '9'
-            const isEnterKey = e.key === 'Enter'
-
-            if (!isNumberKey && !isEnterKey) return
-
-            const active = document.activeElement
-            const input = document.querySelector('input') as HTMLInputElement
-
-            if (active?.tagName !== 'INPUT') {
-                input?.focus()
-            }
-
-            if (isEnterKey && input) {
-                input.value = ''
-                setDocumentNumber('')
+            if (!document.fullscreenElement && elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => {
+                    console.warn('No se pudo entrar en pantalla completa:', err)
+                })
             }
         }
 
-        window.addEventListener('keydown', keepInputFocused)
+        // Ejecutar al cargar
+        if (shouldGoFullscreen) {
+            setTimeout(() => {
+                enterFullScreen()
+            }, 300)
+        }
+
+        // Fallback: primer interacción del usuario
+        const handleInteraction = () => {
+            if (shouldGoFullscreen) {
+                enterFullScreen()
+            }
+            document.removeEventListener('click', handleInteraction)
+            document.removeEventListener('keydown', handleInteraction)
+        }
+
+        document.addEventListener('click', handleInteraction)
+        document.addEventListener('keydown', handleInteraction)
 
         return () => {
-            clearTimeout(fullscreenTimeout)
-            window.removeEventListener('keydown', keepInputFocused)
-            document.removeEventListener('click', handleUserInteraction)
-            document.removeEventListener('keydown', handleUserInteraction)
+            document.removeEventListener('click', handleInteraction)
+            document.removeEventListener('keydown', handleInteraction)
         }
     }, [])
 
