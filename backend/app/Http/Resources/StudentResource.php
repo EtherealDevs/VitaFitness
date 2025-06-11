@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -37,6 +39,16 @@ class StudentResource extends JsonResource
                 return $array;
             });
         }
+        $expiration = null;
+        $daysOverdue = null;
+        $payment = Payment::where('student_id', $this->id)->latest()->first();
+        if ($payment !== null) {
+            $expiration = $payment->expiration_date;
+            //turn expiration date into Carbon object
+            $expiration = Carbon::createFromFormat('Y-m-d', $expiration);
+            $daysOverdue = $expiration->diffInDays(Carbon::now());
+
+        }
 
         return [
             'id' => $this->id,
@@ -48,6 +60,8 @@ class StudentResource extends JsonResource
             'phone' => $this->phone,
             'dni' => $this->dni,
             'schedules' => $classScheduleTimeslotStudents,
+            'paymentDueDate' => $expiration,
+            'daysOverdue' => $daysOverdue,
             'branch' => new BranchResource($this->whenLoaded('branch')),
             'classes' => ClasseResource::collection($this->whenLoaded('classes')),
             'attendances' => AttendanceResource::collection($this->whenLoaded('attendances')),

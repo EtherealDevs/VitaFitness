@@ -171,7 +171,7 @@ export default function StudentManagement() {
     const [showPaymentHistoryModal, setShowPaymentHistoryModal] =
         useState<boolean>(false)
 
-    const { getStudents } = useStudents()
+    const { getStudents, getStudent } = useStudents()
 
     const deleteStudent = useCallback(async (id: string) => {
         // Simulate API delay
@@ -196,6 +196,7 @@ export default function StudentManagement() {
     const closePaymentHistoryModal = () => {
         setShowPaymentHistoryModal(false)
     }
+    console.log(students)
 
     const capitalize = (str: string) => {
         return str.charAt(0).toUpperCase() + str.slice(1)
@@ -216,95 +217,45 @@ export default function StudentManagement() {
 
                     const processedStudents = response.students.map(
                         (student: StudentFromServer) => {
-                            let paymentDueDate: string | null = null
-                            let daysUntilDue = 0
-                            let daysOverdue = 0
+                            let paymentDueDate: string | null = null;
 
-                            if (
-                                student.payments &&
-                                student.payments.length > 0
-                            ) {
-                                // Get the latest unpaid or upcoming payment
-                                const relevantPayment = student.payments
-                                    .filter((p: Payment) => p.expiration_date)
-                                    .sort(
-                                        (a: Payment, b: Payment) =>
-                                            new Date(
-                                                a.expiration_date,
-                                            ).getTime() -
-                                            new Date(
-                                                b.expiration_date,
-                                            ).getTime(),
-                                    )
-                                    .reverse()[0]
+                            let daysUntilDue = student.daysUntilDue
+                            let daysOverdue = student.daysOverdue
 
-                                if (relevantPayment) {
-                                    const dueDate = new Date(
-                                        relevantPayment.expiration_date,
-                                    )
-                                    paymentDueDate = dueDate
-                                        .toISOString()
-                                        .split('T')[0] // 'YYYY-MM-DD'
-                                    daysUntilDue = Math.ceil(
-                                        (dueDate.getTime() - now.getTime()) /
-                                            (1000 * 60 * 60 * 24),
-                                    )
+                            if (daysUntilDue === null){
+                                daysUntilDue = 0;
+                            }
+                            if (daysOverdue === null){
+                                daysOverdue = 0;
+                            }
+                            if (student.paymentDueDate !== null) {
+                                const dueDate = new Date(
+                                    student.paymentDueDate,
+                                )
+                                paymentDueDate = dueDate
+                                    .toISOString()
+                                    .split('T')[0] // 'YYYY-MM-DD'
+                                daysUntilDue = Math.ceil(
+                                    (dueDate.getTime() - now.getTime()) /
+                                        (1000 * 60 * 60 * 24),
+                                )
 
-                                    const timeDiff =
-                                        dueDate.getTime() - now.getTime()
-                                    const dayDiff = Math.ceil(
-                                        timeDiff / (1000 * 60 * 60 * 24),
-                                    )
+                                const timeDiff =
+                                    dueDate.getTime() - now.getTime()
+                                const dayDiff = Math.ceil(
+                                    timeDiff / (1000 * 60 * 60 * 24),
+                                )
 
-                                    if (dayDiff < 0) {
-                                        daysOverdue = Math.abs(dayDiff)
-                                        daysUntilDue = 0
-                                    } else {
-                                        daysUntilDue = dayDiff
-                                        daysOverdue = 0
-                                    }
+                                if (dayDiff < 0) {
+                                    daysOverdue = Math.abs(dayDiff)
+                                    daysUntilDue = 0
+                                } else {
+                                    daysUntilDue = dayDiff
+                                    daysOverdue = 0
                                 }
                             }
                             const schedules: Schedule[] = []
                             student.last_name = capitalize(student.last_name)
-
-                            // Guardar los datos originales
-                            const originalScheduleData: ScheduleData[] =
-                                student.schedules || []
-                            console.log(originalScheduleData)
-                            // Procesar los datos originales para crear Schedule[]
-                            originalScheduleData.forEach(
-                                (scheduleData: ScheduleData) => {
-                                    let newSchedule = schedules.find(
-                                        s =>
-                                            s.schedule_id ===
-                                            scheduleData.schedule_id,
-                                    )
-                                    if (newSchedule === undefined) {
-                                        newSchedule = {
-                                            schedule_id:
-                                                scheduleData.schedule_id,
-                                            days: scheduleData.schedule_days,
-                                            timeslots: [],
-                                            class: null,
-                                        }
-                                        schedules.push(newSchedule)
-                                    }
-                                    const newTimeslot: Timeslot = {
-                                        id: scheduleData.timeslot_id,
-                                        hour: scheduleData.timeslot_hour,
-                                    }
-                                    const newClass: Class = {
-                                        class_id: scheduleData.class_id,
-                                        plan: [
-                                            scheduleData.plan_id,
-                                            scheduleData.plan_name,
-                                        ],
-                                    }
-                                    newSchedule.timeslots.push(newTimeslot)
-                                    newSchedule.class = newClass
-                                },
-                            )
 
                             return {
                                 ...student,
@@ -352,19 +303,22 @@ export default function StudentManagement() {
     }
 
     // Handle student selection
-    const handleStudentClick = (student: Student) => {
+    const handleStudentClick = async (student: Student) => {
         if (selectedStudent?.id === student.id) {
             setSelectedStudent(null) // Deselect if clicking the same student
             setAccountInfo(null)
         } else {
-            const sortedDates = student.payments
+            // Make an API call to get the student data (This is done to load a student's attendances and payments)
+            const response = await getStudent(student.id)
+            const newStudent: StudentFromServer = response.student
+            const sortedDates = newStudent.payments
                 ?.sort(
                     (a, b) =>
                         new Date(a.payment_date).getTime() -
                         new Date(b.payment_date).getTime(),
                 )
                 .reverse()
-            const sortedAttendances = student.attendances
+            const sortedAttendances = newStudent.attendances
                 ?.sort(
                     (a, b) =>
                         new Date(a.date).getTime() - new Date(b.date).getTime(),
@@ -381,7 +335,70 @@ export default function StudentManagement() {
                 ),
                 lastPaymentAmount: Number(sortedDates?.[0]?.amount || 0),
             }
-            setSelectedStudent(student) // Select the clicked student
+             // Guardar los datos originales
+
+                const schedules: Schedule[] = []
+                const originalScheduleData: ScheduleData[] =
+                    newStudent.schedules || []
+                newStudent.schedules.forEach(schedule => {
+                    // Procesar los datos originales para crear Schedule[]
+                    originalScheduleData.forEach(
+                        (scheduleData: ScheduleData) => {
+                            let newSchedule = schedules.find(
+                                s =>
+                                    s.schedule_id ===
+                                    scheduleData.schedule_id,
+                            )
+                            if (newSchedule === undefined) {
+                                newSchedule = {
+                                    schedule_id:
+                                        scheduleData.schedule_id,
+                                    days: scheduleData.schedule_days,
+                                    timeslots: [],
+                                    class: null,
+                                }
+                                schedules.push(newSchedule)
+                            }
+                            const newTimeslot: Timeslot = {
+                                id: scheduleData.timeslot_id,
+                                hour: scheduleData.timeslot_hour,
+                            }
+                            const newClass: Class = {
+                                class_id: scheduleData.class_id,
+                                plan: [
+                                    scheduleData.plan_id,
+                                    scheduleData.plan_name,
+                                ],
+                            }
+                            newSchedule.timeslots.push(newTimeslot)
+                            newSchedule.class = newClass
+                        },
+                    )
+                });
+                const anotherNewStudent: Student = {
+                    id: newStudent.id,
+                    name: newStudent.name,
+                    last_name: newStudent.last_name,
+                    phone: newStudent.phone,
+                    dni: newStudent.dni,
+                    registration_date: newStudent.registration_date,
+                    status: newStudent.status,
+                    payments: newStudent.payments,
+                    attendances: newStudent.attendances,
+                    accountInfo: newStudent.accountInfo,
+                    // Información adicional que pueda ser útil
+                    paymentDueDate: newStudent.paymentDueDate,
+                    daysOverdue: newStudent.daysOverdue,
+                    daysUntilDue: newStudent.daysUntilDue,
+                    remainingClasses: newStudent.remainingClasses,
+                    canAttend: newStudent.canAttend,
+                    branch: newStudent.branch,
+                    scheduleData: originalScheduleData,
+                    schedules,
+                }
+            console.log(newStudent)
+            console.log(student)
+            setSelectedStudent(anotherNewStudent) // Select the clicked student
             setAccountInfo(accountInfo)
         }
     }

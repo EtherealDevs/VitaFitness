@@ -21,10 +21,16 @@ class StudentController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $students->load('branch', 'payments', 'attendances', 'classes', 'classScheduleTimeslotStudents');
+        // $students->load('branch', 'payments', 'attendances', 'classes', 'classScheduleTimeslotStudents');
         $students = StudentResource::collection($students);
         $data = [
             'students' => $students,
+            // 'pagination' => [
+            //     'total' => $students->total(),
+            //     'per_page' => $students->perPage(),
+            //     'current_page' => $students->currentPage(),
+            //     'last_page' => $students->lastPage(),
+            // ],
             'message' => 'Succesfully retrieved students',
             'status' => 'success (200)'
         ];
@@ -35,13 +41,10 @@ class StudentController extends Controller
         // Retrieve a student by its ID from the database
         // Return the retrieved student as a JSON response
         try {
-            $student = Student::find($id);
+            $student = Student::with('branch', 'payments', 'attendances', 'classes', 'classScheduleTimeslotStudents')->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $student->load('branch');
-        $student->load('attendances');
-        $student->load('classes');
 
         $student = new StudentResource($student);
         $data = [
