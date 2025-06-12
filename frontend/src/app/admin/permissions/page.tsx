@@ -5,21 +5,18 @@ import { Plus } from 'lucide-react'
 import Link from 'next/link'
 
 import { Roles, Users, useUser } from '@/hooks/users'
-import { toast } from '@/hooks/use-toast'
-import { ToastAction } from '@/components/ui/toast'
 
 import { Button } from '../components/ui/button'
 import { Checkbox } from '@/app/admin/components/ui/checkbox'
 import { DataTable } from '../components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Table } from '../components/ui/table'
 
 import type { ColumnDef } from '@tanstack/react-table'
 
 export default function PermissionsPage() {
     const [users, setUsers] = useState<Users[]>([])
     const [roles, setRoles] = useState<Roles[]>([])
-    const { getUsers, getRoles, update } = useUser()
+    const { getUsers, getRoles } = useUser()
 
     useEffect(() => {
         const fetchData = async () => {

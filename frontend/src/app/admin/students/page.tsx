@@ -196,7 +196,6 @@ export default function StudentManagement() {
     const closePaymentHistoryModal = () => {
         setShowPaymentHistoryModal(false)
     }
-    console.log(students)
 
     const capitalize = (str: string) => {
         return str.charAt(0).toUpperCase() + str.slice(1)
@@ -266,7 +265,6 @@ export default function StudentManagement() {
                             }
                         },
                     )
-                    console.log(processedStudents)
                     setStudents(processedStudents)
                     setLoading(false)
                 }
@@ -340,7 +338,6 @@ export default function StudentManagement() {
                 const schedules: Schedule[] = []
                 const originalScheduleData: ScheduleData[] =
                     newStudent.schedules || []
-                newStudent.schedules.forEach(schedule => {
                     // Procesar los datos originales para crear Schedule[]
                     originalScheduleData.forEach(
                         (scheduleData: ScheduleData) => {
@@ -374,7 +371,6 @@ export default function StudentManagement() {
                             newSchedule.class = newClass
                         },
                     )
-                });
                 const anotherNewStudent: Student = {
                     id: newStudent.id,
                     name: newStudent.name,
@@ -394,10 +390,8 @@ export default function StudentManagement() {
                     canAttend: newStudent.canAttend,
                     branch: newStudent.branch,
                     scheduleData: originalScheduleData,
-                    schedules,
+                    schedules: schedules,
                 }
-            console.log(newStudent)
-            console.log(student)
             setSelectedStudent(anotherNewStudent) // Select the clicked student
             setAccountInfo(accountInfo)
         }
@@ -504,11 +498,6 @@ export default function StudentManagement() {
                 </div>
             )
         }
-        console.log(
-            student,
-            student.schedules,
-            hasValidClass(student.schedules[0]),
-        )
         return (
             <div className="space-y-6">
                 {student.schedules.filter(hasValidClass).map(schedule => (
@@ -528,7 +517,6 @@ export default function StudentManagement() {
         schedules: Schedule[],
         planName: string,
     ) => {
-        console.log(schedules)
         if (!schedules || schedules.length === 0) {
             return (
                 <div className="text-center py-4 text-gray-500 dark:text-gray-400">

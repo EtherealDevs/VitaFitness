@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { useClasses } from '@/hooks/classes'
 import { useStudents } from '@/hooks/students'
 import { useTeachers } from '@/hooks/teachers'
 import { useClassSchedules } from '@/hooks/classSchedules'
@@ -15,7 +14,6 @@ import { Button } from '@/app/admin/components/ui/button'
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import Label from '@/components/ui/Label';
 import { Trash2, Pencil, UserPlus, UserMinus } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -75,18 +73,6 @@ export default function AdminClassDetails() {
     const params = { id: id as string }
 
     const [schedule, setSchedule] = useState<ClassSchedule>()
-    const [loading, setLoading] = useState<boolean>(true)
-    const [error, setError] = useState<string | null>(null)
-    const [selectedDay] = useState<string | null>(null)
-    const [isPanelOpen] = useState<boolean>(false)
-    const [expandedTimeSlots, setExpandedTimeSlots] = useState<
-        Record<string, boolean>
-    >({})
-    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
-    const [isStudentModalOpen, setIsStudentModalOpen] = useState<boolean>(false)
-    const [isTeacherModalOpen, setIsTeacherModalOpen] = useState<boolean>(false)
-    const [isTimeslotModalOpen, setIsTimeslotModalOpen] =
-        useState<boolean>(false)
 
     const [studentModal, setStudentModal] = useState<string | null>(null);
     const [teacherModal, setTeacherModal] = useState<string | null>(null);
@@ -98,8 +84,8 @@ export default function AdminClassDetails() {
     const [allTeachers, setAllTeachers] = useState<Teacher[]>([]);
 
     const { getClassSchedule } = useClassSchedules()
-    const { createClassTeacher, updateClassTeacher, deleteClassTeacher } = useClassTeachers()
-    const { createClassStudent, updateClassStudent, deleteClassStudent } = useClassStudents()
+    const { createClassTeacher, deleteClassTeacher } = useClassTeachers()
+    const { createClassStudent, deleteClassStudent } = useClassStudents()
     const { getStudents } = useStudents()
     const { getTeachers } = useTeachers()
 
@@ -109,10 +95,6 @@ export default function AdminClassDetails() {
 
         const fetchData = async () => {
             if (!isMounted) return
-
-            setLoading(true)
-            setError(null)
-
             try {
                 const res = await getClassSchedule(params.id)
                 const students = await getStudents()
@@ -125,12 +107,10 @@ export default function AdminClassDetails() {
                 }
             } catch (err) {
                 if (isMounted) {
-                    setError('Error al cargar los datos de la clase')
                     console.error(err)
                 }
             } finally {
                 if (isMounted) {
-                    setLoading(false)
                 }
             }
         }
@@ -139,14 +119,14 @@ export default function AdminClassDetails() {
         return () => {
             isMounted = false
         }
-    }, [getClassSchedule, params.id])
-    
+    }, [getClassSchedule, params.id, getStudents, getTeachers])
+
     const onEdit = (id: string) => {
         router.push(`/admin/classes/edit/${id}`)
     }
-    const onDelete = (id: string) => {
-        alert('Esta seguro de que desea eliminar esta clase?')
-    }
+    // const onDelete = (id: string) => {
+    //     alert('Esta seguro de que desea eliminar esta clase?')
+    // }
     const onAddStudent = async (id: string, students: string[]) => {
       // Turn an array of student IDs into formData
         const formData = new FormData()
@@ -208,9 +188,6 @@ export default function AdminClassDetails() {
         )
     }
 
-    console.log(schedule.students)
-    console.log(schedule.teachers)
-
     return (
     <div className="grid gap-6 p-4">
         <Card className="shadow-lg">
@@ -224,7 +201,8 @@ export default function AdminClassDetails() {
                 <Button variant="outline" size="icon" onClick={() => onEdit(schedule.class.id)}>
                   <Pencil className="w-4 h-4" />
                 </Button>
-                <Button variant="destructive" size="icon" onClick={() => onDelete(schedule.class.id)}>
+                {/* onClick={() => onDelete(schedule.class.id)} */}
+                <Button variant="destructive" size="icon">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>

@@ -1,6 +1,5 @@
 'use client'
 
-import axios from '@/lib/axios'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -40,7 +39,7 @@ export default function CreatePermissionPage() {
         }
 
         fetchData()
-    }, [])
+    }, [getRoles, getUsers])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

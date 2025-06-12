@@ -61,7 +61,7 @@ export default function AddStudentsModal({
             }
         }
         fetchData()
-    }, [])
+    }, [getStudents])
     useEffect(() => {
         if (isStudentModalOpen) {
             document.body.style.overflow = 'hidden'

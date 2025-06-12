@@ -14,11 +14,7 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/app/admin/components/ui/button'
-import { useTeachers } from '@/hooks/teachers'
 import { useClasses } from '@/hooks/classes'
-import { useClassSchedules } from '@/hooks/classSchedules'
-import { useClassStudents } from '@/hooks/classStudents'
-import { useClassTeachers } from '@/hooks/classTeachers'
 
 // Types for our student data
 interface Teacher {
@@ -89,24 +85,24 @@ interface Class {
 }
 
 // Helper function to format date
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
-}
+// const formatDate = (dateString: string) => {
+//     const date = new Date(dateString)
+//     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+// }
 
 // Helper function to get day name in Spanish
-const getDayName = (day: string) => {
-    const dayNames: { [key: string]: string } = {
-        monday: 'Lunes',
-        tuesday: 'Martes',
-        wednesday: 'Miércoles',
-        thursday: 'Jueves',
-        friday: 'Viernes',
-        saturday: 'Sábado',
-        sunday: 'Domingo',
-    }
-    return dayNames[day.toLowerCase()] || day
-}
+// const getDayName = (day: string) => {
+//     const dayNames: { [key: string]: string } = {
+//         monday: 'Lunes',
+//         tuesday: 'Martes',
+//         wednesday: 'Miércoles',
+//         thursday: 'Jueves',
+//         friday: 'Viernes',
+//         saturday: 'Sábado',
+//         sunday: 'Domingo',
+//     }
+//     return dayNames[day.toLowerCase()] || day
+// }
 
 export default function ClassPage() {
     const router = useRouter()
@@ -121,25 +117,7 @@ export default function ClassPage() {
     const [selectedClass, setSelectedClass] = useState<Class | null>(null)
     const [showDetails, setShowDetails] = useState<boolean>(false)
 
-    const { getClasses, createClass, deleteClass, updateClass } = useClasses()
-    const {
-        getClassSchedules,
-        createClassSchedule,
-        updateClassSchedule,
-        deleteClassSchedule,
-    } = useClassSchedules()
-    const {
-        getClassStudents,
-        createClassStudent,
-        updateClassStudent,
-        deleteClassStudent,
-    } = useClassStudents()
-    const {
-        getClassTeachers,
-        createClassTeacher,
-        updateClassTeacher,
-        deleteClassTeacher,
-    } = useClassTeachers()
+    const { getClasses, deleteClass } = useClasses()
 
     // Toggle details view for mobile
     const toggleDetails = () => {
@@ -430,7 +408,6 @@ export default function ClassPage() {
                 </div>
             )
         }
-        console.log(schedule.schedule_id)
         return (
             <div className="mb-6">
                 <div className="overflow-x-auto">

@@ -5,10 +5,6 @@ import {
     Plus,
     Edit2,
     Trash2,
-    DollarSign,
-    Activity,
-    Calendar,
-    Users,
     Eye,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'

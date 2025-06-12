@@ -132,7 +132,7 @@ export default function CreateSchedulePage() {
             })
 
             // Reset form or redirect
-            router.push('/admin/schedules')
+            router.push('/admin/classes')
         } catch (error) {
             console.error('Error creating schedule:', error)
             toast({

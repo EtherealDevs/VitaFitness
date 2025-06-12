@@ -6,7 +6,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
     ArrowLeft,
-    User,
     DollarSign,
     Calendar,
     Clock,
@@ -14,9 +13,7 @@ import {
     CheckCircle,
     Save,
     X,
-    Phone,
     CreditCard,
-    Info,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/app/admin/components/ui/button'
@@ -83,7 +80,6 @@ export default function CreatePaymentPage() {
     // Estados principales
     const [students, setStudents] = useState<Student[]>([])
     const [classes, setClasses] = useState<Class[]>([]) // Mantenemos el estado pero lo llenaremos de otra manera
-    const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
     const [loading, setLoading] = useState(false)
     const [fetchingData, setFetchingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -103,13 +99,13 @@ export default function CreatePaymentPage() {
     // Función para formatear fechas
 
     // Función para formatear moneda
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0,
-        }).format(amount)
-    }
+    // const formatCurrency = (amount: number) => {
+    //     return new Intl.NumberFormat('es-AR', {
+    //         style: 'currency',
+    //         currency: 'ARS',
+    //         minimumFractionDigits: 0,
+    //     }).format(amount)
+    // }
 
     // Función para obtener fechas sugeridas
     const getSuggestedDates = useCallback(() => {
@@ -200,7 +196,6 @@ export default function CreatePaymentPage() {
     // Manejar cambio de estudiante
     const handleStudentChange = (studentId: string) => {
         const student = students.find(s => s.id === studentId)
-        setSelectedStudent(student || null)
 
         setFormData(prev => ({
             ...prev,
