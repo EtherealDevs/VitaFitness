@@ -216,21 +216,19 @@ export default function StudentManagement() {
 
                     const processedStudents = response.students.map(
                         (student: StudentFromServer) => {
-                            let paymentDueDate: string | null = null;
+                            let paymentDueDate: string | null = null
 
                             let daysUntilDue = student.daysUntilDue
                             let daysOverdue = student.daysOverdue
 
-                            if (daysUntilDue === null){
-                                daysUntilDue = 0;
+                            if (daysUntilDue === null) {
+                                daysUntilDue = 0
                             }
-                            if (daysOverdue === null){
-                                daysOverdue = 0;
+                            if (daysOverdue === null) {
+                                daysOverdue = 0
                             }
                             if (student.paymentDueDate !== null) {
-                                const dueDate = new Date(
-                                    student.paymentDueDate,
-                                )
+                                const dueDate = new Date(student.paymentDueDate)
                                 paymentDueDate = dueDate
                                     .toISOString()
                                     .split('T')[0] // 'YYYY-MM-DD'
@@ -333,65 +331,57 @@ export default function StudentManagement() {
                 ),
                 lastPaymentAmount: Number(sortedDates?.[0]?.amount || 0),
             }
-             // Guardar los datos originales
+            // Guardar los datos originales
 
-                const schedules: Schedule[] = []
-                const originalScheduleData: ScheduleData[] =
-                    newStudent.schedules || []
-                    // Procesar los datos originales para crear Schedule[]
-                    originalScheduleData.forEach(
-                        (scheduleData: ScheduleData) => {
-                            let newSchedule = schedules.find(
-                                s =>
-                                    s.schedule_id ===
-                                    scheduleData.schedule_id,
-                            )
-                            if (newSchedule === undefined) {
-                                newSchedule = {
-                                    schedule_id:
-                                        scheduleData.schedule_id,
-                                    days: scheduleData.schedule_days,
-                                    timeslots: [],
-                                    class: null,
-                                }
-                                schedules.push(newSchedule)
-                            }
-                            const newTimeslot: Timeslot = {
-                                id: scheduleData.timeslot_id,
-                                hour: scheduleData.timeslot_hour,
-                            }
-                            const newClass: Class = {
-                                class_id: scheduleData.class_id,
-                                plan: [
-                                    scheduleData.plan_id,
-                                    scheduleData.plan_name,
-                                ],
-                            }
-                            newSchedule.timeslots.push(newTimeslot)
-                            newSchedule.class = newClass
-                        },
-                    )
-                const anotherNewStudent: Student = {
-                    id: newStudent.id,
-                    name: newStudent.name,
-                    last_name: newStudent.last_name,
-                    phone: newStudent.phone,
-                    dni: newStudent.dni,
-                    registration_date: newStudent.registration_date,
-                    status: newStudent.status,
-                    payments: newStudent.payments,
-                    attendances: newStudent.attendances,
-                    accountInfo: newStudent.accountInfo,
-                    // Información adicional que pueda ser útil
-                    paymentDueDate: newStudent.paymentDueDate,
-                    daysOverdue: newStudent.daysOverdue,
-                    daysUntilDue: newStudent.daysUntilDue,
-                    remainingClasses: newStudent.remainingClasses,
-                    canAttend: newStudent.canAttend,
-                    branch: newStudent.branch,
-                    scheduleData: originalScheduleData,
-                    schedules: schedules,
+            const schedules: Schedule[] = []
+            const originalScheduleData: ScheduleData[] =
+                newStudent.schedules || []
+            // Procesar los datos originales para crear Schedule[]
+            originalScheduleData.forEach((scheduleData: ScheduleData) => {
+                let newSchedule = schedules.find(
+                    s => s.schedule_id === scheduleData.schedule_id,
+                )
+                if (newSchedule === undefined) {
+                    newSchedule = {
+                        schedule_id: scheduleData.schedule_id,
+                        days: scheduleData.schedule_days,
+                        timeslots: [],
+                        class: null,
+                    }
+                    schedules.push(newSchedule)
                 }
+                const newTimeslot: Timeslot = {
+                    id: scheduleData.timeslot_id,
+                    hour: scheduleData.timeslot_hour,
+                }
+                const newClass: Class = {
+                    class_id: scheduleData.class_id,
+                    plan: [scheduleData.plan_id, scheduleData.plan_name],
+                }
+                newSchedule.timeslots.push(newTimeslot)
+                newSchedule.class = newClass
+            })
+            const anotherNewStudent: Student = {
+                id: newStudent.id,
+                name: newStudent.name,
+                last_name: newStudent.last_name,
+                phone: newStudent.phone,
+                dni: newStudent.dni,
+                registration_date: newStudent.registration_date,
+                status: newStudent.status,
+                payments: newStudent.payments,
+                attendances: newStudent.attendances,
+                accountInfo: newStudent.accountInfo,
+                // Información adicional que pueda ser útil
+                paymentDueDate: newStudent.paymentDueDate,
+                daysOverdue: newStudent.daysOverdue,
+                daysUntilDue: newStudent.daysUntilDue,
+                remainingClasses: newStudent.remainingClasses,
+                canAttend: newStudent.canAttend,
+                branch: newStudent.branch,
+                scheduleData: originalScheduleData,
+                schedules: schedules,
+            }
             setSelectedStudent(anotherNewStudent) // Select the clicked student
             setAccountInfo(accountInfo)
         }
@@ -592,11 +582,17 @@ export default function StudentManagement() {
                                             {daySchedules.length > 0 ? (
                                                 <div className="space-y-2">
                                                     {daySchedules.map(
-                                                        schedule =>
+                                                        (
+                                                            schedule,
+                                                            scheduleIndex,
+                                                        ) =>
                                                             schedule.timeslots.map(
-                                                                timeslot => (
+                                                                (
+                                                                    timeslot,
+                                                                    timeslotIndex,
+                                                                ) => (
                                                                     <div
-                                                                        key={`${schedule.schedule_id}-${timeslot.id}`}
+                                                                        key={`${day}-${schedule.schedule_id}-${timeslot.id}-${scheduleIndex}-${timeslotIndex}`}
                                                                         className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
                                                                         {
                                                                             timeslot.hour
@@ -1163,14 +1159,29 @@ export default function StudentManagement() {
                             </div>
                             {/* Payment History */}
                             <div className="space-y-4">
-                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
-                                    Historial de Pagos
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center justify-between">
+                                    <span>Historial de Pagos</span>
+                                    <button
+                                        onClick={openPaymentHistoryModal}
+                                        className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                        Ver historial
+                                    </button>
                                 </h4>
                                 <div className="space-y-2">
                                     {selectedStudent.payments &&
                                     selectedStudent.payments.length > 0 ? (
-                                        selectedStudent.payments.map(
-                                            (payment, index) => (
+                                        selectedStudent.payments
+                                            .sort(
+                                                (a, b) =>
+                                                    new Date(
+                                                        b.payment_date,
+                                                    ).getTime() -
+                                                    new Date(
+                                                        a.payment_date,
+                                                    ).getTime(),
+                                            )
+                                            .slice(0, 3) // Only show the last 3 payments
+                                            .map((payment, index) => (
                                                 <div
                                                     key={index}
                                                     className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/70 rounded-md">
@@ -1221,13 +1232,29 @@ export default function StudentManagement() {
                                                         )}
                                                     </span>
                                                 </div>
-                                            ),
-                                        )
+                                            ))
                                     ) : (
                                         <p className="text-gray-500 dark:text-gray-400 italic">
                                             No hay historial de pagos disponible
                                         </p>
                                     )}
+                                    {selectedStudent.payments &&
+                                        selectedStudent.payments.length > 3 && (
+                                            <div className="text-center pt-2">
+                                                <button
+                                                    onClick={
+                                                        openPaymentHistoryModal
+                                                    }
+                                                    className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                                    Ver todos los pagos (
+                                                    {
+                                                        selectedStudent.payments
+                                                            .length
+                                                    }
+                                                    )
+                                                </button>
+                                            </div>
+                                        )}
                                 </div>
                             </div>
 
@@ -1314,13 +1341,6 @@ export default function StudentManagement() {
                                             <span className="font-medium dark:text-white">
                                                 Último Pago Cuota
                                             </span>
-                                            <button
-                                                onClick={
-                                                    openPaymentHistoryModal
-                                                }
-                                                className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
-                                                Ver Historial
-                                            </button>
                                         </div>
                                         <div className="flex items-center justify-between dark:text-white">
                                             {accountInfo?.lastPaymentDate ==
