@@ -1426,9 +1426,6 @@ export default function StudentManagement() {
                                         <DollarSign className="h-5 w-5" />
                                         Cobrar Cuota
                                     </button>
-                                    <button className="bg-purple-600 hover:bg-purple-700 text-white rounded-md px-2 py-2">
-                                        Otros Abonos
-                                    </button>
                                 </div>
                             </div>
                         </div>
