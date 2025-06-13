@@ -26,8 +26,17 @@ import { Label } from '@/app/admin/components/ui/label'
 // Helper function to format date
 const formatDate = (dateString: string) => {
     if (!dateString) return 'Sin fecha'
-    const date = new Date(dateString)
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+    try {
+        const date = new Date(dateString)
+        // Usar formato numérico para evitar problemas de localización
+        return `${date.getDate().toString().padStart(2, '0')}/${(
+            date.getMonth() + 1
+        )
+            .toString()
+            .padStart(2, '0')}/${date.getFullYear()}`
+    } catch {
+        return 'Fecha inválida'
+    }
 }
 
 // Helper function to determine row color based on payment status
@@ -157,28 +166,52 @@ export default function PaymentsPage() {
 
     // Apply filtering
     const filteredPayments = payments.filter(payment => {
-        const matchesSearch =
-            (payment.student?.name
-                ?.toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-                payment.student?.last_name
-                    ?.toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
-                payment.status
-                    ?.toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
-                String(payment.amount).includes(searchTerm)) ??
-            false
+        // Improved search functionality that handles space-separated terms
+        const searchTerms = searchTerm
+            .toLowerCase()
+            .split(/\s+/)
+            .filter(term => term.length > 0)
 
-        const matchesStartDate = filterStartDate
-            ? payment.date_start?.startsWith(filterStartDate)
-            : true
-        const matchesPaymentDate = filterPaymentDate
-            ? payment.payment_date?.startsWith(filterPaymentDate)
-            : true
-        const matchesExpirationDate = filterExpirationDate
-            ? payment.expiration_date?.startsWith(filterExpirationDate)
-            : true
+        // If no search terms, don't filter by search
+        const matchesSearch =
+            searchTerms.length === 0
+                ? true
+                : searchTerms.some(term => {
+                      return (
+                          payment.student?.name?.toLowerCase().includes(term) ||
+                          payment.student?.last_name
+                              ?.toLowerCase()
+                              .includes(term) ||
+                          payment.status?.toLowerCase().includes(term) ||
+                          String(payment.amount).includes(term) ||
+                          // Convertir payment.id a string antes de usar toLowerCase
+                          (payment.id
+                              ? String(payment.id).toLowerCase().includes(term)
+                              : false) ||
+                          // Convertir student_id a string antes de usar toLowerCase
+                          (payment.student_id
+                              ? String(payment.student_id)
+                                    .toLowerCase()
+                                    .includes(term)
+                              : false)
+                      )
+                  })
+
+        // Corregir el filtrado de fechas para evitar errores si las fechas son null o undefined
+        const matchesStartDate =
+            !filterStartDate || !payment.date_start
+                ? !filterStartDate
+                : payment.date_start.includes(filterStartDate)
+
+        const matchesPaymentDate =
+            !filterPaymentDate || !payment.payment_date
+                ? !filterPaymentDate
+                : payment.payment_date.includes(filterPaymentDate)
+
+        const matchesExpirationDate =
+            !filterExpirationDate || !payment.expiration_date
+                ? !filterExpirationDate
+                : payment.expiration_date.includes(filterExpirationDate)
 
         return (
             matchesSearch &&
