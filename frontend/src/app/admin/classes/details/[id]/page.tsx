@@ -584,7 +584,7 @@ export default function AdminClassDetails() {
                                     <ul className="space-y-2 max-h-40 overflow-y-auto pr-2">
                                         {pendingStudents.map(student => (
                                             <li
-                                                key={student.student.id}
+                                                key={`pending-${student.student.id}`}
                                                 className="flex justify-between items-center p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                                                 <div className="flex items-center">
                                                     <div>
