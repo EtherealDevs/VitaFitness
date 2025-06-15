@@ -118,8 +118,6 @@ export default function PaymentsPage() {
         }
     }, [getPayments])
 
-    console.log(payments)
-
     // Handle sorting
     const handleSort = (key: keyof Payment) => {
         let direction: 'asc' | 'desc' = 'asc'
@@ -140,8 +138,14 @@ export default function PaymentsPage() {
         if (selectedPayment?.id === payment.id) {
             setSelectedPayment(null) // Deselect if clicking the same payment
         } else {
-            const response = await getPayment(payment.id)
-            setSelectedPayment(response.payment) // Select the clicked payment
+            try {
+                const response = await getPayment(payment.id)
+                setSelectedPayment(response.payment) // Select the clicked payment
+            } catch (error) {
+                console.error('Error al cargar detalles del pago:', error)
+                // Si falla la carga de detalles, usar los datos básicos
+                setSelectedPayment(payment)
+            }
         }
     }
 
@@ -167,54 +171,56 @@ export default function PaymentsPage() {
         }
     }
 
-    // Apply filtering
+    // Apply filtering - FIXED
     const filteredPayments = payments.filter(payment => {
-        // Improved search functionality that handles space-separated terms
+        // Mejorar la funcionalidad de búsqueda para trabajar con los nuevos campos
         const searchTerms = searchTerm
             .toLowerCase()
             .split(/\s+/)
             .filter(term => term.length > 0)
 
-        // If no search terms, don't filter by search
+        // Si no hay términos de búsqueda, no filtrar por búsqueda
         const matchesSearch =
             searchTerms.length === 0
                 ? true
                 : searchTerms.some(term => {
                       return (
+                          // Buscar en el nombre completo del estudiante (nuevo campo)
+                          payment.student_full_name
+                              ?.toLowerCase()
+                              .includes(term) ||
+                          // Buscar en campos individuales si están disponibles
                           payment.student?.name?.toLowerCase().includes(term) ||
                           payment.student?.last_name
                               ?.toLowerCase()
                               .includes(term) ||
+                          // Buscar en estado del pago
                           payment.status?.toLowerCase().includes(term) ||
+                          // Buscar en monto (convertir a string)
                           String(payment.amount).includes(term) ||
-                          // Convertir payment.id a string antes de usar toLowerCase
-                          (payment.id
-                              ? String(payment.id).toLowerCase().includes(term)
-                              : false) ||
-                          // Convertir student_id a string antes de usar toLowerCase
-                          (payment.student_id
-                              ? String(payment.student_id)
-                                    .toLowerCase()
-                                    .includes(term)
-                              : false)
+                          // Buscar en ID del pago
+                          String(payment.id).toLowerCase().includes(term) ||
+                          // Buscar en ID del estudiante
+                          String(payment.student_id || '')
+                              .toLowerCase()
+                              .includes(term)
                       )
                   })
 
-        // Corregir el filtrado de fechas para evitar errores si las fechas son null o undefined
+        // Mejorar el filtrado de fechas
         const matchesStartDate =
-            !filterStartDate || !payment.date_start
-                ? !filterStartDate
-                : payment.date_start.includes(filterStartDate)
+            !filterStartDate ||
+            (payment.date_start && payment.date_start.includes(filterStartDate))
 
         const matchesPaymentDate =
-            !filterPaymentDate || !payment.payment_date
-                ? !filterPaymentDate
-                : payment.payment_date.includes(filterPaymentDate)
+            !filterPaymentDate ||
+            (payment.payment_date &&
+                payment.payment_date.includes(filterPaymentDate))
 
         const matchesExpirationDate =
-            !filterExpirationDate || !payment.expiration_date
-                ? !filterExpirationDate
-                : payment.expiration_date.includes(filterExpirationDate)
+            !filterExpirationDate ||
+            (payment.expiration_date &&
+                payment.expiration_date.includes(filterExpirationDate))
 
         return (
             matchesSearch &&
@@ -224,16 +230,63 @@ export default function PaymentsPage() {
         )
     })
 
-    // Apply sorting
+    // Apply sorting - FIXED with proper types
     const sortedPayments = [...filteredPayments].sort((a, b) => {
         if (!sortConfig) return 0
 
         const { key, direction } = sortConfig
 
-        // Use type assertion to tell TypeScript that these properties exist
-        const aValue = a[key] as string | number | boolean
-        const bValue = b[key] as string | number | boolean
+        // Manejar casos especiales de ordenamiento con tipos apropiados
+        let aValue: string | number
+        let bValue: string | number
 
+        switch (key) {
+            case 'student_full_name':
+                aValue =
+                    a.student_full_name ||
+                    (a.student
+                        ? `${a.student.name} ${a.student.last_name}`
+                        : '')
+                bValue =
+                    b.student_full_name ||
+                    (b.student
+                        ? `${b.student.name} ${b.student.last_name}`
+                        : '')
+                break
+            case 'amount':
+                aValue = Number(a.amount) || 0
+                bValue = Number(b.amount) || 0
+                break
+            case 'id':
+                aValue = Number(a.id) || 0
+                bValue = Number(b.id) || 0
+                break
+            case 'payment_date':
+            case 'expiration_date':
+            case 'date_start':
+                aValue = a[key] ? new Date(a[key] as string).getTime() : 0
+                bValue = b[key] ? new Date(b[key] as string).getTime() : 0
+                break
+            case 'status':
+                aValue = a.status || ''
+                bValue = b.status || ''
+                break
+            default:
+                // Para otros campos, convertir a string
+                aValue = String(a[key] || '')
+                bValue = String(b[key] || '')
+        }
+
+        // Comparar valores
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+            const aLower = aValue.toLowerCase()
+            const bLower = bValue.toLowerCase()
+            if (aLower < bLower) return direction === 'asc' ? -1 : 1
+            if (aLower > bLower) return direction === 'asc' ? 1 : -1
+            return 0
+        }
+
+        // Para valores numéricos
         if (aValue < bValue) return direction === 'asc' ? -1 : 1
         if (aValue > bValue) return direction === 'asc' ? 1 : -1
         return 0
@@ -293,14 +346,14 @@ export default function PaymentsPage() {
                                                     Nombre:
                                                 </span>
                                                 <span className="font-medium">
-                                                    {
+                                                    {selectedPayment.student_full_name ||
                                                         selectedPayment.student
-                                                            ?.name
-                                                    }{' '}
-                                                    {
-                                                        selectedPayment.student
-                                                            ?.last_name
-                                                    }
+                                                            ?.name +
+                                                            ' ' +
+                                                            selectedPayment
+                                                                .student
+                                                                ?.last_name ||
+                                                        'No disponible'}
                                                 </span>
                                             </p>
                                             <p className="text-sm flex items-center gap-2 mt-2">
@@ -427,8 +480,6 @@ export default function PaymentsPage() {
                                         )}
                                     </div>
                                 </div>
-
-                                {/* Notes section removed as it's not available in the Payment type */}
                             </div>
                         </div>
 
@@ -495,7 +546,7 @@ export default function PaymentsPage() {
                         <div className="relative w-full md:w-64 mb-4">
                             <input
                                 type="text"
-                                placeholder="Buscar pagos..."
+                                placeholder="Buscar por estudiante, ID, monto o estado..."
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
@@ -543,6 +594,21 @@ export default function PaymentsPage() {
                                 />
                             </div>
                         </div>
+                        {/* Mostrar resultados de búsqueda */}
+                        {searchTerm && (
+                            <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                                Mostrando {filteredPayments.length} de{' '}
+                                {payments.length} pagos
+                                {filteredPayments.length !==
+                                    payments.length && (
+                                    <button
+                                        onClick={() => setSearchTerm('')}
+                                        className="ml-2 text-purple-600 hover:text-purple-800 dark:text-purple-400">
+                                        Limpiar búsqueda
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Payments table */}
@@ -571,7 +637,8 @@ export default function PaymentsPage() {
                                             }
                                             className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
                                             Estudiante
-                                            {sortConfig?.key === 'student_full_name' &&
+                                            {sortConfig?.key ===
+                                                'student_full_name' &&
                                                 (sortConfig.direction ===
                                                 'asc' ? (
                                                     <ChevronUp className="h-4 w-4" />
@@ -671,7 +738,12 @@ export default function PaymentsPage() {
                                         <td
                                             colSpan={7}
                                             className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                                            No se encontraron pagos
+                                            {searchTerm ||
+                                            filterStartDate ||
+                                            filterPaymentDate ||
+                                            filterExpirationDate
+                                                ? 'No se encontraron pagos que coincidan con los filtros'
+                                                : 'No se encontraron pagos'}
                                         </td>
                                     </tr>
                                 ) : (
@@ -685,7 +757,7 @@ export default function PaymentsPage() {
                                                 payment.id
                                                     ? 'ring-2 ring-inset ring-purple-500'
                                                     : ''
-                                            }`}
+                                            } cursor-pointer`}
                                             onClick={() =>
                                                 handlePaymentClick(payment)
                                             }>
@@ -693,7 +765,10 @@ export default function PaymentsPage() {
                                                 {payment.id}
                                             </td>
                                             <td className="px-4 py-3 font-medium">
-                                                {payment.student_full_name}
+                                                {payment.student_full_name ||
+                                                    (payment.student
+                                                        ? `${payment.student.name} ${payment.student.last_name}`
+                                                        : 'No disponible')}
                                             </td>
                                             <td className="px-4 py-3">
                                                 {formatCurrency(
@@ -823,11 +898,10 @@ export default function PaymentsPage() {
                                                 Nombre
                                             </p>
                                             <p className="dark:text-white">
-                                                {selectedPayment.student?.name}{' '}
-                                                {
-                                                    selectedPayment.student
-                                                        ?.last_name
-                                                }
+                                                {selectedPayment.student_full_name ||
+                                                    (selectedPayment.student
+                                                        ? `${selectedPayment.student.name} ${selectedPayment.student.last_name}`
+                                                        : 'No disponible')}
                                             </p>
                                         </div>
                                     </div>
@@ -962,8 +1036,6 @@ export default function PaymentsPage() {
                                     )}
                                 </div>
                             </div>
-
-                            {/* Notes section removed as it's not available in the Payment type */}
 
                             {/* Actions */}
                             <div className="md:col-span-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur">
