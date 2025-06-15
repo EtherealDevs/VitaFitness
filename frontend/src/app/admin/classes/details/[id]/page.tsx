@@ -527,7 +527,7 @@ export default function AdminClassDetails() {
                                     <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
                                         {activeStudents.map(student => (
                                             <li
-                                                key={student.student.id}
+                                                key={`active-${student.student.id}`}
                                                 className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                                 <div className="flex items-center">
                                                     <div>
@@ -653,7 +653,7 @@ export default function AdminClassDetails() {
                                         <ul className="space-y-2 max-h-40 overflow-y-auto pr-2">
                                             {inactiveStudents.map(student => (
                                                 <li
-                                                    key={student.student.id}
+                                                    key={`inactive-${student.student.id}`}
                                                     className="flex justify-between items-center p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
                                                     <div className="flex items-center">
                                                         <div>
