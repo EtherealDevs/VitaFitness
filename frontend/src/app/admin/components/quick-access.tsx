@@ -7,7 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from './ui/card'
-import { Plus, UserPlus, FileText} from 'lucide-react'
+import { Plus, UserPlus } from 'lucide-react'
 
 const quickActions = [
     {
@@ -21,12 +21,6 @@ const quickActions = [
         description: 'Programar una nueva clase',
         icon: Plus,
         href: '/admin/classes/create',
-    },
-    {
-        title: 'Permisos',
-        description: 'Gestionar permisos de usuarios',
-        icon: FileText,
-        href: '/admin/permissions',
     },
 ]
 

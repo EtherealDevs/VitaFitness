@@ -18,6 +18,10 @@ import {
     Edit,
     Trash,
     AlertCircle,
+    X,
+    Users,
+    Clock,
+    Search,
 } from 'lucide-react'
 import {
     Dialog,
@@ -112,6 +116,10 @@ export default function AdminClassDetails() {
 
     const [allStudents, setAllStudents] = useState<Student[]>([])
     const [allTeachers, setAllTeachers] = useState<Teacher[]>([])
+
+    // Agregar estados para los buscadores después de los otros useState
+    const [studentSearchTerm, setStudentSearchTerm] = useState<string>('')
+    const [teacherSearchTerm, setTeacherSearchTerm] = useState<string>('')
 
     const { getClassSchedule, deleteClassSchedule } = useClassSchedules()
     const { createClassTeacher, deleteClassTeacher } = useClassTeachers()
@@ -243,6 +251,32 @@ export default function AdminClassDetails() {
         }
     }
 
+    // Agregar funciones de filtrado después de las otras funciones
+    const filteredStudents = allStudents.filter(student => {
+        const searchTerm = studentSearchTerm.toLowerCase()
+        return (
+            student.name.toLowerCase().includes(searchTerm) ||
+            student.last_name.toLowerCase().includes(searchTerm) ||
+            `${student.name} ${student.last_name}`
+                .toLowerCase()
+                .includes(searchTerm) ||
+            student.dni.toLowerCase().includes(searchTerm)
+        )
+    })
+
+    const filteredTeachers = allTeachers.filter(teacher => {
+        const searchTerm = teacherSearchTerm.toLowerCase()
+        return (
+            teacher.name.toLowerCase().includes(searchTerm) ||
+            teacher.last_name.toLowerCase().includes(searchTerm) ||
+            `${teacher.name} ${teacher.last_name}`
+                .toLowerCase()
+                .includes(searchTerm) ||
+            teacher.email.toLowerCase().includes(searchTerm)
+        )
+    })
+
+    // Actualizar la función handleAddStudents para limpiar el buscador
     const handleAddStudents = () => {
         if (studentModal && onAddStudent) {
             onAddStudent(studentModal, selectedStudents)
@@ -250,8 +284,10 @@ export default function AdminClassDetails() {
         setStudentModal(null)
         setSelectedStudents([])
         setSelectedTimeslotId('')
+        setStudentSearchTerm('') // Limpiar búsqueda
     }
 
+    // Actualizar la función handleAddTeachers para limpiar el buscador
     const handleAddTeachers = () => {
         if (teacherModal && onAddTeacher) {
             onAddTeacher(teacherModal, selectedTeachers)
@@ -259,6 +295,7 @@ export default function AdminClassDetails() {
         setTeacherModal(null)
         setSelectedTeachers([])
         setSelectedTimeslotId('')
+        setTeacherSearchTerm('') // Limpiar búsqueda
     }
 
     // Get active and inactive students
@@ -669,169 +706,332 @@ export default function AdminClassDetails() {
                 </CardContent>
             </Card>
 
-            {/* Add Student Dialog */}
-            <Dialog
-                open={!!studentModal}
-                onOpenChange={open => !open && setStudentModal(null)}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Agregar Estudiantes</DialogTitle>
-                        <DialogDescription>
-                            Selecciona los estudiantes y el horario al que
-                            deseas agregarlos.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <label
-                                htmlFor="students"
-                                className="text-sm font-medium">
-                                Estudiantes (mantén presionado Ctrl para
-                                seleccionar varios)
-                            </label>
-                            <select
-                                id="students"
-                                multiple
-                                className="border rounded p-2 h-40"
-                                value={selectedStudents}
-                                onChange={e =>
-                                    setSelectedStudents(
-                                        Array.from(
-                                            e.target.selectedOptions,
-                                            option => option.value,
-                                        ),
-                                    )
-                                }>
-                                {allStudents.map(s => (
-                                    <option key={s.id} value={s.id}>
-                                        {s.name} {s.last_name} - {s.status}
-                                    </option>
-                                ))}
-                            </select>
+            {/* Add Student Modal - Redesigned */}
+            {studentModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white/95 dark:bg-[#1f2122]/95 backdrop-blur rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
+                                <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                Agregar Estudiantes a la Clase
+                            </h3>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setStudentModal(null)}
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <X className="h-4 w-4" />
+                            </Button>
                         </div>
-                        <div className="grid gap-2">
-                            <label
-                                htmlFor="timeslot"
-                                className="text-sm font-medium">
-                                Horario
-                            </label>
-                            <select
-                                id="timeslot"
-                                className="w-full border p-2 rounded"
-                                onChange={e =>
-                                    setSelectedTimeslotId(e.target.value)
-                                }
-                                value={selectedTimeslotId}>
-                                <option value="">Selecciona un horario</option>
-                                {schedule.timeslots.map(timeslot => (
-                                    <option
-                                        key={timeslot.id}
-                                        value={timeslot.id}>
-                                        {timeslot.hour}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setStudentModal(null)}>
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={handleAddStudents}
-                            disabled={
-                                selectedStudents.length === 0 ||
-                                !selectedTimeslotId
-                            }>
-                            Agregar
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
 
-            {/* Add Teacher Dialog */}
-            <Dialog
-                open={!!teacherModal}
-                onOpenChange={open => !open && setTeacherModal(null)}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Agregar Profesores</DialogTitle>
-                        <DialogDescription>
-                            Selecciona los profesores y el horario al que deseas
-                            agregarlos.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <label
-                                htmlFor="teachers"
-                                className="text-sm font-medium">
-                                Profesores (mantén presionado Ctrl para
-                                seleccionar varios)
-                            </label>
-                            <select
-                                id="teachers"
-                                multiple
-                                className="border rounded p-2 h-40"
-                                value={selectedTeachers}
-                                onChange={e =>
-                                    setSelectedTeachers(
-                                        Array.from(
-                                            e.target.selectedOptions,
-                                            option => option.value,
-                                        ),
-                                    )
-                                }>
-                                {allTeachers.map(t => (
-                                    <option key={t.id} value={t.id}>
-                                        {t.name} {t.last_name} - {t.email}
-                                    </option>
-                                ))}
-                            </select>
+                        {/* Modal Content */}
+                        <div className="p-4 overflow-y-auto max-h-[60vh]">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Seleccionar Estudiantes
+                                    </label>
+
+                                    {/* Buscador */}
+                                    <div className="relative mb-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar por nombre, apellido o DNI..."
+                                            value={studentSearchTerm}
+                                            onChange={e =>
+                                                setStudentSearchTerm(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        />
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    </div>
+
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                        Mantén presionado Ctrl (Cmd en Mac) para
+                                        seleccionar múltiples estudiantes
+                                    </p>
+                                    <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                                        <select
+                                            multiple
+                                            className="w-full h-48 p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                                            value={selectedStudents}
+                                            onChange={e =>
+                                                setSelectedStudents(
+                                                    Array.from(
+                                                        e.target
+                                                            .selectedOptions,
+                                                        option => option.value,
+                                                    ),
+                                                )
+                                            }>
+                                            {filteredStudents.length === 0 ? (
+                                                <option
+                                                    disabled
+                                                    className="text-gray-500 dark:text-gray-400">
+                                                    {studentSearchTerm
+                                                        ? 'No se encontraron estudiantes'
+                                                        : 'No hay estudiantes disponibles'}
+                                                </option>
+                                            ) : (
+                                                filteredStudents.map(
+                                                    student => (
+                                                        <option
+                                                            key={student.id}
+                                                            value={student.id}
+                                                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            {student.name}{' '}
+                                                            {student.last_name}{' '}
+                                                            - {student.status}{' '}
+                                                            (DNI: {student.dni})
+                                                        </option>
+                                                    ),
+                                                )
+                                            )}
+                                        </select>
+                                    </div>
+                                    {studentSearchTerm && (
+                                        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                Mostrando{' '}
+                                                {filteredStudents.length} de{' '}
+                                                {allStudents.length} estudiantes
+                                            </p>
+                                        </div>
+                                    )}
+                                    {selectedStudents.length > 0 && (
+                                        <div className="mt-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-md">
+                                            <p className="text-sm text-purple-700 dark:text-purple-300">
+                                                {selectedStudents.length}{' '}
+                                                estudiante(s) seleccionado(s)
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        <Clock className="inline h-4 w-4 mr-1" />
+                                        Horario de Clase
+                                    </label>
+                                    <select
+                                        className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        onChange={e =>
+                                            setSelectedTimeslotId(
+                                                e.target.value,
+                                            )
+                                        }
+                                        value={selectedTimeslotId}>
+                                        <option value="">
+                                            Selecciona un horario
+                                        </option>
+                                        {schedule?.timeslots.map(timeslot => (
+                                            <option
+                                                key={timeslot.id}
+                                                value={timeslot.id}>
+                                                {timeslot.hour}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div className="grid gap-2">
-                            <label
-                                htmlFor="timeslot"
-                                className="text-sm font-medium">
-                                Horario
-                            </label>
-                            <select
-                                id="timeslot"
-                                className="w-full border p-2 rounded"
-                                onChange={e =>
-                                    setSelectedTimeslotId(e.target.value)
-                                }
-                                value={selectedTimeslotId}>
-                                <option value="">Selecciona un horario</option>
-                                {schedule.timeslots.map(timeslot => (
-                                    <option
-                                        key={timeslot.id}
-                                        value={timeslot.id}>
-                                        {timeslot.hour}
-                                    </option>
-                                ))}
-                            </select>
+
+                        {/* Modal Footer */}
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50">
+                            <div className="flex justify-between items-center">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    {selectedStudents.length > 0 &&
+                                    selectedTimeslotId
+                                        ? `Listo para agregar ${selectedStudents.length} estudiante(s)`
+                                        : 'Selecciona estudiantes y horario para continuar'}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setStudentModal(null)}>
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        onClick={handleAddStudents}
+                                        disabled={
+                                            selectedStudents.length === 0 ||
+                                            !selectedTimeslotId
+                                        }
+                                        className="bg-purple-600 hover:bg-purple-700 text-white">
+                                        Agregar Estudiantes
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setTeacherModal(null)}>
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={handleAddTeachers}
-                            disabled={
-                                selectedTeachers.length === 0 ||
-                                !selectedTimeslotId
-                            }>
-                            Agregar
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                </div>
+            )}
+
+            {/* Add Teacher Modal - Redesigned */}
+            {teacherModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white/95 dark:bg-[#1f2122]/95 backdrop-blur rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
+                                <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                Agregar Profesores a la Clase
+                            </h3>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setTeacherModal(null)}
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-4 overflow-y-auto max-h-[60vh]">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Seleccionar Profesores
+                                    </label>
+
+                                    {/* Buscador */}
+                                    <div className="relative mb-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar por nombre, apellido o email..."
+                                            value={teacherSearchTerm}
+                                            onChange={e =>
+                                                setTeacherSearchTerm(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        />
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    </div>
+
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                        Mantén presionado Ctrl (Cmd en Mac) para
+                                        seleccionar múltiples profesores
+                                    </p>
+                                    <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                                        <select
+                                            multiple
+                                            className="w-full h-48 p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                                            value={selectedTeachers}
+                                            onChange={e =>
+                                                setSelectedTeachers(
+                                                    Array.from(
+                                                        e.target
+                                                            .selectedOptions,
+                                                        option => option.value,
+                                                    ),
+                                                )
+                                            }>
+                                            {filteredTeachers.length === 0 ? (
+                                                <option
+                                                    disabled
+                                                    className="text-gray-500 dark:text-gray-400">
+                                                    {teacherSearchTerm
+                                                        ? 'No se encontraron profesores'
+                                                        : 'No hay profesores disponibles'}
+                                                </option>
+                                            ) : (
+                                                filteredTeachers.map(
+                                                    teacher => (
+                                                        <option
+                                                            key={teacher.id}
+                                                            value={teacher.id}
+                                                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            {teacher.name}{' '}
+                                                            {teacher.last_name}{' '}
+                                                            - {teacher.email}
+                                                        </option>
+                                                    ),
+                                                )
+                                            )}
+                                        </select>
+                                    </div>
+                                    {teacherSearchTerm && (
+                                        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                Mostrando{' '}
+                                                {filteredTeachers.length} de{' '}
+                                                {allTeachers.length} profesores
+                                            </p>
+                                        </div>
+                                    )}
+                                    {selectedTeachers.length > 0 && (
+                                        <div className="mt-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-md">
+                                            <p className="text-sm text-purple-700 dark:text-purple-300">
+                                                {selectedTeachers.length}{' '}
+                                                profesor(es) seleccionado(s)
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        <Clock className="inline h-4 w-4 mr-1" />
+                                        Horario de Clase
+                                    </label>
+                                    <select
+                                        className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        onChange={e =>
+                                            setSelectedTimeslotId(
+                                                e.target.value,
+                                            )
+                                        }
+                                        value={selectedTimeslotId}>
+                                        <option value="">
+                                            Selecciona un horario
+                                        </option>
+                                        {schedule?.timeslots.map(timeslot => (
+                                            <option
+                                                key={timeslot.id}
+                                                value={timeslot.id}>
+                                                {timeslot.hour}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50">
+                            <div className="flex justify-between items-center">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    {selectedTeachers.length > 0 &&
+                                    selectedTimeslotId
+                                        ? `Listo para agregar ${selectedTeachers.length} profesor(es)`
+                                        : 'Selecciona profesores y horario para continuar'}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setTeacherModal(null)}>
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        onClick={handleAddTeachers}
+                                        disabled={
+                                            selectedTeachers.length === 0 ||
+                                            !selectedTimeslotId
+                                        }
+                                        className="bg-purple-600 hover:bg-purple-700 text-white">
+                                        Agregar Profesores
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Delete Confirmation Dialog */}
             <Dialog

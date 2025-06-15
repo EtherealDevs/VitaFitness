@@ -468,32 +468,35 @@ export default function StudentManagement() {
         } {
             return schedule.class !== null && schedule.class !== undefined
         }
+
         if (!student.schedules || student.schedules.length === 0) {
             return (
                 <div className="text-center py-8">
                     <p className="text-gray-500 dark:text-gray-400 mb-4">
                         Sin planes asignados
                     </p>
-                    {student.schedules && student.schedules.length > 0 && (
-                        <div>
-                            <h5 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
-                                Horarios generales
-                            </h5>
-                            {renderScheduleTableForPlan(
-                                student.schedules,
-                                'Horarios generales',
-                            )}
-                        </div>
-                    )}
+                    {student.scheduleData &&
+                        student.scheduleData.length > 0 && (
+                            <div>
+                                <h5 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+                                    Horarios generales
+                                </h5>
+                                {renderScheduleTableForPlan(
+                                    student.schedules,
+                                    'Horarios generales',
+                                )}
+                            </div>
+                        )}
                 </div>
             )
         }
+
         return (
             <div className="space-y-6">
                 {student.schedules.filter(hasValidClass).map(schedule => (
                     <div key={schedule.class.class_id}>
                         {renderScheduleTableForPlan(
-                            student.schedules,
+                            [schedule],
                             schedule.class.plan[1] || 'Plan sin nombre',
                         )}
                     </div>
@@ -528,9 +531,12 @@ export default function StudentManagement() {
         const daysWithSchedules = new Set()
 
         schedules.forEach(schedule => {
-            schedule.days.forEach(day =>
-                daysWithSchedules.add(day.toLowerCase()),
-            )
+            // Verificar que schedule.days existe y es un array
+            if (schedule.days && Array.isArray(schedule.days)) {
+                schedule.days.forEach(day =>
+                    daysWithSchedules.add(day.toLowerCase()),
+                )
+            }
         })
 
         const activeDays = allDays.filter(day => daysWithSchedules.has(day))
@@ -568,6 +574,8 @@ export default function StudentManagement() {
                                     // Find schedules for this day
                                     const daySchedules = schedules.filter(
                                         schedule =>
+                                            schedule.days &&
+                                            Array.isArray(schedule.days) &&
                                             schedule.days.some(
                                                 scheduleDay =>
                                                     scheduleDay.toLowerCase() ===
@@ -586,20 +594,25 @@ export default function StudentManagement() {
                                                             schedule,
                                                             scheduleIndex,
                                                         ) =>
-                                                            schedule.timeslots.map(
-                                                                (
-                                                                    timeslot,
-                                                                    timeslotIndex,
-                                                                ) => (
-                                                                    <div
-                                                                        key={`${day}-${schedule.schedule_id}-${timeslot.id}-${scheduleIndex}-${timeslotIndex}`}
-                                                                        className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
-                                                                        {
-                                                                            timeslot.hour
-                                                                        }
-                                                                    </div>
-                                                                ),
-                                                            ),
+                                                            schedule.timeslots &&
+                                                            Array.isArray(
+                                                                schedule.timeslots,
+                                                            )
+                                                                ? schedule.timeslots.map(
+                                                                      (
+                                                                          timeslot,
+                                                                          timeslotIndex,
+                                                                      ) => (
+                                                                          <div
+                                                                              key={`${day}-${schedule.schedule_id}-${timeslot.id}-${scheduleIndex}-${timeslotIndex}`}
+                                                                              className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
+                                                                              {
+                                                                                  timeslot.hour
+                                                                              }
+                                                                          </div>
+                                                                      ),
+                                                                  )
+                                                                : null,
                                                     )}
                                                 </div>
                                             ) : (
@@ -1425,6 +1438,9 @@ export default function StudentManagement() {
                                         className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 rounded-md px-2 py-2 transition-colors">
                                         <DollarSign className="h-5 w-5" />
                                         Cobrar Cuota
+                                    </button>
+                                    <button className="bg-purple-600 hover:bg-purple-700 text-white rounded-md px-2 py-2">
+                                        Otros Abonos
                                     </button>
                                 </div>
                             </div>
