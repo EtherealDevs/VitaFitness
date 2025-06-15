@@ -18,8 +18,9 @@ export interface Payment {
     classSchedule_id: string
     student_id: string
     student: Student
+    student_full_name: string
     date_start: string
-    amount: string
+    amount: number
     status: string
     payment_date: string
     expiration_date: string

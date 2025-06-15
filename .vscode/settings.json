@@ -7,4 +7,5 @@
   }
 },
 "terminal.integrated.defaultProfile.windows": "PowerShell",
+"postman.settings.dotenv-detection-notification-visibility": false,
 }

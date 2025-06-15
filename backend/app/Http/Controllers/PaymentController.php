@@ -16,7 +16,7 @@ class PaymentController extends Controller
     public function index()
     {
         try {
-            $payments = Payment::with(['student', 'classSchedule', 'comprobante'])->get();
+            $payments = Payment::with(['student:name', 'comprobante'])->get();
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

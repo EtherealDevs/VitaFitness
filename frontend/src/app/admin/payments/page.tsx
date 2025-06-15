@@ -55,7 +55,7 @@ const getRowColor = (status: string) => {
 
 export default function PaymentsPage() {
     const router = useRouter()
-    const { getPayments, deletePayment } = usePayments()
+    const { getPayments, deletePayment, getPayment } = usePayments()
     const [payments, setPayments] = useState<Payment[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
@@ -118,6 +118,8 @@ export default function PaymentsPage() {
         }
     }, [getPayments])
 
+    console.log(payments)
+
     // Handle sorting
     const handleSort = (key: keyof Payment) => {
         let direction: 'asc' | 'desc' = 'asc'
@@ -134,11 +136,12 @@ export default function PaymentsPage() {
     }
 
     // Handle payment selection
-    const handlePaymentClick = (payment: Payment) => {
+    const handlePaymentClick = async (payment: Payment) => {
         if (selectedPayment?.id === payment.id) {
             setSelectedPayment(null) // Deselect if clicking the same payment
         } else {
-            setSelectedPayment(payment) // Select the clicked payment
+            const response = await getPayment(payment.id)
+            setSelectedPayment(response.payment) // Select the clicked payment
         }
     }
 
@@ -241,7 +244,7 @@ export default function PaymentsPage() {
         return new Intl.NumberFormat('es-AR', {
             style: 'currency',
             currency: 'ARS',
-            minimumFractionDigits: 0,
+            minimumFractionDigits: 2,
         }).format(amount)
     }
 
@@ -564,11 +567,11 @@ export default function PaymentsPage() {
                                     <th className="px-4 py-3 text-left">
                                         <button
                                             onClick={() =>
-                                                handleSort('student_id')
+                                                handleSort('student_full_name')
                                             }
                                             className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
                                             Estudiante
-                                            {sortConfig?.key === 'student_id' &&
+                                            {sortConfig?.key === 'student_full_name' &&
                                                 (sortConfig.direction ===
                                                 'asc' ? (
                                                     <ChevronUp className="h-4 w-4" />
@@ -690,8 +693,7 @@ export default function PaymentsPage() {
                                                 {payment.id}
                                             </td>
                                             <td className="px-4 py-3 font-medium">
-                                                {payment.student?.name}{' '}
-                                                {payment.student?.last_name}
+                                                {payment.student_full_name}
                                             </td>
                                             <td className="px-4 py-3">
                                                 {formatCurrency(
