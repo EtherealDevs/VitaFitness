@@ -345,7 +345,7 @@ export default function PaymentsPage() {
                                                 <span className="text-gray-500 dark:text-gray-400">
                                                     Nombre:
                                                 </span>
-                                                <span className="font-medium">
+                                                <span className="font-medium dark:text-white">
                                                     {selectedPayment.student_full_name ||
                                                         selectedPayment.student
                                                             ?.name +
@@ -361,7 +361,7 @@ export default function PaymentsPage() {
                                                 <span className="text-gray-500 dark:text-gray-400">
                                                     ID Estudiante:
                                                 </span>
-                                                <span className="font-medium">
+                                                <span className="font-medium dark:text-white">
                                                     {selectedPayment.student_id}
                                                 </span>
                                             </p>
@@ -418,7 +418,7 @@ export default function PaymentsPage() {
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                                     Fecha de inicio
                                                 </p>
-                                                <p className="font-medium">
+                                                <p className="font-medium dark:text-white">
                                                     {formatDate(
                                                         selectedPayment.date_start ||
                                                             '',
@@ -429,7 +429,7 @@ export default function PaymentsPage() {
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                                     Fecha de pago
                                                 </p>
-                                                <p className="font-medium">
+                                                <p className="font-medium dark:text-white">
                                                     {formatDate(
                                                         selectedPayment.payment_date ||
                                                             '',
@@ -440,7 +440,7 @@ export default function PaymentsPage() {
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
                                                     Fecha de expiración
                                                 </p>
-                                                <p className="font-medium">
+                                                <p className="font-medium dark:text-white">
                                                     {formatDate(
                                                         selectedPayment.expiration_date ||
                                                             '',
@@ -460,7 +460,7 @@ export default function PaymentsPage() {
                                             <span className="text-gray-500 dark:text-gray-400">
                                                 ID de Clase:
                                             </span>{' '}
-                                            <span className="font-medium">
+                                            <span className="font-medium dark:text-white">
                                                 {selectedPayment.classSchedule_id ||
                                                     'No asignado'}
                                             </span>
@@ -470,7 +470,7 @@ export default function PaymentsPage() {
                                                 <span className="text-gray-500 dark:text-gray-400">
                                                     Nombre de Clase:
                                                 </span>{' '}
-                                                <span className="font-medium">
+                                                <span className="font-medium dark:text-white">
                                                     {selectedPayment
                                                         .classSchedule.class
                                                         ?.name ||
@@ -491,7 +491,7 @@ export default function PaymentsPage() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="flex items-center gap-2">
+                                        className="flex items-center gap-2 dark:text-white">
                                         <Edit2 className="h-4 w-4" />
                                         Editar Pago
                                     </Button>
@@ -499,7 +499,7 @@ export default function PaymentsPage() {
                                 <Button
                                     variant="destructive"
                                     size="sm"
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-2 dark:text-red-500"
                                     onClick={() => {
                                         closePaymentDetailsModal()
                                         handleDeletePayment(selectedPayment.id)
@@ -1053,7 +1053,7 @@ export default function PaymentsPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="flex items-center gap-2">
+                                                className="flex items-center gap-2 dark:text-white">
                                                 <Edit2 className="h-4 w-4" />
                                                 Editar
                                             </Button>
@@ -1061,7 +1061,7 @@ export default function PaymentsPage() {
                                         <Button
                                             variant="destructive"
                                             size="sm"
-                                            className="flex items-center gap-2"
+                                            className="flex items-center gap-2 dark:text-red-500"
                                             onClick={() =>
                                                 handleDeletePayment(
                                                     selectedPayment.id,

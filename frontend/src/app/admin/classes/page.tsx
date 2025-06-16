@@ -658,19 +658,19 @@ export default function ClassPage() {
                                             onClick={() =>
                                                 handleClassClick(classe)
                                             }>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 {classe.plan_name}
                                             </td>
-                                            <td className="px-4 py-3 font-medium">
+                                            <td className="px-4 py-3 font-medium dark:text-white">
                                                 {classe.branch_name}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 {classe.max_students}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 {classe.precio}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 {capitalize(classe.plan_status)}
                                             </td>
                                             <td className="px-4 py-3 text-right">
@@ -698,7 +698,7 @@ export default function ClassPage() {
                                                         )
                                                     }}
                                                     className="h-8 w-8 p-0">
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-4 w-4 dark:text-red-500" />
                                                 </Button>
                                             </td>
                                         </tr>

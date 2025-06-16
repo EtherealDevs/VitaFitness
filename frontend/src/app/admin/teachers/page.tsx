@@ -270,7 +270,7 @@ export default function TeacherIndex() {
     const renderQuickClassOverview = (teacher: Teacher) => {
         if (teacher.schedules.length === 0) {
             return (
-                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-4 text-gray-500 dark:text-white">
                     Sin clases asignadas
                 </div>
             )
@@ -295,12 +295,12 @@ export default function TeacherIndex() {
                             className="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
                             <div className="flex items-center gap-2 mb-2">
                                 <BookOpen className="h-4 w-4 text-blue-500" />
-                                <h6 className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                                <h6 className="font-medium text-sm text-gray-700 dark:text-white">
                                     {schedule.class.plan?.[1] ||
                                         'Plan sin nombre'}
                                 </h6>
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                            <div className="text-xs text-gray-500 dark:text-white space-y-1">
                                 <div className="flex flex-wrap gap-1">
                                     {schedule.days.map(day => (
                                         <span
@@ -333,12 +333,12 @@ export default function TeacherIndex() {
         if (!teacher.schedules || teacher.schedules.length === 0) {
             return (
                 <div className="text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    <p className="text-gray-500 dark:text-white mb-4">
                         Sin planes asignados
                     </p>
                     {teacher.schedules && teacher.schedules.length > 0 && (
                         <div>
-                            <h5 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+                            <h5 className="text-sm font-medium text-gray-600 dark:text-white mb-3">
                                 Horarios generales
                             </h5>
                             {renderScheduleTableForPlan(
@@ -376,7 +376,7 @@ export default function TeacherIndex() {
     ) => {
         if (!schedules || schedules.length === 0) {
             return (
-                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-4 text-gray-500 dark:text-white">
                     Sin horarios asignados
                 </div>
             )
@@ -404,7 +404,7 @@ export default function TeacherIndex() {
 
         if (activeDays.length === 0) {
             return (
-                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-4 text-gray-500 dark:text-white">
                     Sin horarios asignados
                 </div>
             )
@@ -412,7 +412,7 @@ export default function TeacherIndex() {
 
         return (
             <div className="mb-6">
-                <h5 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                <h5 className="text-lg font-medium text-gray-700 dark:text-white mb-4 flex items-center gap-2">
                     <div className="w-3 h-3 bg-violet-500 rounded-full"></div>
                     {planName}
                 </h5>
@@ -423,7 +423,7 @@ export default function TeacherIndex() {
                                 {activeDays.map(day => (
                                     <th
                                         key={day}
-                                        className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
+                                        className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-white border-r border-gray-200 dark:border-gray-600 last:border-r-0">
                                         {capitalize(getDayName(day))}
                                     </th>
                                 ))}
@@ -454,7 +454,7 @@ export default function TeacherIndex() {
                                                                 timeslot => (
                                                                     <div
                                                                         key={`${schedule.schedule_id}-${timeslot.id}`}
-                                                                        className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
+                                                                        className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-white  px-3 py-2 rounded-md font-medium">
                                                                         {
                                                                             timeslot.hour
                                                                         }
@@ -502,7 +502,7 @@ export default function TeacherIndex() {
                         <Button
                             onClick={toggleDetails}
                             variant="outline"
-                            className="w-full sm:w-auto dark:text-white dark:border-gray-600">
+                            className="w-full sm:w-auto dark:text-white  dark:border-gray-600">
                             {showDetails
                                 ? 'Ocultar detalles'
                                 : 'Mostrar más detalles'}
@@ -527,7 +527,7 @@ export default function TeacherIndex() {
                                 placeholder="Buscar profes..."
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50  dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50  dark:bg-[#363a3b] dark:border-slate-700 dark:text-white "
                             />
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                         </div>
@@ -541,7 +541,7 @@ export default function TeacherIndex() {
                                     <th className="px-4 py-3 text-left">
                                         <button
                                             onClick={() => handleSort('dni')}
-                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-white">
                                             DNI
                                             {sortConfig?.key === 'dni' &&
                                                 (sortConfig.direction ===
@@ -555,7 +555,7 @@ export default function TeacherIndex() {
                                     <th className="px-4 py-3 text-left">
                                         <button
                                             onClick={() => handleSort('name')}
-                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-white">
                                             Nombre
                                             {sortConfig?.key === 'name' &&
                                                 (sortConfig.direction ===
@@ -571,7 +571,7 @@ export default function TeacherIndex() {
                                             onClick={() =>
                                                 handleSort('last_name')
                                             }
-                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-white">
                                             Apellido
                                             {sortConfig?.key === 'last_name' &&
                                                 (sortConfig.direction ===
@@ -585,7 +585,7 @@ export default function TeacherIndex() {
                                     <th className="px-4 py-3 text-left">
                                         <button
                                             onClick={() => handleSort('phone')}
-                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                            className="flex items-center gap-1 font-semibold text-gray-600 dark:text-white">
                                             Teléfono
                                             {sortConfig?.key === 'phone' &&
                                                 (sortConfig.direction ===
@@ -596,7 +596,7 @@ export default function TeacherIndex() {
                                                 ))}
                                         </button>
                                     </th>
-                                    <th className="px-4 py-3 text-right text-gray-600 dark:text-gray-300">
+                                    <th className="px-4 py-3 text-right text-gray-600 dark:text-white">
                                         Acciones
                                     </th>
                                 </tr>
@@ -624,7 +624,7 @@ export default function TeacherIndex() {
                                     <tr>
                                         <td
                                             colSpan={9}
-                                            className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                            className="px-4 py-8 text-center text-gray-500 dark:text-white ">
                                             No se encontraron profesores
                                         </td>
                                     </tr>
@@ -641,16 +641,16 @@ export default function TeacherIndex() {
                                             onClick={() =>
                                                 handleTeacherClick(teacher)
                                             }>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 {teacher.dni}
                                             </td>
-                                            <td className="px-4 py-3 font-medium">
+                                            <td className="px-4 py-3 font-medium dark:text-white">
                                                 {teacher.name}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 {teacher.last_name}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 {teacher.phone}
                                             </td>
                                             <td className="px-4 py-3 text-right">
@@ -664,7 +664,7 @@ export default function TeacherIndex() {
                                                                 `/admin/teachers/edit/${teacher.id}`,
                                                             )
                                                         }}
-                                                        className="h-8 w-8 p-0 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                                                        className="h-8 w-8 p-0 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700">
                                                         <Edit2 className="h-4 w-4" />
                                                     </Button>
                                                 </div>
@@ -678,7 +678,7 @@ export default function TeacherIndex() {
                                                         )
                                                     }}
                                                     className="h-8 w-8 p-0">
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-4 w-4 dark:text-red-600" />
                                                 </Button>
                                             </td>
                                         </tr>
@@ -693,9 +693,9 @@ export default function TeacherIndex() {
                             size="sm"
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(prev => prev - 1)}>
-                            <p className="dark:text-white">← Anterior</p>
+                            <p className="dark:text-white ">← Anterior</p>
                         </Button>
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-sm text-gray-700 dark:text-white">
                             Página {currentPage} de {totalPages}
                         </span>
                         <Button
@@ -703,7 +703,7 @@ export default function TeacherIndex() {
                             size="sm"
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(prev => prev + 1)}>
-                            <p className="dark:text-white">Siguiente →</p>
+                            <p className="dark:text-white ">Siguiente →</p>
                         </Button>
                     </div>
 
@@ -712,7 +712,7 @@ export default function TeacherIndex() {
                         <Button
                             variant="outline"
                             onClick={toggleDetails}
-                            className="w-full dark:text-white dark:border-gray-600">
+                            className="w-full dark:text-white  dark:border-gray-600">
                             {showDetails
                                 ? 'Ocultar detalles'
                                 : 'Mostrar más detalles'}
@@ -724,7 +724,7 @@ export default function TeacherIndex() {
                 {selectedTeacher && (
                     <div className="mt-6 bg-white/80 dark:bg-[#1f2122] backdrop-blur shadow-lg rounded-lg border border-opacity-50 dark:border-gray-700 overflow-hidden">
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
+                            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white ">
                                 <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                 Detalles del Profe: {selectedTeacher.name}{' '}
                                 {selectedTeacher.last_name}
@@ -733,7 +733,7 @@ export default function TeacherIndex() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => setSelectedTeacher(null)}
-                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                className="text-gray-500 hover:text-gray-700 dark:text-white  dark:hover:text-gray-200">
                                 Cerrar
                             </Button>
                         </div>
@@ -741,26 +741,26 @@ export default function TeacherIndex() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
                             {/* Personal Information */}
                             <div className="space-y-4">
-                                <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                                <h4 className="font-medium text-gray-700 dark:text-white">
                                     Información Personal
                                 </h4>
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-2">
-                                        <Phone className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
+                                        <Phone className="h-4 w-4 text-gray-500 dark:text-white  mt-0.5" />
                                         <div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            <p className="text-sm text-gray-500 dark:text-white ">
                                                 Teléfono
                                             </p>
-                                            <p className="dark:text-white">
+                                            <p className="dark:text-white ">
                                                 {selectedTeacher.phone}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-start gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5" />
+                                        <Calendar className="h-4 w-4 text-gray-500 dark:text-white mt-0.5" />
                                         <div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            <p className="text-sm text-gray-500 dark:text-white">
                                                 Registrado desde
                                             </p>
                                             <p className="dark:text-white">
@@ -777,7 +777,7 @@ export default function TeacherIndex() {
 
                             {/* Quick Class Overview */}
                             <div className="space-y-4">
-                                <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <h4 className="font-medium text-gray-700 dark:text-white flex items-center gap-2">
                                     <Clock className="h-4 w-4" />
                                     Clases Asignadas
                                 </h4>
@@ -790,7 +790,7 @@ export default function TeacherIndex() {
                         {/* Detailed Schedule Table Section - Replaces payment info */}
                         <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[#1f2122] backdrop-blur">
                             <div className="p-6">
-                                <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2">
+                                <h4 className="text-lg font-semibold text-gray-700 dark:text-white mb-6 flex items-center gap-2">
                                     <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                     Horarios Detallados
                                 </h4>

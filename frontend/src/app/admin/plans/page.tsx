@@ -273,13 +273,13 @@ export default function PlansPage() {
                                             onClick={() =>
                                                 handlePlanClick(plan)
                                             }>
-                                            <td className="px-4 py-3 font-medium">
+                                            <td className="px-4 py-3 font-medium dark:text-white">
                                                 {plan.name}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 {plan.description}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-3 dark:text-white">
                                                 <span
                                                     className={`px-2 py-1 text-xs rounded-full ${
                                                         plan.status.toLowerCase() ===
@@ -317,7 +317,7 @@ export default function PlansPage() {
                                                             )
                                                         }}
                                                         className="h-8 w-8 p-0">
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="h-4 w-4 dark:text-red-500" />
                                                     </Button>
                                                 </div>
                                             </td>
@@ -441,7 +441,7 @@ export default function PlansPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="flex items-center gap-2">
+                                                className="flex items-center gap-2 dark:text-white">
                                                 <Edit2 className="h-4 w-4" />
                                                 Editar Plan
                                             </Button>
@@ -449,7 +449,7 @@ export default function PlansPage() {
                                         <Button
                                             variant="destructive"
                                             size="sm"
-                                            className="flex items-center gap-2"
+                                            className="flex items-center gap-2 dark:text-red-500"
                                             onClick={() =>
                                                 handleDelete(selectedPlan.id)
                                             }>

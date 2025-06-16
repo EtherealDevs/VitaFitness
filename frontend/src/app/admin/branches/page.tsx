@@ -284,13 +284,13 @@ export default function BranchesPage() {
                                             onClick={() =>
                                                 handleBranchClick(branch)
                                             }>
-                                            <td className="px-4 py-3 font-medium">
+                                            <td className="px-4 py-3 font-medium dark:text-white">
                                                 {branch.name}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-start gap-1">
                                                     <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5" />
-                                                    <span>
+                                                    <span className=" font-medium dark:text-white">
                                                         {branch.address}
                                                     </span>
                                                 </div>
@@ -319,7 +319,7 @@ export default function BranchesPage() {
                                                             )
                                                         }}
                                                         className="h-8 w-8 p-0">
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="h-4 w-4 dark:text-red-500" />
                                                     </Button>
                                                 </div>
                                             </td>
@@ -423,7 +423,7 @@ export default function BranchesPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="flex items-center gap-2">
+                                                className="flex items-center gap-2 dark:text-white">
                                                 <Edit2 className="h-4 w-4" />
                                                 Editar Sucursal
                                             </Button>
@@ -431,7 +431,7 @@ export default function BranchesPage() {
                                         <Button
                                             variant="destructive"
                                             size="sm"
-                                            className="flex items-center gap-2"
+                                            className="flex items-center gap-2 dark:text-red-500"
                                             onClick={() =>
                                                 handleDelete(selectedBranch.id)
                                             }>

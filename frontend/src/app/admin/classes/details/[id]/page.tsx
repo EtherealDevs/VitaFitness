@@ -301,32 +301,38 @@ export default function AdminClassDetails() {
     // Get active and inactive students
     const activeSeen = new Set()
     const activeStudents =
-        schedule?.students.filter(s => s.student.status === 'activo').filter(s => {
-        if (activeSeen.has(s.student.id)) {
-            return false
-        }
-        activeSeen.add(s.student.id)
-        return true
-        }) || []
+        schedule?.students
+            .filter(s => s.student.status === 'activo')
+            .filter(s => {
+                if (activeSeen.has(s.student.id)) {
+                    return false
+                }
+                activeSeen.add(s.student.id)
+                return true
+            }) || []
 
     const inactiveSeen = new Set()
     const inactiveStudents =
-        schedule?.students.filter(s => s.student.status === 'inactivo').filter(s => {
-        if (inactiveSeen.has(s.student.id)) {
-            return false
-        }
-        inactiveSeen.add(s.student.id)
-        return true
-        }) || []
+        schedule?.students
+            .filter(s => s.student.status === 'inactivo')
+            .filter(s => {
+                if (inactiveSeen.has(s.student.id)) {
+                    return false
+                }
+                inactiveSeen.add(s.student.id)
+                return true
+            }) || []
     const pendingSeen = new Set()
     const pendingStudents =
-        schedule?.students.filter(s => s.student.status === 'pendiente').filter(s => {
-        if (pendingSeen.has(s.student.id)) {
-            return false
-        }
-        pendingSeen.add(s.student.id)
-        return true
-        }) || []
+        schedule?.students
+            .filter(s => s.student.status === 'pendiente')
+            .filter(s => {
+                if (pendingSeen.has(s.student.id)) {
+                    return false
+                }
+                pendingSeen.add(s.student.id)
+                return true
+            }) || []
 
     if (loading) {
         return (
@@ -874,7 +880,9 @@ export default function AdminClassDetails() {
                                     <Button
                                         variant="outline"
                                         onClick={() => setStudentModal(null)}>
-                                        Cancelar
+                                        <p className="dark:text-white">
+                                            Cancelar
+                                        </p>
                                     </Button>
                                     <Button
                                         onClick={handleAddStudents}
@@ -1037,7 +1045,9 @@ export default function AdminClassDetails() {
                                     <Button
                                         variant="outline"
                                         onClick={() => setTeacherModal(null)}>
-                                        Cancelar
+                                        <p className="dark:text-white">
+                                            Cancelar
+                                        </p>
                                     </Button>
                                     <Button
                                         onClick={handleAddTeachers}
