@@ -100,7 +100,6 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $payment->load('comprobante');
         $payment = new PaymentResource($payment);
         $data = [
             'payment' => $payment,

@@ -41,7 +41,7 @@ class StudentController extends Controller
         // Retrieve a student by its ID from the database
         // Return the retrieved student as a JSON response
         try {
-            $student = Student::with('branch', 'payments', 'attendances', 'classes', 'classScheduleTimeslotStudents')->find($id);
+            $student = Student::with('branch', 'payments.classSchedule', 'attendances', 'classes', 'classScheduleTimeslotStudents')->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
