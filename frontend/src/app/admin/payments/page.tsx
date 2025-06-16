@@ -532,7 +532,7 @@ export default function PaymentsPage() {
                     </div>
                     <div className="hidden sm:flex justify-end gap-2">
                         <Link href="/admin/payments/create/new">
-                            <Button className="dark:text-white text-black">
+                            <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Cargar un Pago
                             </Button>

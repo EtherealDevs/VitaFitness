@@ -284,7 +284,7 @@ export default function TeacherIndex() {
         } {
             return schedule.class !== null && schedule.class !== undefined
         }
-        
+
         return (
             <div className="space-y-3">
                 {teacher.schedules
@@ -350,7 +350,11 @@ export default function TeacherIndex() {
                 </div>
             )
         }
-        console.log(teacher, teacher.schedules, hasValidClass(teacher.schedules[0]))
+        console.log(
+            teacher,
+            teacher.schedules,
+            hasValidClass(teacher.schedules[0]),
+        )
         return (
             <div className="space-y-6">
                 {teacher.schedules.filter(hasValidClass).map(schedule => (
@@ -506,7 +510,7 @@ export default function TeacherIndex() {
                     </div>
                     <div className="hidden sm:flex justify-end gap-2">
                         <Link href="/admin/teachers/create">
-                            <Button className="dark:text-white text-black">
+                            <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Nuevo profesor
                             </Button>

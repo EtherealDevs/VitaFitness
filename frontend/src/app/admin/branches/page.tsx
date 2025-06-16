@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/app/admin/components/ui/button'
 import { toast } from '@/hooks/use-toast'
-import { Branch, useBranches } from '@/hooks/branches'
+import { type Branch, useBranches } from '@/hooks/branches'
 
 export default function BranchesPage() {
     const router = useRouter()
@@ -168,7 +168,7 @@ export default function BranchesPage() {
                     </div>
                     <div className="hidden sm:flex justify-end gap-2">
                         <Link href="/admin/branches/create">
-                            <Button className="dark:text-white text-black">
+                            <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Nueva Sucursal
                             </Button>
@@ -265,7 +265,7 @@ export default function BranchesPage() {
                                                     : 'Aún no hay sucursales registradas.'}
                                             </p>
                                             <Link href="/admin/branches/create">
-                                                <Button>
+                                                <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                                                     <Plus className="mr-2 h-4 w-4" />
                                                     Crear Nueva Sucursal
                                                 </Button>
@@ -448,7 +448,7 @@ export default function BranchesPage() {
                 {/* Mobile new branch button */}
                 <div className="sm:hidden flex justify-center mt-6">
                     <Link href="/admin/branches/create" className="w-full">
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                             <Plus className="mr-2 h-4 w-4" />
                             Nueva Sucursal
                         </Button>

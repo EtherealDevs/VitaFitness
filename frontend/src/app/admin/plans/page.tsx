@@ -1,6 +1,6 @@
 'use client'
 
-import { Plan, usePlans } from '@/hooks/plans'
+import { type Plan, usePlans } from '@/hooks/plans'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import {
@@ -142,7 +142,7 @@ export default function PlansPage() {
                     </div>
                     <div className="hidden sm:flex justify-end gap-2">
                         <Link href="/admin/plans/create">
-                            <Button className="dark:text-white text-black">
+                            <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Crear Plan
                             </Button>
@@ -254,7 +254,7 @@ export default function PlansPage() {
                                                     : 'Aún no hay planes registrados.'}
                                             </p>
                                             <Link href="/admin/plans/create">
-                                                <Button>
+                                                <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                                                     <Plus className="mr-2 h-4 w-4" />
                                                     Crear Nuevo Plan
                                                 </Button>
@@ -466,7 +466,7 @@ export default function PlansPage() {
                 {/* Mobile new plan button */}
                 <div className="sm:hidden flex justify-center mt-6">
                     <Link href="/admin/plans/create" className="w-full">
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                             <Plus className="mr-2 h-4 w-4" />
                             Crear Plan
                         </Button>

@@ -175,7 +175,7 @@ export default function ProductsPage() {
                     </div>
                     <div className="hidden sm:flex justify-end gap-2">
                         <Link href="/admin/products/create">
-                            <Button className="dark:text-white text-black">
+                            <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Nuevo Producto
                             </Button>
@@ -301,7 +301,7 @@ export default function ProductsPage() {
                                                     : 'Aún no hay productos registrados.'}
                                             </p>
                                             <Link href="/admin/products/create">
-                                                <Button>
+                                                <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                                                     <Plus className="mr-2 h-4 w-4" />
                                                     Crear Nuevo Producto
                                                 </Button>
@@ -540,7 +540,7 @@ export default function ProductsPage() {
                 {/* Mobile new product button */}
                 <div className="sm:hidden flex justify-center mt-6">
                     <Link href="/admin/products/create" className="w-full">
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
                             <Plus className="mr-2 h-4 w-4" />
                             Nuevo Producto
                         </Button>
