@@ -1056,7 +1056,7 @@ export default function StudentManagement() {
                             size="sm"
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(prev => prev - 1)}>
-                            ← Anterior
+                            <p className="dark:text-white">← Anterior</p>
                         </Button>
                         <span className="text-sm text-gray-700 dark:text-gray-300">
                             Página {currentPage} de {totalPages}
@@ -1066,7 +1066,7 @@ export default function StudentManagement() {
                             size="sm"
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(prev => prev + 1)}>
-                            Siguiente →
+                            <p className="dark:text-white">Siguiente →</p>
                         </Button>
                     </div>
 

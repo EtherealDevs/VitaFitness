@@ -15,13 +15,15 @@ export function DashboardMetrics({
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-bold">
+                    <CardTitle className="text-sm font-bold dark:text-white">
                         Total Alumnos
                     </CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <Users className="h-4 w-4 text-muted-foreground dark:text-white" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{total_students}</div>
+                    <div className="text-2xl font-bold dark:text-white">
+                        {total_students}
+                    </div>
                     {/* <p className="text-xs text-muted-foreground">
                         +4 desde el último mes
                     </p> */}
@@ -29,13 +31,15 @@ export function DashboardMetrics({
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-bold">
+                    <CardTitle className="text-sm font-bold dark:text-white">
                         Clases Hoy
                     </CardTitle>
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <Calendar className="h-4 w-4 text-muted-foreground dark:text-white" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{total_classes}</div>
+                    <div className="text-2xl font-bold dark:text-white">
+                        {total_classes}
+                    </div>
                     {/* <p className="text-xs text-muted-foreground">
                         3 más que ayer
                     </p> */}
@@ -43,13 +47,15 @@ export function DashboardMetrics({
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-bold">
+                    <CardTitle className="text-sm font-bold dark:text-white">
                         Ingresos
                     </CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <DollarSign className="h-4 w-4 text-muted-foreground dark:text-white" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">${total_income}</div>
+                    <div className="text-2xl font-bold dark:text-white">
+                        ${total_income}
+                    </div>
                     {/* <p className="text-xs text-muted-foreground">
                         +15% este mes
                     </p> */}
@@ -57,13 +63,15 @@ export function DashboardMetrics({
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-bold">
+                    <CardTitle className="text-sm font-bold dark:text-white">
                         Asistencia
                     </CardTitle>
-                    <Activity className="h-4 w-4 text-muted-foreground" />
+                    <Activity className="h-4 w-4 text-muted-foreground dark:text-white" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">85%</div>
+                    <div className="text-2xl font-bold dark:text-white">
+                        85%
+                    </div>
                     {/* <p className="text-xs text-muted-foreground">
                         +2% desde la semana pasada
                     </p> */}

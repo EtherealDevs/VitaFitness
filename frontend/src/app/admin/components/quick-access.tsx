@@ -32,11 +32,11 @@ export function QuickAccess() {
                 return (
                     <Card key={action.title}>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Icon className="h-5 w-5" />
+                            <CardTitle className="flex items-center gap-2 dark:text-white">
+                                <Icon className="h-5 w-5 dark:text-white" />
                                 {action.title}
                             </CardTitle>
-                            <CardDescription>
+                            <CardDescription className="flex items-center gap-2 dark:text-white">
                                 {action.description}
                             </CardDescription>
                         </CardHeader>

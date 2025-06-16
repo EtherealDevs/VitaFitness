@@ -89,9 +89,9 @@ export function DashboardNav() {
                         }}
                         className={cn(
                             'group flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800',
-                            'text-gray-700 dark:text-gray-400 cursor-pointer select-none',
+                            'text-gray-700 dark:text-white cursor-pointer select-none',
                         )}>
-                        <item.icon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:text-gray-400" />
+                        <item.icon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 dark:text-white" />
                         {item.name}
                     </div>
                 ) : (
@@ -101,15 +101,15 @@ export function DashboardNav() {
                         className={cn(
                             'group flex items-center rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800',
                             isActive
-                                ? 'text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                                : 'text-gray-700 dark:text-gray-400',
+                                ? 'text-gray-600 dark:bg-gray-800 dark:text-gray-100'
+                                : 'text-gray-700 dark:text-white',
                         )}>
                         <Icon
                             className={cn(
                                 'mr-3 h-5 w-5',
                                 isActive
-                                    ? 'text-blue-600 dark:text-gray-400'
-                                    : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-400',
+                                    ? 'text-blue-600 dark:text-white'
+                                    : 'text-gray-400 group-hover:text-gray-500 dark:text-white',
                             )}
                         />
                         {item.name}
