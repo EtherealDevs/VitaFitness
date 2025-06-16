@@ -87,7 +87,7 @@ export default function PaymentHistory() {
             )
 
             const totalPaid = paidPayments.reduce(
-                (sum, p) => sum + parseFloat(p.amount),
+                (sum, p) => sum + parseFloat(String(p.amount)),
                 0,
             )
 
@@ -117,7 +117,7 @@ export default function PaymentHistory() {
                 paymentHistory: payments.map(p => ({
                     id: String(p.id),
                     date: p.payment_date,
-                    amount: parseFloat(p.amount).toString(),
+                    amount: p.amount,
                     className:
                         p.classSchedule?.class?.name || 'Clase no disponible',
                     status: p.status.toLowerCase(),
@@ -125,6 +125,7 @@ export default function PaymentHistory() {
                     classSchedule_id: p.classSchedule?.id || '',
                     student_id: p.student_id || '',
                     student: p.student || '',
+                    student_full_name: p.student_full_name || '',
                     expiration_date: p.expiration_date || '',
                     date_start: p.date_start || '',
                     payment_date: p.payment_date || '',
@@ -485,7 +486,7 @@ export default function PaymentHistory() {
                                                 <span className="font-semibold text-gray-700">
                                                     {formatCurrency(
                                                         parseFloat(
-                                                            payment.amount,
+                                                            String(payment.amount),
                                                         ),
                                                     )}
                                                 </span>
