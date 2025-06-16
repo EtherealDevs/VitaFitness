@@ -66,7 +66,7 @@ export default function PaymentsPage() {
     const [sortConfig, setSortConfig] = useState<{
         key: keyof Payment
         direction: 'asc' | 'desc'
-    } | null>(null)
+    } | null>({ key: 'id', direction: 'desc' })
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
     const [showDetails, setShowDetails] = useState<boolean>(false)
     const [showPaymentDetailsModal, setShowPaymentDetailsModal] =
@@ -120,14 +120,14 @@ export default function PaymentsPage() {
 
     // Handle sorting
     const handleSort = (key: keyof Payment) => {
-        let direction: 'asc' | 'desc' = 'asc'
+        let direction: 'asc' | 'desc' = 'desc'
 
         if (
             sortConfig &&
             sortConfig.key === key &&
-            sortConfig.direction === 'asc'
+            sortConfig.direction === 'desc'
         ) {
-            direction = 'desc'
+            direction = 'asc'
         }
 
         setSortConfig({ key, direction })
