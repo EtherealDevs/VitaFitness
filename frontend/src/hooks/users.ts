@@ -1,4 +1,5 @@
 import axios from '@/lib/axios'
+import { useCallback } from 'react'
 
 export interface Roles {
     id: number
@@ -25,25 +26,16 @@ export const useUser = () => {
             throw error
         }
     }
-    const getUsers = async () => {
-        try {
-            const response = await axios.get('/api/users')
-            return response.data
-        } catch (error) {
-            console.error('Error al obtener los usuarios:', error)
-            throw error
-        }
-    }
+    const getUsers = useCallback(async () => {
+        const response = await axios.get('/api/users')
+        return response.data
+    }, [])
 
-    const getRoles = async () => {
-        try {
-            const response = await axios.get(`/api/users/roles`)
-            return response.data
-        } catch (error) {
-            console.error('Error al obtener los roles del usuario:', error)
-            throw error
-        }
-    }
+    const getRoles = useCallback(async () => {
+        const response = await axios.get('/api/roles')
+        return response.data
+    }, [])
+
     const update = async (id: string, formData: FormData) => {
         await csrf()
         try {

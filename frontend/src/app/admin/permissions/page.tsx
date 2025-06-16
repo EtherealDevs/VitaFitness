@@ -48,7 +48,7 @@ export default function PermissionsPage() {
         }
 
         fetchData()
-    }, [])
+    }, [getUsers, getRoles]) // ✅ Se agregan como dependencias
 
     // Filtrar usuarios
     const filteredUsers = users.filter(
@@ -206,6 +206,7 @@ export default function PermissionsPage() {
                                                                                 {
                                                                                     role.guard_name
                                                                                 }
+
                                                                                 )
                                                                             </span>
                                                                         )}
