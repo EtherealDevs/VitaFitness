@@ -48,7 +48,7 @@ export default function PermissionsPage() {
         }
 
         fetchData()
-    }, [])
+    }, [getRoles, getUsers])
 
     // Filtrar usuarios
     const filteredUsers = users.filter(
