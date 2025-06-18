@@ -21,7 +21,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/app/admin/components/ui/label'
 import { Input } from '@/app/admin/components/ui/input'
 import { useStudents } from '@/hooks/students'
-import { usePayments } from '@/hooks/payments'
+import { ClassSchedule, usePayments } from '@/hooks/payments'
+import { useClassSchedules } from '@/hooks/classSchedules'
 
 // Interfaces
 interface Student {
@@ -64,10 +65,10 @@ interface Class {
 
 interface FormData {
     student_id: string
-    class_id: string
+    classSchedule_id: string
     amount: string
     status: string
-    start_date: string
+    date_start: string
     payment_date: string
     expiration_date: string
 }
@@ -75,11 +76,12 @@ interface FormData {
 export default function CreatePaymentPage() {
     const router = useRouter()
     const { getStudents } = useStudents()
+    const { getClassSchedules } = useClassSchedules()
     const { createPayment } = usePayments() // Eliminamos getClasses que no existe
 
     // Estados principales
     const [students, setStudents] = useState<Student[]>([])
-    const [classes, setClasses] = useState<Class[]>([]) // Mantenemos el estado pero lo llenaremos de otra manera
+    const [classes, setClasses] = useState<ClassSchedule[]>([]) // Mantenemos el estado pero lo llenaremos de otra manera
     const [loading, setLoading] = useState(false)
     const [fetchingData, setFetchingData] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -88,10 +90,10 @@ export default function CreatePaymentPage() {
     // Estado del formulario
     const [formData, setFormData] = useState<FormData>({
         student_id: '',
-        class_id: '',
+        classSchedule_id: '',
         amount: '',
         status: 'pendiente',
-        start_date: '',
+        date_start: '',
         payment_date: '',
         expiration_date: '',
     })
@@ -134,26 +136,9 @@ export default function CreatePaymentPage() {
             // return data.classes || [];
 
             // Opción 2: Si puedes extraer clases de los estudiantes
-            const studentsResponse = await getStudents()
-            const allClasses = new Map()
-
-            // Extraer clases únicas de los pagos de los estudiantes
-            studentsResponse.students.forEach((student: Student) => {
-                if (student.payments) {
-                    student.payments.forEach((payment: Payment) => {
-                        if (payment.classSchedule?.class) {
-                            const classItem = payment.classSchedule.class
-                            allClasses.set(classItem.id, {
-                                id: classItem.id,
-                                name: classItem.name,
-                            })
-                        }
-                    })
-                }
-            })
-
-            // Convertir el Map a un array
-            return Array.from(allClasses.values())
+            const response = await getClassSchedules()
+            const data = response.classSchedules
+            return data || []
         } catch (error) {
             console.error('Error obteniendo clases:', error)
             return []
@@ -179,7 +164,7 @@ export default function CreatePaymentPage() {
                     setFormData(prev => ({
                         ...prev,
                         payment_date: dates.today,
-                        start_date: dates.today,
+                        date_start: dates.today,
                         expiration_date: dates.nextMonth,
                     }))
             } catch (error) {
@@ -220,18 +205,18 @@ export default function CreatePaymentPage() {
         const errors: string[] = []
 
         if (!formData.student_id) errors.push('Debe seleccionar un alumno')
-        if (!formData.class_id) errors.push('Debe seleccionar una clase')
+        if (!formData.classSchedule_id) errors.push('Debe seleccionar una clase')
         if (!formData.amount || Number.parseFloat(formData.amount) <= 0)
             errors.push('El monto debe ser mayor a 0')
         if (!formData.payment_date)
             errors.push('Debe ingresar la fecha de pago')
-        if (!formData.start_date)
+        if (!formData.date_start)
             errors.push('Debe ingresar la fecha de inicio')
         if (!formData.expiration_date)
             errors.push('Debe ingresar la fecha de expiración')
 
         // Validar fechas
-        const startDate = new Date(formData.start_date)
+        const startDate = new Date(formData.date_start)
         const expirationDate = new Date(formData.expiration_date)
         const paymentDate = new Date(formData.payment_date)
 
@@ -408,13 +393,13 @@ export default function CreatePaymentPage() {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="class_id">Clase</Label>
+                                    <Label htmlFor="classSchedule_id">Clase</Label>
                                     <select
-                                        id="class_id"
-                                        value={formData.class_id}
+                                        id="classSchedule_id"
+                                        value={formData.classSchedule_id}
                                         onChange={e =>
                                             handleInputChange(
-                                                'class_id',
+                                                'classSchedule_id',
                                                 e.target.value,
                                             )
                                         }
@@ -428,7 +413,7 @@ export default function CreatePaymentPage() {
                                             <option
                                                 key={classItem.id}
                                                 value={classItem.id}>
-                                                {classItem.name}
+                                                {classItem.class.name} - {classItem.selectedDays.join(', ')}
                                             </option>
                                         ))}
                                     </select>
@@ -489,18 +474,18 @@ export default function CreatePaymentPage() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <Label
-                                        htmlFor="start_date"
+                                        htmlFor="date_start"
                                         className="flex items-center gap-2">
                                         <Calendar className="h-4 w-4" />
                                         Fecha de Inicio
                                     </Label>
                                     <Input
-                                        id="start_date"
+                                        id="date_start"
                                         type="date"
-                                        value={formData.start_date}
+                                        value={formData.date_start}
                                         onChange={e =>
                                             handleInputChange(
-                                                'start_date',
+                                                'date_start',
                                                 e.target.value,
                                             )
                                         }
