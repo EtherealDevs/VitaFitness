@@ -62,11 +62,6 @@ interface AccountInfo {
     lastPaymentDate: string
 }
 
-interface Class {
-    id: string
-    name: string
-}
-
 interface FormData {
     student_id: string
     classSchedule_id: string
@@ -149,7 +144,7 @@ export default function CreatePaymentPage() {
             console.error('Error obteniendo clases:', error)
             return []
         }
-    }, [getStudents])
+    }, [getClassSchedules])
 
     // Cargar datos iniciales
     useEffect(() => {
