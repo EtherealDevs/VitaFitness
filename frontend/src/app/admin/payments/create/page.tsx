@@ -130,7 +130,6 @@ export default function CreatePaymentPage() {
             nextMonth: nextMonth.toISOString().split('T')[0],
         }
     }, [])
-    console.log(selectedStudentFromStorage)
 
     // Función para obtener clases (simulada ya que no existe getClasses)
     const fetchClasses = useCallback(async () => {
@@ -166,7 +165,6 @@ export default function CreatePaymentPage() {
                 if (studentData) {
                     const student = JSON.parse(studentData)
                     setSelectedStudentFromStorage(student)
-                    console.log('Estudiante preseleccionado:', student)
                 }
 
                 // Cargar estudiantes
@@ -287,7 +285,6 @@ export default function CreatePaymentPage() {
 
         return errors
     }
-    console.log(formData)
 
     // Manejar envío del formulario
     const handleSubmit = async (e: React.FormEvent) => {
