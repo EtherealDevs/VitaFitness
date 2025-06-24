@@ -25,19 +25,18 @@ export default function EditPlanPage() {
         Partial<Record<keyof Plan | 'general', string[]>>
     >({})
 
-    const fetchPlan = useCallback(async () => {
-        try {
+    useEffect(() => {
+             const fetchPlan = async () => {
+            try {
             const response = await getPlan(id as string)
             setFormData(response.plan)
-        } catch (error) {
+            } catch (error) {
             console.error(error)
             setErrors({ general: ['No se pudo cargar el plan.'] })
+            }
         }
-    }, [getPlan, id])
-
-    useEffect(() => {
         fetchPlan()
-    }, [fetchPlan])
+    }, [])
 
     const handleChange = (
         e: React.ChangeEvent<
