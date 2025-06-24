@@ -2,16 +2,17 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { usePayments } from '@/hooks/payments'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/app/admin/components/ui/input'
 import { Label } from '@/app/admin/components/ui/label'
 import { Button } from '@/app/admin/components/ui/button'
-import { useStudents } from '@/hooks/students'
 import axios from '@/lib/axios'
+import { useStudents } from '@/hooks/students'
 import { Student } from '@/app/admin/students/columns'
 import { Class } from '@/hooks/classes'
 import { Schedule } from '@/hooks/schedules'
+import { usePayments, ClassSchedule } from '@/hooks/payments'
+import { useClassSchedules } from '@/hooks/classSchedules'
 
 interface ClassSchedules {
     id: string
@@ -27,10 +28,12 @@ export default function EditPayment() {
     const [students, setStudents] = useState<Student[]>([])
     const [classSchedule, setClassSchedule] = useState<ClassSchedules[]>([])
     const [selectedClass, setSelectedClass] = useState<ClassSchedules | null>(
-        null,
+        null
     )
+    const [classes, setClasses] = useState<ClassSchedule[]>([])
     const [loadingData, setLoadingData] = useState(false)
     const { getStudents } = useStudents()
+    const { getClassSchedules } = useClassSchedules()
 
     const [form, setForm] = useState({
         student_id: '',
@@ -57,6 +60,16 @@ export default function EditPayment() {
             fetchClassSchedule(value)
         }
     }
+    const fetchClasses = useCallback(async () => {
+            try {
+                const response = await getClassSchedules()
+                const data = response.classSchedules
+                setClasses(data)
+            } catch (error) {
+                console.error('Error obteniendo clases:', error)
+                return []
+            }
+        }, [getClassSchedules])
     const fetchStudents = useCallback(async () => {
         try {
             const response = await getStudents()
@@ -91,6 +104,7 @@ export default function EditPayment() {
                         payment_date: data.payment.payment_date,
                         expiration_date: data.payment.expiration_date,
                     })
+                   
 
                     // ⚠️ Traer las clases correspondientes después de setear el estudiante
                     if (data.payment.student_id) {
@@ -98,10 +112,13 @@ export default function EditPayment() {
                     }
                 })
                 .catch(console.error)
+
+                fetchClasses().catch(console.error)
+
         }
 
         fetchStudents().catch(console.error)
-    }, [id, getPayment, fetchClassSchedule, fetchStudents])
+    }, [id, getPayment, fetchClassSchedule, fetchStudents, fetchClasses])
 
     useEffect(() => {
         try {
@@ -109,6 +126,7 @@ export default function EditPayment() {
                 s => s.id === form.classSchedule_id,
             )
             setSelectedClass(selected ?? null)
+            console.log(selectedClass)
         } finally {
             setLoadingData(false)
         }
@@ -120,8 +138,6 @@ export default function EditPayment() {
         setError(null)
 
         const formData = new FormData()
-        console.log('schedule', form.classSchedule_id)
-        console.log('student', form.student_id)
         formData.append('student_id', form.student_id)
         formData.append('classSchedule_id', form.classSchedule_id as string)
         formData.append('amount', form.amount)
@@ -195,28 +211,19 @@ export default function EditPayment() {
                                     <option value="">Seleccionar clase</option>
 
                                     {/* Si aún no se ha cargado el schedule completo, mostrar esta opción temporal */}
-                                    {selectedClass && (
+                                    {/* {selectedClass && (
                                         <option value={selectedClass.id}>
-                                            Clase ID {selectedClass.id} - Hora:{' '}
-                                            {selectedClass.scheduleTimeslot
-                                                ?.hour ?? '---'}
+                                            Clase: {selectedClass.class.name} - Dias:{' '}
+                                            { selectedClass.schedule.days.map(day => day).join(', ')}
                                         </option>
-                                    )}
-
-                                    {classSchedule.map(
-                                        (schedule: {
-                                            id: string
-                                            scheduleTimeslot?: { hour: string }
-                                        }) => (
+                                    )} */}
+                                    {classes.map(classItem => (
                                             <option
-                                                key={schedule.id}
-                                                value={schedule.id}>
-                                                Clase ID {schedule.id} - Hora:{' '}
-                                                {schedule.scheduleTimeslot
-                                                    ?.hour ?? '---'}
+                                                key={classItem.id}
+                                                value={classItem.id}>
+                                                {classItem.class.name} - {classItem.selectedDays.join(', ')}
                                             </option>
-                                        ),
-                                    )}
+                                        ))}
                                 </select>
                             </div>
                             <div>
