@@ -22,15 +22,15 @@ export const usePlans = () => {
             throw error
         }
     }, [])
-    const getPlan = async (id: string) => {
+    const getPlan = useCallback(async (id: string) => {
         try {
-            const response = await axios.get(`/api/plans/${id}`)
-            return response.data
+        const response = await axios.get(`/api/plans/${id}`)
+        return response.data
         } catch (error) {
-            console.error(error)
-            throw error
+        console.error(error)
+        throw error
         }
-    }
+    }, [])
 
     const createPlan = async (formData: FormData) => {
         await csrf()

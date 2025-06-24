@@ -273,7 +273,6 @@ export default function CreatePaymentPage() {
             </div>
         )
     }
-
     return (
         <div className="min-h-screen w-full p-4">
             <div className="w-full max-w-4xl mx-auto">

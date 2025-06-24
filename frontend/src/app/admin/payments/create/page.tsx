@@ -181,6 +181,7 @@ export default function CreatePaymentPage() {
                         payment_date: dates.today,
                         date_start: dates.today,
                         expiration_date: dates.nextMonth,
+                        classSchedule_id: student.payments?.[0]?.classSchedule_id,
                         amount:
                             student.accountInfo?.lastPaymentAmount?.toString() ||
                             '',

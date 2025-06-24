@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Plan, usePlans } from '@/hooks/plans'
 import { Label } from '@/app/admin/components/ui/label'
@@ -26,7 +26,7 @@ export default function EditPlanPage() {
     >({})
 
     useEffect(() => {
-             const fetchPlan = async () => {
+        const fetchPlan = async () => {
             try {
             const response = await getPlan(id as string)
             setFormData(response.plan)
@@ -35,8 +35,9 @@ export default function EditPlanPage() {
             setErrors({ general: ['No se pudo cargar el plan.'] })
             }
         }
+
         fetchPlan()
-    }, [])
+    }, [getPlan, id])
 
     const handleChange = (
         e: React.ChangeEvent<
