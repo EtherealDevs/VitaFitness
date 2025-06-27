@@ -56,7 +56,10 @@ export default function AdminLayout({
     return (
         <div
             className={`admin ${inter.className} min-h-screen bg-[#f8f9fa] text-black dark:text-white`}>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ThemeProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem={false}>
                 <div className="relative flex min-h-screen">
                     {/* Sidebar */}
                     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-gray-200 bg-white px-4 dark:bg-zinc-950 md:block">

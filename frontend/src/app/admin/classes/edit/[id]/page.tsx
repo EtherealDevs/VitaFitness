@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
     BookOpen,
     Building,
@@ -10,6 +10,8 @@ import {
     CalendarRange,
     Save,
     ArrowLeft,
+    ChevronDown,
+    Check,
 } from 'lucide-react'
 
 import Button from '@/components/ui/Button'
@@ -23,22 +25,13 @@ import {
 } from '@/components/ui/card'
 import Input from '@/components/ui/Input'
 import Label from '@/components/ui/Label'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
 import { useClasses } from '@/hooks/classes'
 import { type Plan, usePlans } from '@/hooks/plans'
 import { type Branch, useBranches } from '@/hooks/branches'
 import { useParams, useRouter } from 'next/navigation'
-/* import { Skeleton } from '@/app/admin/components/ui/skeleton' */
 
 export default function EditClassPage() {
-    // Acceder directamente a params.id ya que es un objeto simple
     const { id } = useParams()
     const classId = id as string
 
@@ -46,52 +39,65 @@ export default function EditClassPage() {
     const [selectedBranch, setSelectedBranch] = useState('')
     const [price, setPrice] = useState('')
     const [maxStudents, setMaxStudents] = useState('')
-    // const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [plans, setPlans] = useState<Plan[]>([])
     const [branches, setBranches] = useState<Branch[]>([])
 
-    // Obtener las funciones de los hooks
+    // Estados para controlar los dropdowns
+    const [isPlanDropdownOpen, setIsPlanDropdownOpen] = useState(false)
+    const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false)
+
+    // Referencias para cerrar dropdowns al hacer click fuera
+    const planDropdownRef = useRef<HTMLDivElement>(null)
+    const branchDropdownRef = useRef<HTMLDivElement>(null)
+
     const { getClass, updateClass } = useClasses()
     const { getPlans } = usePlans()
     const { getBranches } = useBranches()
     const router = useRouter()
 
-    // Bandera para controlar si ya se ha realizado la carga inicial
-    // const initialLoadDone = useRef(false)
+    // Encontrar el plan y sucursal seleccionados para mostrar sus nombres
+    const selectedPlanData = plans.find(
+        plan => plan.id.toString() === selectedPlan,
+    )
+    const selectedBranchData = branches.find(
+        branch => branch.id.toString() === selectedBranch,
+    )
 
-    // Función para cargar los datos iniciales
+    // Cerrar dropdowns al hacer click fuera
     useEffect(() => {
-        // Prevenir múltiples cargas y bucles infinitos
-        // if (initialLoadDone.current) return
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                planDropdownRef.current &&
+                !planDropdownRef.current.contains(event.target as Node)
+            ) {
+                setIsPlanDropdownOpen(false)
+            }
+            if (
+                branchDropdownRef.current &&
+                !branchDropdownRef.current.contains(event.target as Node)
+            ) {
+                setIsBranchDropdownOpen(false)
+            }
+        }
 
-        // Marcar inmediatamente que estamos en proceso de carga
-        // initialLoadDone.current = true
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [])
 
-        // const controller = new AbortController()
-        // const signal = controller.signal
-
+    useEffect(() => {
         async function loadData() {
             try {
-                // setIsLoading(true)
-
-                // Cargar datos de la clase
                 const classData = await getClass(classId)
-
-                // Cargar planes y sucursales en paralelo
                 const [plansData, branchesData] = await Promise.all([
                     getPlans(),
                     getBranches(),
                 ])
 
-                // Verificar si la petición fue abortada
-                // if (signal.aborted) return
-
                 setPlans(plansData.plans)
                 setBranches(branchesData.branches)
-
-                // Verificar si la petición fue abortada
-                // if (signal.aborted) return
 
                 if (classData && classData.classe) {
                     setSelectedPlan(classData.classe.plan.id.toString())
@@ -100,29 +106,16 @@ export default function EditClassPage() {
                     setMaxStudents(classData.classe.max_students.toString())
                 }
             } catch (error) {
-                // if (!signal.aborted) {
-                    console.error('Error loading data:', error)
-                    toast({
-                        title: 'Error',
-                        description:
-                            'No se pudo cargar la información necesaria',
-                        variant: 'destructive',
-                    })
-                // }
-            } 
-            // finally {
-            //     // if (!signal.aborted) {
-            //         // setIsLoading(false)
-            //     // }
-            // }
+                console.error('Error loading data:', error)
+                toast({
+                    title: 'Error',
+                    description: 'No se pudo cargar la información necesaria',
+                    variant: 'destructive',
+                })
+            }
         }
 
         loadData()
-
-        // Función de limpieza para abortar peticiones pendientes
-        // return () => {
-        //     controller.abort()
-        // }
     }, [classId, getClass, getPlans, getBranches])
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -157,6 +150,16 @@ export default function EditClassPage() {
         }
     }
 
+    const handlePlanSelect = (plan: Plan) => {
+        setSelectedPlan(plan.id.toString())
+        setIsPlanDropdownOpen(false)
+    }
+
+    const handleBranchSelect = (branch: Branch) => {
+        setSelectedBranch(branch.id.toString())
+        setIsBranchDropdownOpen(false)
+    }
+
     return (
         <div className="container mx-auto py-4 px-4 sm:py-6 md:py-8">
             <div className="max-w-3xl mx-auto">
@@ -184,65 +187,177 @@ export default function EditClassPage() {
                                 </h3>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                    {/* Plan Dropdown */}
                                     <div className="space-y-1 sm:space-y-2">
                                         <Label htmlFor="plan">Plan</Label>
-                                        <div className="relative">
-                                            <Select
-                                                value={selectedPlan}
-                                                onValueChange={
-                                                    setSelectedPlan
-                                                }>
-                                                <SelectTrigger
-                                                    id="plan"
-                                                    className="w-full">
-                                                    <SelectValue placeholder="Seleccionar plan" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {plans.map(plan => (
-                                                        <SelectItem
-                                                            key={plan.id}
-                                                            value={plan.id.toString()}>
-                                                            {plan.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <CalendarRange className="absolute right-10 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <div
+                                            className="relative"
+                                            ref={planDropdownRef}>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setIsPlanDropdownOpen(
+                                                        !isPlanDropdownOpen,
+                                                    )
+                                                }
+                                                className="w-full flex items-center justify-between px-3 py-2.5 text-sm bg-white dark:bg-zinc-900 border border-gray-300 dark:border-gray-600 rounded-md hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                                <div className="flex items-center">
+                                                    <CalendarRange className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                    <span className="truncate text-left">
+                                                        {selectedPlanData?.name ||
+                                                            'Seleccionar plan'}
+                                                    </span>
+                                                </div>
+                                                <ChevronDown
+                                                    className={`h-4 w-4 text-muted-foreground transition-transform ${
+                                                        isPlanDropdownOpen
+                                                            ? 'rotate-180'
+                                                            : ''
+                                                    }`}
+                                                />
+                                            </button>
+
+                                            {isPlanDropdownOpen && (
+                                                <div
+                                                    className="fixed inset-0 z-40"
+                                                    onClick={() =>
+                                                        setIsPlanDropdownOpen(
+                                                            false,
+                                                        )
+                                                    }>
+                                                    <div
+                                                        className="absolute z-50 w-full mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-auto"
+                                                        style={{
+                                                            top:
+                                                                planDropdownRef.current?.getBoundingClientRect()
+                                                                    .bottom ||
+                                                                0,
+                                                            left:
+                                                                planDropdownRef.current?.getBoundingClientRect()
+                                                                    .left || 0,
+                                                            width:
+                                                                planDropdownRef.current?.getBoundingClientRect()
+                                                                    .width ||
+                                                                'auto',
+                                                        }}
+                                                        onClick={e =>
+                                                            e.stopPropagation()
+                                                        }>
+                                                        {plans.map(plan => (
+                                                            <div
+                                                                key={plan.id}
+                                                                onClick={() =>
+                                                                    handlePlanSelect(
+                                                                        plan,
+                                                                    )
+                                                                }
+                                                                className="flex items-center justify-between px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                                                                <div className="flex items-center">
+                                                                    <CalendarRange className="mr-3 h-4 w-4 text-gray-500" />
+                                                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                                                        {
+                                                                            plan.name
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                                {selectedPlan ===
+                                                                    plan.id.toString() && (
+                                                                    <Check className="h-4 w-4 text-blue-600" />
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
+                                    {/* Branch Dropdown */}
                                     <div className="space-y-1 sm:space-y-2">
-                                        <Label htmlFor="branch">
-                                            Sucursal
-                                        </Label>
-                                        <div className="relative">
-                                            <Select
-                                                value={selectedBranch}
-                                                onValueChange={
-                                                    setSelectedBranch
-                                                }>
-                                                <SelectTrigger
-                                                    id="branch"
-                                                    className="w-full">
-                                                    <SelectValue placeholder="Seleccionar sucursal" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {branches.map(
-                                                        branch => (
-                                                            <SelectItem
-                                                                key={
-                                                                    branch.id
-                                                                }
-                                                                value={branch.id.toString()}>
-                                                                {
-                                                                    branch.name
-                                                                }
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                            <Building className="absolute right-10 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Label htmlFor="branch">Sucursal</Label>
+                                        <div
+                                            className="relative"
+                                            ref={branchDropdownRef}>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setIsBranchDropdownOpen(
+                                                        !isBranchDropdownOpen,
+                                                    )
+                                                }
+                                                className="w-full flex items-center justify-between px-3 py-2.5 text-sm bg-white dark:bg-zinc-900 border border-gray-300 dark:border-gray-600 rounded-md hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                                <div className="flex items-center">
+                                                    <Building className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                    <span className="truncate text-left">
+                                                        {selectedBranchData?.name ||
+                                                            'Seleccionar sucursal'}
+                                                    </span>
+                                                </div>
+                                                <ChevronDown
+                                                    className={`h-4 w-4 text-muted-foreground transition-transform ${
+                                                        isBranchDropdownOpen
+                                                            ? 'rotate-180'
+                                                            : ''
+                                                    }`}
+                                                />
+                                            </button>
+
+                                            {isBranchDropdownOpen && (
+                                                <div
+                                                    className="fixed inset-0 z-40"
+                                                    onClick={() =>
+                                                        setIsBranchDropdownOpen(
+                                                            false,
+                                                        )
+                                                    }>
+                                                    <div
+                                                        className="absolute z-50 w-full mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-auto"
+                                                        style={{
+                                                            top:
+                                                                branchDropdownRef.current?.getBoundingClientRect()
+                                                                    .bottom ||
+                                                                0,
+                                                            left:
+                                                                branchDropdownRef.current?.getBoundingClientRect()
+                                                                    .left || 0,
+                                                            width:
+                                                                branchDropdownRef.current?.getBoundingClientRect()
+                                                                    .width ||
+                                                                'auto',
+                                                        }}
+                                                        onClick={e =>
+                                                            e.stopPropagation()
+                                                        }>
+                                                        {branches.map(
+                                                            branch => (
+                                                                <div
+                                                                    key={
+                                                                        branch.id
+                                                                    }
+                                                                    onClick={() =>
+                                                                        handleBranchSelect(
+                                                                            branch,
+                                                                        )
+                                                                    }
+                                                                    className="flex items-center justify-between px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                                                                    <div className="flex items-center">
+                                                                        <Building className="mr-3 h-4 w-4 text-gray-500" />
+                                                                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                                                                            {
+                                                                                branch.name
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                    {selectedBranch ===
+                                                                        branch.id.toString() && (
+                                                                        <Check className="h-4 w-4 text-blue-600" />
+                                                                    )}
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -256,9 +371,7 @@ export default function EditClassPage() {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 bg-transparent">
                                     <div className="space-y-1 sm:space-y-2">
-                                        <Label htmlFor="price">
-                                            Precio
-                                        </Label>
+                                        <Label htmlFor="price">Precio</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                             <Input
@@ -318,32 +431,10 @@ export default function EditClassPage() {
                                 type="submit"
                                 disabled={isSaving}>
                                 <Save className="mr-2 h-4 w-4" />
-                                {isSaving
-                                    ? 'Guardando...'
-                                    : 'Guardar Cambios'}
+                                {isSaving ? 'Guardando...' : 'Guardar Cambios'}
                             </Button>
                         </CardFooter>
                     </form>
-                    {/* {isLoading ? (
-                        <CardContent className="space-y-6">
-                            <div className="space-y-4">
-                                <Skeleton className="h-4 w-32" />
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Skeleton className="h-10 w-full" />
-                                    <Skeleton className="h-10 w-full" />
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <Skeleton className="h-4 w-40" />
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <Skeleton className="h-10 w-full" />
-                                    <Skeleton className="h-10 w-full" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    ) : (
-                        
-                    )} */}
                 </Card>
             </div>
         </div>

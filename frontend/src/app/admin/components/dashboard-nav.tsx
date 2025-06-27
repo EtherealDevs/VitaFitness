@@ -108,7 +108,7 @@ export function DashboardNav() {
                             className={cn(
                                 'mr-3 h-5 w-5',
                                 isActive
-                                    ? 'text-blue-600 dark:text-gray-400'
+                                    ? 'text-violet-500  dark:text-gray-400'
                                     : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-400',
                             )}
                         />
