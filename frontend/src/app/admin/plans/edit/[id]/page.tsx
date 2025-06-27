@@ -28,11 +28,11 @@ export default function EditPlanPage() {
     useEffect(() => {
         const fetchPlan = async () => {
             try {
-            const response = await getPlan(id as string)
-            setFormData(response.plan)
+                const response = await getPlan(id as string)
+                setFormData(response.plan)
             } catch (error) {
-            console.error(error)
-            setErrors({ general: ['No se pudo cargar el plan.'] })
+                console.error(error)
+                setErrors({ general: ['No se pudo cargar el plan.'] })
             }
         }
 
@@ -149,7 +149,11 @@ export default function EditPlanPage() {
                                 className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
                                 Cancelar
                             </Button>
-                            <Button type="submit">Guardar Cambios</Button>
+                            <Button
+                                className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
+                                type="submit">
+                                Guardar Cambios
+                            </Button>
                         </div>
                     </form>
                 </CardContent>
