@@ -60,6 +60,14 @@ interface ClassStudent {
     id: string
     student: Student
     student_id: string
+    schedule_timeslot: ScheduleTimeslot
+    timeslot: Timeslot
+    timeslotsArray?: CompoundTimeslot[]
+}
+interface CompoundTimeslot {
+    classStudentId: string
+    scheduleTimeslotId: string
+    hour: string
 }
 
 interface ClassTeacher {
@@ -76,6 +84,9 @@ interface Student {
     dni: string
     registration_date: string
     status: 'activo' | 'inactivo' | 'pendiente'
+}
+interface ScheduleTimeslot {
+    id: string
 }
 
 interface Timeslot {
@@ -225,6 +236,7 @@ export default function AdminClassDetails() {
 
     const onRemoveStudent = async (id: string, studentId: string) => {
         try {
+            console.log(studentId)
             const res = await deleteClassStudent(studentId)
             console.log(res)
 
@@ -299,40 +311,74 @@ export default function AdminClassDetails() {
     }
 
     // Get active and inactive students
-    const activeSeen = new Set()
-    const activeStudents =
-        schedule?.students
-            .filter(s => s.student.status === 'activo')
-            .filter(s => {
-                if (activeSeen.has(s.student.id)) {
-                    return false
-                }
-                activeSeen.add(s.student.id)
-                return true
-            }) || []
+    const studentMap = new Map();
 
-    const inactiveSeen = new Set()
-    const inactiveStudents =
-        schedule?.students
-            .filter(s => s.student.status === 'inactivo')
-            .filter(s => {
-                if (inactiveSeen.has(s.student.id)) {
-                    return false
-                }
-                inactiveSeen.add(s.student.id)
-                return true
-            }) || []
-    const pendingSeen = new Set()
-    const pendingStudents =
-        schedule?.students
-            .filter(s => s.student.status === 'pendiente')
-            .filter(s => {
-                if (pendingSeen.has(s.student.id)) {
-                    return false
-                }
-                pendingSeen.add(s.student.id)
-                return true
-            }) || []
+    schedule?.students
+    .filter(s => s.student.status === 'activo')
+    .forEach(s => {
+        const compoundTimeslot: CompoundTimeslot = {
+        classStudentId: s.id,
+        scheduleTimeslotId: s.schedule_timeslot.id,
+        hour: s.timeslot.hour,
+        };
+
+        if (!studentMap.has(s.student.id)) {
+        // first time seeing this student
+        s.timeslotsArray = [compoundTimeslot];
+        studentMap.set(s.student.id, s);
+        } else {
+        // seen before, push to existing
+        studentMap.get(s.student.id).timeslotsArray.push(compoundTimeslot);
+        }
+    });
+
+    const activeStudents = Array.from(studentMap.values())  || [];
+
+    const inactiveStudentMap = new Map();
+
+    schedule?.students
+    .filter(s => s.student.status === 'inactivo')
+    .forEach(s => {
+        const compoundTimeslot: CompoundTimeslot = {
+        classStudentId: s.id,
+        scheduleTimeslotId: s.schedule_timeslot.id,
+        hour: s.timeslot.hour,
+        };
+
+        if (!inactiveStudentMap.has(s.student.id)) {
+        // first time seeing this student
+        s.timeslotsArray = [compoundTimeslot];
+        inactiveStudentMap.set(s.student.id, s);
+        } else {
+        // seen before, push to existing
+        inactiveStudentMap.get(s.student.id).timeslotsArray.push(compoundTimeslot);
+        }
+    });
+
+    const inactiveStudents = Array.from(inactiveStudentMap.values())  || [];
+
+    const pendingStudentMap = new Map();
+
+    schedule?.students
+    .filter(s => s.student.status === 'pendiente')
+    .forEach(s => {
+        const compoundTimeslot: CompoundTimeslot = {
+        classStudentId: s.id,
+        scheduleTimeslotId: s.schedule_timeslot.id,
+        hour: s.timeslot.hour,
+        };
+
+        if (!pendingStudentMap.has(s.student.id)) {
+        // first time seeing this student
+        s.timeslotsArray = [compoundTimeslot];
+        pendingStudentMap.set(s.student.id, s);
+        } else {
+        // seen before, push to existing
+        pendingStudentMap.get(s.student.id).timeslotsArray.push(compoundTimeslot);
+        }
+    });
+
+    const pendingStudents = Array.from(pendingStudentMap.values()) || [];
 
     if (loading) {
         return (
@@ -354,6 +400,8 @@ export default function AdminClassDetails() {
             </Alert>
         )
     }
+    console.log(schedule)
+    console.log(activeStudents)
 
     return (
         <div className="grid gap-6 p-4">
@@ -580,6 +628,18 @@ export default function AdminClassDetails() {
                                                     <Badge className="ml-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
                                                         Activo
                                                     </Badge>
+                                                    {student.timeslotsArray?.map(timeslot => (
+                                                        // Placeholder. Can be replaced entirely as long as the timeslots are displayed correctly
+                                                        <Badge className="ml-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                            {timeslot.hour}
+                                                            <button onClick={() =>
+                                                        onRemoveStudent(
+                                                            timeslot.scheduleTimeslotId,
+                                                            timeslot.classStudentId,
+                                                        )
+                                                    }>X</button>
+                                                        </Badge>
+                                                    ))}
                                                 </div>
                                                 <Button
                                                     variant="ghost"
