@@ -128,9 +128,17 @@ export default function AdminClassDetails() {
     const [allStudents, setAllStudents] = useState<Student[]>([])
     const [allTeachers, setAllTeachers] = useState<Teacher[]>([])
 
-    // Agregar estados para los buscadores después de los otros useState
+    // Search term states
     const [studentSearchTerm, setStudentSearchTerm] = useState<string>('')
     const [teacherSearchTerm, setTeacherSearchTerm] = useState<string>('')
+
+    // State for editing student schedule
+    const [editingStudent, setEditingStudent] = useState<ClassStudent | null>(
+        null,
+    )
+    const [selectedTimeslotsForEdit, setSelectedTimeslotsForEdit] = useState<
+        string[]
+    >([])
 
     const { getClassSchedule, deleteClassSchedule } = useClassSchedules()
     const { createClassTeacher, deleteClassTeacher } = useClassTeachers()
@@ -200,8 +208,7 @@ export default function AdminClassDetails() {
 
         try {
             // Send the formData to the backend
-            const res = await createClassStudent(formData)
-            console.log(res)
+            await createClassStudent(formData)
 
             // Refresh data
             const updatedSchedule = await getClassSchedule(params.id)
@@ -222,8 +229,7 @@ export default function AdminClassDetails() {
 
         try {
             // Send the formData to the backend
-            const res = await createClassTeacher(formData)
-            console.log(res)
+            await createClassTeacher(formData)
 
             // Refresh data
             const updatedSchedule = await getClassSchedule(params.id)
@@ -234,25 +240,31 @@ export default function AdminClassDetails() {
         }
     }
 
-    const onRemoveStudent = async (id: string, studentId: string) => {
+    const onRemoveStudentFromClass = async (student: ClassStudent) => {
+        if (!student.timeslotsArray || student.timeslotsArray.length === 0) {
+            console.warn(
+                'Attempted to remove a student with no assigned timeslots.',
+            )
+            return
+        }
         try {
-            console.log(studentId)
-            const res = await deleteClassStudent(studentId)
-            console.log(res)
+            const removePromises = student.timeslotsArray.map(timeslot =>
+                deleteClassStudent(timeslot.classStudentId),
+            )
+            await Promise.all(removePromises)
 
             // Refresh data
             const updatedSchedule = await getClassSchedule(params.id)
             setSchedule(updatedSchedule.classSchedule)
         } catch (error) {
-            console.error('Error al eliminar estudiante:', error)
-            alert('No se pudo eliminar el estudiante')
+            console.error('Error al eliminar al estudiante de la clase:', error)
+            alert('No se pudo eliminar al estudiante de la clase.')
         }
     }
 
-    const onRemoveTeacher = async (id: string, teacherId: string) => {
+    const onRemoveTeacher = async (teacherId: string) => {
         try {
-            const res = await deleteClassTeacher(teacherId)
-            console.log(res)
+            await deleteClassTeacher(teacherId)
 
             // Refresh data
             const updatedSchedule = await getClassSchedule(params.id)
@@ -263,7 +275,54 @@ export default function AdminClassDetails() {
         }
     }
 
-    // Agregar funciones de filtrado después de las otras funciones
+    const handleUpdateStudentSchedule = async () => {
+        if (!editingStudent) return
+
+        const originalTimeslotIds =
+            editingStudent.timeslotsArray?.map(
+                (t: CompoundTimeslot) => t.scheduleTimeslotId,
+            ) || []
+
+        const timeslotsToAdd = selectedTimeslotsForEdit.filter(
+            id => !originalTimeslotIds.includes(id),
+        )
+
+        const timeslotsToRemove =
+            editingStudent.timeslotsArray?.filter(
+                (t: CompoundTimeslot) =>
+                    !selectedTimeslotsForEdit.includes(t.scheduleTimeslotId),
+            ) || []
+
+        try {
+            // Promises for adding new timeslots
+            const addPromises = timeslotsToAdd.map(timeslotId => {
+                const formData = new FormData()
+                formData.append('students[]', editingStudent.student.id)
+                formData.append('c_sch_ts_id', timeslotId)
+                return createClassStudent(formData)
+            })
+
+            // Promises for removing deselected timeslots
+            const removePromises = timeslotsToRemove.map(timeslot =>
+                deleteClassStudent(timeslot.classStudentId),
+            )
+
+            await Promise.all([...addPromises, ...removePromises])
+
+            // Refresh data and close the modal
+            const updatedSchedule = await getClassSchedule(params.id)
+            setSchedule(updatedSchedule.classSchedule)
+            setEditingStudent(null)
+        } catch (error) {
+            console.error(
+                'Error al actualizar el horario del estudiante:',
+                error,
+            )
+            alert('No se pudo actualizar el horario.')
+        }
+    }
+
+    // Filter functions
     const filteredStudents = allStudents.filter(student => {
         const searchTerm = studentSearchTerm.toLowerCase()
         return (
@@ -288,7 +347,7 @@ export default function AdminClassDetails() {
         )
     })
 
-    // Actualizar la función handleAddStudents para limpiar el buscador
+    // Handlers for modals
     const handleAddStudents = () => {
         if (studentModal && onAddStudent) {
             onAddStudent(studentModal, selectedStudents)
@@ -296,10 +355,9 @@ export default function AdminClassDetails() {
         setStudentModal(null)
         setSelectedStudents([])
         setSelectedTimeslotId('')
-        setStudentSearchTerm('') // Limpiar búsqueda
+        setStudentSearchTerm('') // Clear search
     }
 
-    // Actualizar la función handleAddTeachers para limpiar el buscador
     const handleAddTeachers = () => {
         if (teacherModal && onAddTeacher) {
             onAddTeacher(teacherModal, selectedTeachers)
@@ -307,78 +365,72 @@ export default function AdminClassDetails() {
         setTeacherModal(null)
         setSelectedTeachers([])
         setSelectedTimeslotId('')
-        setTeacherSearchTerm('') // Limpiar búsqueda
+        setTeacherSearchTerm('') // Clear search
     }
 
-    // Get active and inactive students
-    const studentMap = new Map();
-
+    // Process students to group them by status and aggregate their timeslots
+    const studentMap = new Map()
     schedule?.students
-    .filter(s => s.student.status === 'activo')
-    .forEach(s => {
-        const compoundTimeslot: CompoundTimeslot = {
-        classStudentId: s.id,
-        scheduleTimeslotId: s.schedule_timeslot.id,
-        hour: s.timeslot.hour,
-        };
+        .filter(s => s.student.status === 'activo')
+        .forEach(s => {
+            const compoundTimeslot: CompoundTimeslot = {
+                classStudentId: s.id,
+                scheduleTimeslotId: s.schedule_timeslot.id,
+                hour: s.timeslot.hour,
+            }
 
-        if (!studentMap.has(s.student.id)) {
-        // first time seeing this student
-        s.timeslotsArray = [compoundTimeslot];
-        studentMap.set(s.student.id, s);
-        } else {
-        // seen before, push to existing
-        studentMap.get(s.student.id).timeslotsArray.push(compoundTimeslot);
-        }
-    });
+            if (!studentMap.has(s.student.id)) {
+                s.timeslotsArray = [compoundTimeslot]
+                studentMap.set(s.student.id, s)
+            } else {
+                studentMap
+                    .get(s.student.id)
+                    .timeslotsArray.push(compoundTimeslot)
+            }
+        })
+    const activeStudents = Array.from(studentMap.values()) || []
 
-    const activeStudents = Array.from(studentMap.values())  || [];
-
-    const inactiveStudentMap = new Map();
-
+    const inactiveStudentMap = new Map()
     schedule?.students
-    .filter(s => s.student.status === 'inactivo')
-    .forEach(s => {
-        const compoundTimeslot: CompoundTimeslot = {
-        classStudentId: s.id,
-        scheduleTimeslotId: s.schedule_timeslot.id,
-        hour: s.timeslot.hour,
-        };
+        .filter(s => s.student.status === 'inactivo')
+        .forEach(s => {
+            const compoundTimeslot: CompoundTimeslot = {
+                classStudentId: s.id,
+                scheduleTimeslotId: s.schedule_timeslot.id,
+                hour: s.timeslot.hour,
+            }
 
-        if (!inactiveStudentMap.has(s.student.id)) {
-        // first time seeing this student
-        s.timeslotsArray = [compoundTimeslot];
-        inactiveStudentMap.set(s.student.id, s);
-        } else {
-        // seen before, push to existing
-        inactiveStudentMap.get(s.student.id).timeslotsArray.push(compoundTimeslot);
-        }
-    });
+            if (!inactiveStudentMap.has(s.student.id)) {
+                s.timeslotsArray = [compoundTimeslot]
+                inactiveStudentMap.set(s.student.id, s)
+            } else {
+                inactiveStudentMap
+                    .get(s.student.id)
+                    .timeslotsArray.push(compoundTimeslot)
+            }
+        })
+    const inactiveStudents = Array.from(inactiveStudentMap.values()) || []
 
-    const inactiveStudents = Array.from(inactiveStudentMap.values())  || [];
-
-    const pendingStudentMap = new Map();
-
+    const pendingStudentMap = new Map()
     schedule?.students
-    .filter(s => s.student.status === 'pendiente')
-    .forEach(s => {
-        const compoundTimeslot: CompoundTimeslot = {
-        classStudentId: s.id,
-        scheduleTimeslotId: s.schedule_timeslot.id,
-        hour: s.timeslot.hour,
-        };
+        .filter(s => s.student.status === 'pendiente')
+        .forEach(s => {
+            const compoundTimeslot: CompoundTimeslot = {
+                classStudentId: s.id,
+                scheduleTimeslotId: s.schedule_timeslot.id,
+                hour: s.timeslot.hour,
+            }
 
-        if (!pendingStudentMap.has(s.student.id)) {
-        // first time seeing this student
-        s.timeslotsArray = [compoundTimeslot];
-        pendingStudentMap.set(s.student.id, s);
-        } else {
-        // seen before, push to existing
-        pendingStudentMap.get(s.student.id).timeslotsArray.push(compoundTimeslot);
-        }
-    });
-
-    const pendingStudents = Array.from(pendingStudentMap.values()) || [];
+            if (!pendingStudentMap.has(s.student.id)) {
+                s.timeslotsArray = [compoundTimeslot]
+                pendingStudentMap.set(s.student.id, s)
+            } else {
+                pendingStudentMap
+                    .get(s.student.id)
+                    .timeslotsArray.push(compoundTimeslot)
+            }
+        })
+    const pendingStudents = Array.from(pendingStudentMap.values()) || []
 
     if (loading) {
         return (
@@ -400,8 +452,6 @@ export default function AdminClassDetails() {
             </Alert>
         )
     }
-    console.log(schedule)
-    console.log(activeStudents)
 
     return (
         <div className="grid gap-6 p-4">
@@ -504,14 +554,16 @@ export default function AdminClassDetails() {
                                             Horarios:
                                         </span>{' '}
                                         <div className="flex flex-wrap gap-1 mt-1">
-                                            {schedule.timeslots.map(t => (
-                                                <Badge
-                                                    key={t.id}
-                                                    variant="outline"
-                                                    className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300">
-                                                    {t.hour}
-                                                </Badge>
-                                            ))}
+                                            {schedule.timeslots.map(
+                                                (t: Timeslot) => (
+                                                    <Badge
+                                                        key={t.id}
+                                                        variant="outline"
+                                                        className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300">
+                                                        {t.hour}
+                                                    </Badge>
+                                                ),
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -561,7 +613,6 @@ export default function AdminClassDetails() {
                                                     size="sm"
                                                     onClick={() =>
                                                         onRemoveTeacher(
-                                                            schedule.id,
                                                             teacher.id,
                                                         )
                                                     }
@@ -605,8 +656,8 @@ export default function AdminClassDetails() {
                                             <li
                                                 key={`active-${student.student.id}`}
                                                 className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                                <div className="flex items-center">
-                                                    <div>
+                                                <div className="flex items-center flex-grow">
+                                                    <div className="flex-grow">
                                                         <div className="font-medium">
                                                             {
                                                                 student.student
@@ -625,35 +676,87 @@ export default function AdminClassDetails() {
                                                             }
                                                         </div>
                                                     </div>
-                                                    <Badge className="ml-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                        Activo
-                                                    </Badge>
-                                                    {student.timeslotsArray?.map(timeslot => (
-                                                        // Placeholder. Can be replaced entirely as long as the timeslots are displayed correctly
-                                                        <Badge className="ml-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                            {timeslot.hour}
-                                                            <button onClick={() =>
-                                                        onRemoveStudent(
-                                                            timeslot.scheduleTimeslotId,
-                                                            timeslot.classStudentId,
-                                                        )
-                                                    }>X</button>
+                                                    <div className="flex items-center flex-wrap gap-1 ml-2">
+                                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                            Activo
                                                         </Badge>
-                                                    ))}
+                                                        {student.timeslotsArray?.map(
+                                                            (
+                                                                timeslot: CompoundTimeslot,
+                                                            ) => (
+                                                                <Badge
+                                                                    key={
+                                                                        timeslot.scheduleTimeslotId
+                                                                    }
+                                                                    className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300">
+                                                                    {
+                                                                        timeslot.hour
+                                                                    }
+                                                                </Badge>
+                                                            ),
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        onRemoveStudent(
-                                                            schedule.id,
-                                                            student.id,
-                                                        )
-                                                    }
-                                                    className="hover:bg-red-50 hover:text-red-600 transition-colors">
-                                                    <UserMinus className="w-4 h-4 mr-1" />{' '}
-                                                    Quitar
-                                                </Button>
+                                                <div className="flex items-center ml-2 flex-shrink-0">
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger
+                                                                asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => {
+                                                                        setEditingStudent(
+                                                                            student,
+                                                                        )
+                                                                        setSelectedTimeslotsForEdit(
+                                                                            student.timeslotsArray?.map(
+                                                                                (
+                                                                                    t: CompoundTimeslot,
+                                                                                ) =>
+                                                                                    t.scheduleTimeslotId,
+                                                                            ) ||
+                                                                                [],
+                                                                        )
+                                                                    }}
+                                                                    className="hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                                                    <Edit className="w-4 h-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>
+                                                                    Editar
+                                                                    Horarios
+                                                                </p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger
+                                                                asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() =>
+                                                                        onRemoveStudentFromClass(
+                                                                            student,
+                                                                        )
+                                                                    }
+                                                                    className="hover:bg-red-50 hover:text-red-600 transition-colors">
+                                                                    <UserMinus className="w-4 h-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>
+                                                                    Quitar
+                                                                    Estudiante
+                                                                    de la Clase
+                                                                </p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </div>
                                             </li>
                                         ))}
                                     </ul>
@@ -702,9 +805,8 @@ export default function AdminClassDetails() {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() =>
-                                                        onRemoveStudent(
-                                                            schedule.id,
-                                                            student.id,
+                                                        onRemoveStudentFromClass(
+                                                            student,
                                                         )
                                                     }
                                                     className="hover:bg-red-50 hover:text-red-600 transition-colors">
@@ -774,9 +876,8 @@ export default function AdminClassDetails() {
                                                         variant="ghost"
                                                         size="sm"
                                                         onClick={() =>
-                                                            onRemoveStudent(
-                                                                schedule.id,
-                                                                student.id,
+                                                            onRemoveStudentFromClass(
+                                                                student,
                                                             )
                                                         }
                                                         className="hover:bg-red-50 hover:text-red-600 transition-colors">
@@ -794,11 +895,10 @@ export default function AdminClassDetails() {
                 </CardContent>
             </Card>
 
-            {/* Add Student Modal - Redesigned */}
+            {/* Add Student Modal */}
             {studentModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white/95 dark:bg-[#1f2122]/95 backdrop-blur rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl">
-                        {/* Modal Header */}
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                             <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                                 <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -812,16 +912,12 @@ export default function AdminClassDetails() {
                                 <X className="h-4 w-4" />
                             </Button>
                         </div>
-
-                        {/* Modal Content */}
                         <div className="p-4 overflow-y-auto max-h-[60vh]">
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         Seleccionar Estudiantes
                                     </label>
-
-                                    {/* Buscador */}
                                     <div className="relative mb-3">
                                         <input
                                             type="text"
@@ -836,7 +932,6 @@ export default function AdminClassDetails() {
                                         />
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                     </div>
-
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                                         Mantén presionado Ctrl (Cmd en Mac) para
                                         seleccionar múltiples estudiantes
@@ -898,7 +993,6 @@ export default function AdminClassDetails() {
                                         </div>
                                     )}
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         <Clock className="inline h-4 w-4 mr-1" />
@@ -926,8 +1020,6 @@ export default function AdminClassDetails() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Modal Footer */}
                         <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50">
                             <div className="flex justify-between items-center">
                                 <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -960,11 +1052,10 @@ export default function AdminClassDetails() {
                 </div>
             )}
 
-            {/* Add Teacher Modal - Redesigned */}
+            {/* Add Teacher Modal */}
             {teacherModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white/95 dark:bg-[#1f2122]/95 backdrop-blur rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl">
-                        {/* Modal Header */}
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                             <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                                 <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -978,16 +1069,12 @@ export default function AdminClassDetails() {
                                 <X className="h-4 w-4" />
                             </Button>
                         </div>
-
-                        {/* Modal Content */}
                         <div className="p-4 overflow-y-auto max-h-[60vh]">
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         Seleccionar Profesores
                                     </label>
-
-                                    {/* Buscador */}
                                     <div className="relative mb-3">
                                         <input
                                             type="text"
@@ -1002,7 +1089,6 @@ export default function AdminClassDetails() {
                                         />
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                     </div>
-
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                                         Mantén presionado Ctrl (Cmd en Mac) para
                                         seleccionar múltiples profesores
@@ -1063,7 +1149,6 @@ export default function AdminClassDetails() {
                                         </div>
                                     )}
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         <Clock className="inline h-4 w-4 mr-1" />
@@ -1091,8 +1176,6 @@ export default function AdminClassDetails() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Modal Footer */}
                         <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50">
                             <div className="flex justify-between items-center">
                                 <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -1119,6 +1202,87 @@ export default function AdminClassDetails() {
                                         Agregar Profesores
                                     </Button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Student Schedule Modal */}
+            {editingStudent && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white/95 dark:bg-[#1f2122]/95 backdrop-blur rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-lg max-h-[80vh] overflow-hidden shadow-2xl">
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
+                                <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                Editar Horario de {editingStudent.student.name}
+                            </h3>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingStudent(null)}
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <div className="p-6 overflow-y-auto max-h-[60vh]">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                Selecciona los horarios para este estudiante:
+                            </label>
+                            <div className="space-y-2 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                                {schedule?.timeslots.map(
+                                    (timeslot: Timeslot) => (
+                                        <div
+                                            key={timeslot.id}
+                                            className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id={`timeslot-edit-${timeslot.id}`}
+                                                value={timeslot.id}
+                                                checked={selectedTimeslotsForEdit.includes(
+                                                    timeslot.id,
+                                                )}
+                                                onChange={e => {
+                                                    const { value, checked } =
+                                                        e.target
+                                                    setSelectedTimeslotsForEdit(
+                                                        prev =>
+                                                            checked
+                                                                ? [
+                                                                      ...prev,
+                                                                      value,
+                                                                  ]
+                                                                : prev.filter(
+                                                                      id =>
+                                                                          id !==
+                                                                          value,
+                                                                  ),
+                                                    )
+                                                }}
+                                                className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                            />
+                                            <label
+                                                htmlFor={`timeslot-edit-${timeslot.id}`}
+                                                className="ml-3 block text-sm font-medium text-gray-800 dark:text-gray-200">
+                                                {timeslot.hour}
+                                            </label>
+                                        </div>
+                                    ),
+                                )}
+                            </div>
+                        </div>
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50">
+                            <div className="flex justify-end gap-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setEditingStudent(null)}>
+                                    <p className="dark:text-white">Cancelar</p>
+                                </Button>
+                                <Button
+                                    onClick={handleUpdateStudentSchedule}
+                                    className="bg-purple-600 hover:bg-purple-700 text-white">
+                                    Guardar Cambios
+                                </Button>
                             </div>
                         </div>
                     </div>
