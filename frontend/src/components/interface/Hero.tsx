@@ -43,14 +43,14 @@ export default function Hero() {
         )
     }
 
-    // COMPONENTE BASE
+    // COMPONENTE BASE - Mejorado para móvil
     const HeroContent = () => (
         <div className="relative z-10 h-full flex items-center justify-center md:justify-start">
             <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col items-center md:items-start text-center md:text-left max-w-4xl mx-auto md:mx-0 space-y-8">
-                    {/* Heading */}
+                <div className="flex flex-col items-center md:items-start text-center md:text-left max-w-4xl mx-auto md:mx-0 space-y-6 sm:space-y-8">
+                    {/* Heading - Responsive mejorado */}
                     <motion.h1
-                        className="text-3xl sm:text-6xl md:text-7xl font-bold text-white mt-16 md:mt-0"
+                        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mt-8 sm:mt-12 md:mt-0 leading-tight"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}>
@@ -60,9 +60,9 @@ export default function Hero() {
                         </span>
                     </motion.h1>
 
-                    {/* Description */}
+                    {/* Description - Responsive mejorado */}
                     <motion.p
-                        className="text-lg sm:text-xl text-gray-300 max-w-2xl"
+                        className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}>
@@ -71,63 +71,71 @@ export default function Hero() {
                         acerques a tu mejor versión
                     </motion.p>
 
-                    {/* Schedule */}
+                    {/* Schedule - Responsive mejorado */}
                     <motion.div
-                        className="w-full max-w-2xl mt-12 bg-black/25 p-8 rounded-xl backdrop-blur-sm"
+                        className="w-full max-w-2xl mt-8 sm:mt-12 bg-black/25 p-4 sm:p-6 md:p-8 rounded-xl backdrop-blur-sm"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8 }}>
-                        <h2 className="text-2xl font-semibold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-500">
+                        <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-500">
                             Horarios
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-white">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-white">
                             <div>
-                                <p className="font-semibold text-lg">
+                                <p className="font-semibold text-base sm:text-lg">
                                     Lunes y Martes
                                 </p>
-                                <p className="text-gray-400">
+                                <p className="text-gray-400 text-sm sm:text-base">
                                     8:00 AM - 10:00 PM
                                 </p>
                             </div>
                             <div>
-                                <p className="font-semibold text-lg">
+                                <p className="font-semibold text-base sm:text-lg">
                                     Miércoles y Jueves
                                 </p>
-                                <p className="text-gray-400">
+                                <p className="text-gray-400 text-sm sm:text-base">
                                     10:00 AM - 10:00 PM
                                 </p>
                             </div>
                             <div>
-                                <p className="font-semibold text-lg">Viernes</p>
-                                <p className="text-gray-400">
+                                <p className="font-semibold text-base sm:text-lg">
+                                    Viernes
+                                </p>
+                                <p className="text-gray-400 text-sm sm:text-base">
                                     8:00 AM - 8:00 PM
                                 </p>
                             </div>
                             <div>
-                                <p className="font-semibold text-lg">Sábados</p>
-                                <p className="text-gray-400">
+                                <p className="font-semibold text-base sm:text-lg">
+                                    Sábados
+                                </p>
+                                <p className="text-gray-400 text-sm sm:text-base">
                                     8:00 AM - 2:00 PM
                                 </p>
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* Buttons */}
+                    {/* Buttons - Responsive mejorado */}
                     <motion.div
-                        className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+                        className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}>
                         <a
                             href={getWhatsAppLink(classInfo)}
                             target="_blank"
-                            rel="noopener noreferrer">
-                            <Button className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90 text-white text-lg">
+                            rel="noopener noreferrer"
+                            className="w-full sm:w-auto">
+                            <Button className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-green-400 to-purple-500 hover:opacity-90 text-white text-base sm:text-lg">
                                 Reservar clase Ahora
                             </Button>
                         </a>
-                        <Link href="#productos" passHref>
-                            <Button className="w-full sm:w-auto px-8 py-3 border-2 border-gray-500 hover:border-purple-500 text-white text-lg">
+                        <Link
+                            href="#productos"
+                            passHref
+                            className="w-full sm:w-auto">
+                            <Button className="w-full sm:w-auto px-6 sm:px-8 py-3 border-2 border-gray-500 hover:border-purple-500 text-white text-base sm:text-lg">
                                 Explorar nuestros planes
                             </Button>
                         </Link>
@@ -137,18 +145,19 @@ export default function Hero() {
         </div>
     )
 
+    // Controles del carrusel - Mejorados para móvil
     const CarouselControls = () => (
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center space-x-4 z-20">
+        <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex justify-center items-center space-x-3 sm:space-x-4 z-20">
             <button
                 onClick={prevImage}
-                className="text-white p-2 rounded-full bg-black/30 hover:bg-black/50">
-                <ChevronLeft size={24} />
+                className="text-white p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors">
+                <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
             </button>
-            <div className="flex space-x-2">
+            <div className="flex space-x-1 sm:space-x-2">
                 {desktopImages.map((_, index) => (
                     <button
                         key={index}
-                        className={`w-3 h-3 rounded-full transition-colors ${
+                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
                             index === currentImage ? 'bg-white' : 'bg-gray-500'
                         }`}
                         onClick={() => setCurrentImage(index)}
@@ -157,8 +166,8 @@ export default function Hero() {
             </div>
             <button
                 onClick={nextImage}
-                className="text-white p-2 rounded-full bg-black/30 hover:bg-black/50">
-                <ChevronRight size={24} />
+                className="text-white p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors">
+                <ChevronRight size={20} className="sm:w-6 sm:h-6" />
             </button>
         </div>
     )
@@ -185,8 +194,8 @@ export default function Hero() {
                 {CarouselControls()}
             </section>
 
-            {/* MOBILE VERSION */}
-            <section className="block sm:hidden relative min-h-screen overflow-hidden py-16">
+            {/* MOBILE VERSION - Mejorado */}
+            <section className="block sm:hidden relative min-h-screen overflow-hidden py-8">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentImage}

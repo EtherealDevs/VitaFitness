@@ -80,7 +80,6 @@ const galleryImages = [
 const Reviews = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [currentReviewIndex, setCurrentReviewIndex] = useState(0)
-    // const reviewsContainerRef = useRef<HTMLDivElement>(null)
 
     // Manejo del carrusel de la galería
     const nextImage = () => {
@@ -115,12 +114,12 @@ const Reviews = () => {
     }, [])
 
     return (
-        <section className="min-h-screen bg-black py-16">
+        <section className="min-h-screen bg-black py-8 sm:py-16">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                     {/* Reviews Section */}
                     <div className="order-2 lg:order-1">
-                        <h2 className="text-4xl font-bold font-impact mb-8 relative w-fit text-white">
+                        <h2 className="text-3xl sm:text-4xl font-bold font-impact mb-6 sm:mb-8 relative w-fit text-white">
                             RESEÑAS
                             <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#40E0D0] to-[#4834d4]" />
                         </h2>
@@ -138,25 +137,26 @@ const Reviews = () => {
                                     ))}
                                 </div>
                             </div>
+                            {/* Controles más grandes en móvil */}
                             <button
                                 onClick={prevReview}
-                                className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors">
-                                <ChevronLeft className="w-6 h-6" />
+                                className="absolute left-2 sm:left-0 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors z-10">
+                                <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
                             </button>
                             <button
                                 onClick={nextReview}
-                                className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors">
-                                <ChevronRight className="w-6 h-6" />
+                                className="absolute right-2 sm:right-0 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors z-10">
+                                <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                             </button>
                         </div>
-                        <div className="flex justify-center mt-6 gap-2">
+                        <div className="flex justify-center mt-4 sm:mt-6 gap-2">
                             {reviews.map((_, index) => (
                                 <button
                                     key={index}
                                     onClick={() => setCurrentReviewIndex(index)}
-                                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                    className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                                         index === currentReviewIndex
-                                            ? 'bg-[#40E0D0] w-6'
+                                            ? 'bg-[#40E0D0] w-4 sm:w-6'
                                             : 'bg-gray-600'
                                     }`}
                                 />
@@ -166,7 +166,7 @@ const Reviews = () => {
 
                     {/* Gallery Section */}
                     <div className="order-1 lg:order-2">
-                        <h2 className="text-4xl font-bold mb-8 font-impact relative w-fit text-white">
+                        <h2 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 font-impact relative w-fit text-white">
                             GALERIA
                             <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#40E0D0] to-[#4834d4]" />
                         </h2>
@@ -176,6 +176,7 @@ const Reviews = () => {
                                 <Image
                                     src={
                                         galleryImages[currentImageIndex].src ||
+                                        '/placeholder.svg' ||
                                         '/placeholder.svg'
                                     }
                                     alt={galleryImages[currentImageIndex].alt}
@@ -185,8 +186,8 @@ const Reviews = () => {
                                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
 
                                 {/* Caption */}
-                                <div className="absolute bottom-0 left-0 right-0 p-4">
-                                    <p className="text-white text-lg font-medium">
+                                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                                    <p className="text-white text-base sm:text-lg font-medium">
                                         {
                                             galleryImages[currentImageIndex]
                                                 .caption
@@ -195,26 +196,26 @@ const Reviews = () => {
                                 </div>
                             </div>
 
-                            {/* Navigation Buttons */}
+                            {/* Navigation Buttons - Siempre visibles en móvil */}
                             <button
                                 onClick={prevImage}
-                                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70">
-                                <ChevronLeft className="w-8 h-8" />
+                                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/50 text-white flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10">
+                                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
                             </button>
                             <button
                                 onClick={nextImage}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70">
-                                <ChevronRight className="w-8 h-8" />
+                                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/50 text-white flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10">
+                                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
                             </button>
                         </div>
 
-                        {/* Thumbnails */}
-                        <div className="flex gap-2 mt-4">
+                        {/* Thumbnails - Scroll horizontal en móvil */}
+                        <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
                             {galleryImages.map((image, index) => (
                                 <button
                                     key={index}
                                     onClick={() => setCurrentImageIndex(index)}
-                                    className={`relative w-20 h-20 rounded-lg overflow-hidden ${
+                                    className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 ${
                                         index === currentImageIndex
                                             ? 'ring-2 ring-[#40E0D0]'
                                             : 'opacity-50'
@@ -249,9 +250,9 @@ function ReviewCard({
     date: string
 }) {
     return (
-        <Card className="p-6 bg-gray-900/50 backdrop-blur-sm w-full flex-shrink-0 hover:bg-gray-900/70 transition-colors duration-300">
-            <div className="flex items-start gap-4 mb-4">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+        <Card className="p-4 sm:p-6 bg-gray-900/50 backdrop-blur-sm w-full flex-shrink-0 hover:bg-gray-900/70 transition-colors duration-300 mx-2 sm:mx-0">
+            <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden flex-shrink-0">
                     <Image
                         src={avatar || '/placeholder.svg'}
                         alt={name}
@@ -259,14 +260,16 @@ function ReviewCard({
                         className="object-cover"
                     />
                 </div>
-                <div>
-                    <h3 className="font-semibold text-lg text-white">{name}</h3>
+                <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-base sm:text-lg text-white truncate">
+                        {name}
+                    </h3>
                     <div className="flex items-center gap-1 mt-1">
                         <div className="flex">
                             {Array.from({ length: 5 }).map((_, i) => (
                                 <Star
                                     key={i}
-                                    className={`w-4 h-4 ${
+                                    className={`w-3 h-3 sm:w-4 sm:h-4 ${
                                         i < Math.floor(rating)
                                             ? 'fill-[#40E0D0] text-[#40E0D0]'
                                             : 'text-zinc-600'
@@ -274,19 +277,19 @@ function ReviewCard({
                                 />
                             ))}
                         </div>
-                        <span className="text-[#40E0D0] text-sm ml-2">
+                        <span className="text-[#40E0D0] text-xs sm:text-sm ml-2">
                             {rating}.0
                         </span>
                     </div>
                 </div>
             </div>
             <div className="relative">
-                <Quote className="absolute top-0 left-0 w-8 h-8 text-[#40E0D0] opacity-20" />
-                <p className="text-zinc-300 text-lg leading-relaxed mb-4 pl-10">
+                <Quote className="absolute top-0 left-0 w-6 h-6 sm:w-8 sm:h-8 text-[#40E0D0] opacity-20" />
+                <p className="text-zinc-300 text-sm sm:text-lg leading-relaxed mb-4 pl-8 sm:pl-10">
                     {comment}
                 </p>
             </div>
-            <p className="text-zinc-500 text-sm">{date}</p>
+            <p className="text-zinc-500 text-xs sm:text-sm">{date}</p>
         </Card>
     )
 }
