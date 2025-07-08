@@ -313,6 +313,7 @@ export default function AdminClassDetails() {
             const updatedSchedule = await getClassSchedule(params.id)
             setSchedule(updatedSchedule.classSchedule)
             setEditingStudent(null)
+            setSelectedTimeslotsForEdit([]) // Limpiar el estado
         } catch (error) {
             console.error(
                 'Error al actualizar el horario del estudiante:',
@@ -320,6 +321,19 @@ export default function AdminClassDetails() {
             )
             alert('No se pudo actualizar el horario.')
         }
+    }
+
+    // Función para manejar el cambio de checkbox en el modal de edición
+    const handleTimeslotToggle = (timeslotId: string, checked: boolean) => {
+        setSelectedTimeslotsForEdit(prev => {
+            if (checked) {
+                // Agregar si no está presente
+                return prev.includes(timeslotId) ? prev : [...prev, timeslotId]
+            } else {
+                // Remover si está presente
+                return prev.filter(id => id !== timeslotId)
+            }
+        })
     }
 
     // Filter functions
@@ -709,6 +723,7 @@ export default function AdminClassDetails() {
                                                                         setEditingStudent(
                                                                             student,
                                                                         )
+                                                                        // Inicializar correctamente con los IDs de schedule_timeslot
                                                                         setSelectedTimeslotsForEdit(
                                                                             student.timeslotsArray?.map(
                                                                                 (
@@ -1208,7 +1223,7 @@ export default function AdminClassDetails() {
                 </div>
             )}
 
-            {/* Edit Student Schedule Modal */}
+            {/* Edit Student Schedule Modal - CORREGIDO */}
             {editingStudent && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white/95 dark:bg-[#1f2122]/95 backdrop-blur rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-lg max-h-[80vh] overflow-hidden shadow-2xl">
@@ -1220,7 +1235,10 @@ export default function AdminClassDetails() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setEditingStudent(null)}
+                                onClick={() => {
+                                    setEditingStudent(null)
+                                    setSelectedTimeslotsForEdit([])
+                                }}
                                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                                 <X className="h-4 w-4" />
                             </Button>
@@ -1229,45 +1247,72 @@ export default function AdminClassDetails() {
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                                 Selecciona los horarios para este estudiante:
                             </label>
-                            <div className="space-y-2 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                            <div className="space-y-3 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
                                 {schedule?.timeslots.map(
-                                    (timeslot: Timeslot) => (
-                                        <div
-                                            key={timeslot.id}
-                                            className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                id={`timeslot-edit-${timeslot.id}`}
-                                                value={timeslot.id}
-                                                checked={selectedTimeslotsForEdit.includes(
-                                                    timeslot.id,
+                                    (timeslot: Timeslot) => {
+                                        const isChecked =
+                                            selectedTimeslotsForEdit.includes(
+                                                timeslot.id,
+                                            )
+
+                                        return (
+                                            <div
+                                                key={timeslot.id}
+                                                className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`timeslot-edit-${timeslot.id}`}
+                                                    checked={isChecked}
+                                                    onChange={e =>
+                                                        handleTimeslotToggle(
+                                                            timeslot.id,
+                                                            e.target.checked,
+                                                        )
+                                                    }
+                                                    className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-2"
+                                                />
+                                                <label
+                                                    htmlFor={`timeslot-edit-${timeslot.id}`}
+                                                    className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-200 cursor-pointer select-none">
+                                                    {timeslot.hour}
+                                                </label>
+                                                {isChecked && (
+                                                    <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 text-xs">
+                                                        Seleccionado
+                                                    </Badge>
                                                 )}
-                                                onChange={e => {
-                                                    const { value, checked } =
-                                                        e.target
-                                                    setSelectedTimeslotsForEdit(
-                                                        prev =>
-                                                            checked
-                                                                ? [
-                                                                      ...prev,
-                                                                      value,
-                                                                  ]
-                                                                : prev.filter(
-                                                                      id =>
-                                                                          id !==
-                                                                          value,
-                                                                  ),
+                                            </div>
+                                        )
+                                    },
+                                )}
+                            </div>
+
+                            {/* Mostrar resumen de selección */}
+                            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                                <p className="text-sm text-blue-700 dark:text-blue-300">
+                                    <strong>Horarios seleccionados:</strong>{' '}
+                                    {selectedTimeslotsForEdit.length}
+                                </p>
+                                {selectedTimeslotsForEdit.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                        {selectedTimeslotsForEdit.map(
+                                            timeslotId => {
+                                                const timeslot =
+                                                    schedule?.timeslots.find(
+                                                        t =>
+                                                            t.id === timeslotId,
                                                     )
-                                                }}
-                                                className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                                            />
-                                            <label
-                                                htmlFor={`timeslot-edit-${timeslot.id}`}
-                                                className="ml-3 block text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {timeslot.hour}
-                                            </label>
-                                        </div>
-                                    ),
+                                                return timeslot ? (
+                                                    <Badge
+                                                        key={timeslotId}
+                                                        variant="outline"
+                                                        className="text-xs">
+                                                        {timeslot.hour}
+                                                    </Badge>
+                                                ) : null
+                                            },
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -1275,12 +1320,18 @@ export default function AdminClassDetails() {
                             <div className="flex justify-end gap-2">
                                 <Button
                                     variant="outline"
-                                    onClick={() => setEditingStudent(null)}>
+                                    onClick={() => {
+                                        setEditingStudent(null)
+                                        setSelectedTimeslotsForEdit([])
+                                    }}>
                                     <p className="dark:text-white">Cancelar</p>
                                 </Button>
                                 <Button
                                     onClick={handleUpdateStudentSchedule}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white">
+                                    disabled={
+                                        selectedTimeslotsForEdit.length === 0
+                                    }
+                                    className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50">
                                     Guardar Cambios
                                 </Button>
                             </div>
