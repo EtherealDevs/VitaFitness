@@ -9,14 +9,13 @@ import { CatalogModal } from '@/components/ui/catalog-modal'
 import Image from 'next/image'
 import { User, ArrowRight, ShoppingCart } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { Product, useProducts } from '@/hooks/products'
-import { Plan, usePlans } from '@/hooks/plans'
+import { type Product, useProducts } from '@/hooks/products'
+import { type Plan, usePlans } from '@/hooks/plans'
 import { getWhatsAppLink } from '@/utils/whatsapp'
 import Link from 'next/link'
 
 export default function Services() {
     const { getProducts } = useProducts()
-    // const [allProducts, setProducts] = useState<Product[]>([])
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
     const [allProducts, setProducts] = useState<Product[]>([])
     const [fullCatalog, setFullCatalog] = useState<Product[]>([])
@@ -26,12 +25,13 @@ export default function Services() {
         (typeof allProducts)[0] | null
     >(null)
     const [isCatalogOpen, setIsCatalogOpen] = useState(false)
-    const [visiblePlans, setVisiblePlans] = useState<number>(2)
+    const [visiblePlans, setVisiblePlans] = useState<number>(4) // Aumentado para 2 columnas
     const [visibleProducts, setVisibleProducts] = useState<number>(4)
     const plansContainerRef = useRef<HTMLDivElement>(null)
     const productsContainerRef = useRef<HTMLDivElement>(null)
     const plansInfo =
         'Hola, vi tu pagina y quiero más información sobre los planes'
+
     const fetchProducts = useCallback(async () => {
         try {
             const response = await getProducts()
@@ -42,6 +42,7 @@ export default function Services() {
             throw error
         }
     }, [getProducts])
+
     const fetchPlans = useCallback(async () => {
         try {
             const response = await getPlans()
@@ -63,6 +64,10 @@ export default function Services() {
         }
         fetchAllData()
     }, [fetchProducts, fetchPlans])
+
+    // Determinar si hay productos para mostrar
+    const hasProducts = allProducts && allProducts.length > 0
+
     // Función para manejar el scroll dentro del contenedor de planes
     const handlePlansScroll = () => {
         if (!plansContainerRef.current) return
@@ -76,7 +81,7 @@ export default function Services() {
             scrollHeight - scrollPosition < 100 &&
             visiblePlans < plans.length
         ) {
-            setVisiblePlans(prev => Math.min(prev + 1, plans.length))
+            setVisiblePlans(prev => Math.min(prev + 2, plans.length)) // Incrementar de 2 en 2 para 2 columnas
         }
     }
 
@@ -100,9 +105,15 @@ export default function Services() {
     return (
         <section id="services" className="py-16 bg-black">
             <div className="container mx-auto px-4">
-                <div className="grid md:grid-cols-2 gap-12">
+                {/* Grid principal - condicional basado en si hay productos */}
+                <div
+                    className={
+                        hasProducts
+                            ? 'grid md:grid-cols-2 gap-12'
+                            : 'grid grid-cols-1'
+                    }>
                     {/* Planes Section */}
-                    <div>
+                    <div className={hasProducts ? '' : 'max-w-6xl mx-auto'}>
                         <GradientTitle className="text-3xl font-impact mb-6">
                             PLANES
                         </GradientTitle>
@@ -118,7 +129,13 @@ export default function Services() {
                             ref={plansContainerRef}
                             className="h-[600px] overflow-y-auto pr-2 custom-scrollbar"
                             onScroll={handlePlansScroll}>
-                            <div className="grid gap-6">
+                            {/* Grid de planes - 2 columnas cuando no hay productos, 1 columna cuando sí hay */}
+                            <div
+                                className={
+                                    hasProducts
+                                        ? 'grid gap-6'
+                                        : 'grid grid-cols-1 md:grid-cols-2 gap-6'
+                                }>
                                 {plans
                                     .slice(0, visiblePlans)
                                     .map((plan, index) => (
@@ -157,8 +174,6 @@ export default function Services() {
                                                 {/* Contenido visible en hover */}
                                                 <div className="absolute inset-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                     <div className="px-6 pt-20">
-                                                        {' '}
-                                                        {/* Padding extra arriba para no solapar con el título */}
                                                         <div className="flex justify-between items-center mb-4">
                                                             <div className="flex items-center gap-4">
                                                                 <div className="flex items-center gap-2">
@@ -196,7 +211,10 @@ export default function Services() {
 
                                 {/* Indicador de carga si hay más planes por mostrar */}
                                 {visiblePlans < plans.length && (
-                                    <div className="flex justify-center py-4">
+                                    <div
+                                        className={`flex justify-center py-4 ${
+                                            hasProducts ? '' : 'col-span-full'
+                                        }`}>
                                         <div className="loader">
                                             <div
                                                 className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
@@ -231,114 +249,116 @@ export default function Services() {
                         </div>
                     </div>
 
-                    {/* Tienda Section */}
-                    <div id="productos">
-                        <GradientTitle className="text-3x font-impact mb-6">
-                            TIENDA
-                        </GradientTitle>
-                        <p className="text-gray-400 mb-8">
-                            Encuentra tus productos favoritos para el gym aquí.
-                            Desde ropa deportiva diseñada para maximizar tu
-                            comodidad y rendimiento, hasta accesorios esenciales
-                            para tus entrenamientos.
-                        </p>
+                    {/* Tienda Section - Solo se muestra si hay productos */}
+                    {hasProducts && (
+                        <div id="productos">
+                            <GradientTitle className="text-3xl font-impact mb-6">
+                                TIENDA
+                            </GradientTitle>
+                            <p className="text-gray-400 mb-8">
+                                Encuentra tus productos favoritos para el gym
+                                aquí. Desde ropa deportiva diseñada para
+                                maximizar tu comodidad y rendimiento, hasta
+                                accesorios esenciales para tus entrenamientos.
+                            </p>
 
-                        {/* Contenedor con scroll propio para productos */}
-                        <div
-                            ref={productsContainerRef}
-                            className="h-[600px] overflow-y-auto pr-2 custom-scrollbar"
-                            onScroll={handleProductsScroll}>
-                            <div className="grid grid-cols-2 gap-4">
-                                {allProducts
-                                    .slice(0, visibleProducts)
-                                    .map((product, index) => (
-                                        <Card
-                                            key={index}
-                                            className="relative bg-gray-900 border-gray-800 hover:border-green-400 transition-all duration-300 cursor-pointer overflow-hidden animate-fadeIn"
-                                            style={{
-                                                animationDelay: `${
-                                                    index * 150
-                                                }ms`,
-                                                opacity: 0,
-                                                animation: `fadeIn 0.5s ease-out ${
-                                                    index * 150
-                                                }ms forwards`,
-                                            }}
-                                            onClick={() =>
-                                                setSelectedProduct(product)
-                                            }>
-                                            <div className="aspect-square relative overflow-hidden">
-                                                <Image
-                                                    src={
-                                                        product.images[0] ||
-                                                        '/placeholder.svg'
-                                                    }
-                                                    alt={product.name}
-                                                    fill
-                                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-                                                {/* Etiquetas y badges */}
-                                            </div>
-
-                                            <CardContent className="p-4">
-                                                <h3 className="font-bold text-white mb-1 uppercase">
-                                                    {product.name}
-                                                </h3>
-                                                <p className="text-gray-400 text-xs line-clamp-2 mb-2">
-                                                    {product.description}
-                                                </p>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="gradient-text font-bold">
-                                                        {product.price}
-                                                    </span>
-                                                    <button className="flex items-center gap-1 text-gray-400 hover:text-green-400 transition-colors text-sm">
-                                                        <ShoppingCart className="w-4 h-4" />
-                                                        <span>Comprar</span>
-                                                    </button>
+                            {/* Contenedor con scroll propio para productos */}
+                            <div
+                                ref={productsContainerRef}
+                                className="h-[600px] overflow-y-auto pr-2 custom-scrollbar"
+                                onScroll={handleProductsScroll}>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {allProducts
+                                        .slice(0, visibleProducts)
+                                        .map((product, index) => (
+                                            <Card
+                                                key={index}
+                                                className="relative bg-gray-900 border-gray-800 hover:border-green-400 transition-all duration-300 cursor-pointer overflow-hidden animate-fadeIn"
+                                                style={{
+                                                    animationDelay: `${
+                                                        index * 150
+                                                    }ms`,
+                                                    opacity: 0,
+                                                    animation: `fadeIn 0.5s ease-out ${
+                                                        index * 150
+                                                    }ms forwards`,
+                                                }}
+                                                onClick={() =>
+                                                    setSelectedProduct(product)
+                                                }>
+                                                <div className="aspect-square relative overflow-hidden">
+                                                    <Image
+                                                        src={
+                                                            product.images[0] ||
+                                                            '/placeholder.svg' ||
+                                                            '/placeholder.svg'
+                                                        }
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
                                                 </div>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
+
+                                                <CardContent className="p-4">
+                                                    <h3 className="font-bold text-white mb-1 uppercase">
+                                                        {product.name}
+                                                    </h3>
+                                                    <p className="text-gray-400 text-xs line-clamp-2 mb-2">
+                                                        {product.description}
+                                                    </p>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="gradient-text font-bold">
+                                                            {product.price}
+                                                        </span>
+                                                        <button className="flex items-center gap-1 text-gray-400 hover:text-green-400 transition-colors text-sm">
+                                                            <ShoppingCart className="w-4 h-4" />
+                                                            <span>Comprar</span>
+                                                        </button>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                </div>
+
+                                {/* Indicador de carga si hay más productos por mostrar */}
+                                {visibleProducts < allProducts.length && (
+                                    <div className="flex justify-center py-4 mt-4">
+                                        <div className="loader">
+                                            <div
+                                                className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                                                style={{
+                                                    animationDelay: '0ms',
+                                                }}></div>
+                                            <div
+                                                className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                                                style={{
+                                                    animationDelay: '150ms',
+                                                }}></div>
+                                            <div
+                                                className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                                                style={{
+                                                    animationDelay: '300ms',
+                                                }}></div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Indicador de carga si hay más productos por mostrar */}
-                            {visibleProducts < allProducts.length && (
-                                <div className="flex justify-center py-4 mt-4">
-                                    <div className="loader">
-                                        <div
-                                            className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                                            style={{
-                                                animationDelay: '0ms',
-                                            }}></div>
-                                        <div
-                                            className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                                            style={{
-                                                animationDelay: '150ms',
-                                            }}></div>
-                                        <div
-                                            className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                                            style={{
-                                                animationDelay: '300ms',
-                                            }}></div>
-                                    </div>
-                                </div>
-                            )}
+                            <div className="mt-8 text-center">
+                                <Link
+                                    href={getWhatsAppLink(
+                                        'Hola, vi tu pagina y quiero más información sobre los productos',
+                                    )}
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+                                    <Button className="bg-transparent rounded-xl border">
+                                        VER CATALOGO
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
-
-                        <div className="mt-8 text-center">
-                            <Link
-                                href={getWhatsAppLink(
-                                    'Hola, vi tu pagina y quiero más información sobre los productos',
-                                )}
-                                target="_blank"
-                                rel="noopener noreferrer">
-                                <Button className="bg-transparent rounded-xl border">
-                                    VER CATALOGO
-                                </Button>
-                            </Link>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
