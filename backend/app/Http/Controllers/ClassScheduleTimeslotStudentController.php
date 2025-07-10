@@ -96,17 +96,16 @@ class ClassScheduleTimeslotStudentController extends Controller
             'students.*' => 'required|integer|exists:students,id',
             'c_sch_ts_id' => 'required|integer|exists:class_schedule_timeslots,id',
         ]);
-
-        $classScheduleTimeslot = ClassScheduleTimeslot::find($request->c_sch_ts_id);
-        foreach ($request->students as $student) {
-            $student = Student::find($student);
-            try {
-                $classScheduleTimeslot->students()->sync($student);
-            } catch (\Exception $e) {
-                return response()->json(['message' => $e->getMessage()], 500);
+            $classScheduleTimeslot = ClassScheduleTimeslot::find($request->c_sch_ts_id);
+            foreach ($request->students as $student) {
+                $student = Student::find($student);
+                try {
+                    $classScheduleTimeslot->students()->syncWithoutDetaching($student);
+                } catch (\Exception $e) {
+                    return response()->json(['message' => $e->getMessage()], 500);
+                }
             }
-        }
-        $classScheduleTimeslotStudents = ClassScheduleTimeslotStudent::where('c_sch_ts_id', $request->c_sch_ts_id)->whereIn('student_id', $request->students)->get();
+            $classScheduleTimeslotStudents = ClassScheduleTimeslotStudent::where('c_sch_ts_id', $request->c_sch_ts_id)->whereIn('student_id', $request->students)->get();
 
         // collection of resources
         $classScheduleTimeslotStudentsResource = ClassScheduleTimeslotStudentResource::collection($classScheduleTimeslotStudents);

@@ -277,7 +277,6 @@ export default function AdminClassDetails() {
 
     const handleUpdateStudentSchedule = async () => {
         if (!editingStudent) return
-
         const originalTimeslotIds =
             editingStudent.timeslotsArray?.map(
                 (t: CompoundTimeslot) => t.scheduleTimeslotId,
@@ -297,8 +296,10 @@ export default function AdminClassDetails() {
             // Promises for adding new timeslots
             const addPromises = timeslotsToAdd.map(timeslotId => {
                 const formData = new FormData()
+                
                 formData.append('students[]', editingStudent.student.id)
                 formData.append('c_sch_ts_id', timeslotId)
+
                 return createClassStudent(formData)
             })
 
