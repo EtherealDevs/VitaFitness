@@ -466,7 +466,7 @@ export default function ClassPage() {
                                 `/admin/classes/details/${schedule.classSchedule_id}`,
                             )
                         }}>
-                        Ver estudiantes y alumnos
+                        Ver alumnos y profes
                     </Button>
                 </div>
             </div>

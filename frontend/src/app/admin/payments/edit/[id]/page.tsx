@@ -35,6 +35,10 @@ export default function EditPayment() {
     const { getStudents } = useStudents()
     const { getClassSchedules } = useClassSchedules()
 
+    if (false) {
+        console.log(selectedClass)
+    }
+
     const [form, setForm] = useState({
         student_id: '',
         classSchedule_id: '',
@@ -126,7 +130,6 @@ export default function EditPayment() {
                 s => s.id === form.classSchedule_id,
             )
             setSelectedClass(selected ?? null)
-            console.log(selectedClass)
         } finally {
             setLoadingData(false)
         }
