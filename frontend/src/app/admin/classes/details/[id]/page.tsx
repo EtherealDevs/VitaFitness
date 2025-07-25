@@ -125,6 +125,11 @@ export default function AdminClassDetails() {
     const [showInactiveStudents, setShowInactiveStudents] =
         useState<boolean>(false)
 
+    const [filteredActiveStudents, setFilteredActiveStudents] = useState<ClassStudent[]>([])
+    const [activeStudentFilterBoolean, setActiveStudentFilterBoolean] = useState<boolean>(false)
+    // const [filteredInactiveStudents, setFilteredInactiveStudents] = useState<string[]>([])
+    // const [filteredPendingStudents, setFilteredPendingStudents] = useState<string[]>([])
+
     const [allStudents, setAllStudents] = useState<Student[]>([])
     const [allTeachers, setAllTeachers] = useState<Teacher[]>([])
 
@@ -383,6 +388,33 @@ export default function AdminClassDetails() {
         setTeacherSearchTerm('') // Clear search
     }
 
+    const filterStudentsByTimeslot = (timeslot: string) => {
+        const newStudentMap = new Map()
+
+        schedule?.students
+            .filter(s => s.student.status === 'activo')
+            .filter(s => s.timeslot.hour === timeslot)
+            .forEach(s => {
+            const compoundTimeslot: CompoundTimeslot = {
+                classStudentId: s.id,
+                scheduleTimeslotId: s.schedule_timeslot.id,
+                hour: s.timeslot.hour,
+            }
+
+            if (!newStudentMap.has(s.student.id)) {
+                s.timeslotsArray = [compoundTimeslot]
+                newStudentMap.set(s.student.id, s)
+            } else {
+                newStudentMap
+                    .get(s.student.id)
+                    .timeslotsArray.push(compoundTimeslot)
+            }
+        })
+            setActiveStudentFilterBoolean(true)
+            setFilteredActiveStudents(Array.from(newStudentMap.values()) || [])
+    }
+    console.log(filteredActiveStudents);
+
     // Process students to group them by status and aggregate their timeslots
     const studentMap = new Map()
     schedule?.students
@@ -468,6 +500,250 @@ export default function AdminClassDetails() {
         )
     }
 
+    const renderedStudents = () => {
+        if (activeStudents.length === 0) {
+            return (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    No hay estudiantes activos
+                </div>
+            )
+        }
+        if (activeStudentFilterBoolean === false) {
+            return activeStudents.map(student => (
+            <li
+                key={`active-${student.student.id}`}
+                className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center flex-grow">
+                    <div className="flex-grow">
+                        <div className="font-medium">
+                            {
+                                student.student
+                                    .name
+                            }{' '}
+                            {
+                                student.student
+                                    .last_name
+                            }
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            DNI:{' '}
+                            {
+                                student.student
+                                    .dni
+                            }
+                        </div>
+                    </div>
+                    <div className="flex items-center flex-wrap gap-1 ml-2">
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            Activo
+                        </Badge>
+                        {student.timeslotsArray?.map(
+                            (
+                                timeslot: CompoundTimeslot,
+                            ) => (
+                                <Badge
+                                    key={
+                                        timeslot.scheduleTimeslotId
+                                    }
+                                    className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300">
+                                    {
+                                        timeslot.hour
+                                    }
+                                </Badge>
+                            ),
+                        )}
+                    </div>
+                </div>
+                <div className="flex items-center ml-2 flex-shrink-0">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger
+                                asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                        setEditingStudent(
+                                            student,
+                                        )
+                                        // Inicializar correctamente con los IDs de schedule_timeslot
+                                        setSelectedTimeslotsForEdit(
+                                            student.timeslotsArray?.map(
+                                                (
+                                                    t: CompoundTimeslot,
+                                                ) =>
+                                                    t.scheduleTimeslotId,
+                                            ) ||
+                                                [],
+                                        )
+                                    }}
+                                    className="hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                    <Edit className="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>
+                                    Editar
+                                    Horarios
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger
+                                asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                        onRemoveStudentFromClass(
+                                            student,
+                                        )
+                                    }
+                                    className="hover:bg-red-50 hover:text-red-600 transition-colors">
+                                    <UserMinus className="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>
+                                    Quitar
+                                    Estudiante
+                                    de la Clase
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+            </li>
+        ))
+        }
+        if (filteredActiveStudents.length > 0) {
+            return filteredActiveStudents.map(student => (
+            <li
+                key={`active-${student.student.id}`}
+                className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center flex-grow">
+                    <div className="flex-grow">
+                        <div className="font-medium">
+                            {
+                                student.student
+                                    .name
+                            }{' '}
+                            {
+                                student.student
+                                    .last_name
+                            }
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            DNI:{' '}
+                            {
+                                student.student
+                                    .dni
+                            }
+                        </div>
+                    </div>
+                    <div className="flex items-center flex-wrap gap-1 ml-2">
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            Activo
+                        </Badge>
+                        {student.timeslotsArray?.map(
+                            (
+                                timeslot: CompoundTimeslot,
+                            ) => (
+                                <Badge
+                                    key={
+                                        timeslot.scheduleTimeslotId
+                                    }
+                                    className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300">
+                                    {
+                                        timeslot.hour
+                                    }
+                                </Badge>
+                            ),
+                        )}
+                    </div>
+                </div>
+                <div className="flex items-center ml-2 flex-shrink-0">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger
+                                asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                        setEditingStudent(
+                                            student,
+                                        )
+                                        // Inicializar correctamente con los IDs de schedule_timeslot
+                                        setSelectedTimeslotsForEdit(
+                                            student.timeslotsArray?.map(
+                                                (
+                                                    t: CompoundTimeslot,
+                                                ) =>
+                                                    t.scheduleTimeslotId,
+                                            ) ||
+                                                [],
+                                        )
+                                    }}
+                                    className="hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                    <Edit className="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>
+                                    Editar
+                                    Horarios
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger
+                                asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                        onRemoveStudentFromClass(
+                                            student,
+                                        )
+                                    }
+                                    className="hover:bg-red-50 hover:text-red-600 transition-colors">
+                                    <UserMinus className="w-4 h-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>
+                                    Quitar
+                                    Estudiante
+                                    de la Clase
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+            </li>
+        ))
+        }
+        if (filteredActiveStudents.length === 0 && activeStudentFilterBoolean === true) { 
+            return (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    No hay estudiantes activos en el horario especificado
+                </div>
+            )
+        }
+        // if (filteredActiveStudents == null || filteredActiveStudents.length == 0) {
+        //     return (
+        //         <div className="text-center py-4 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        //             No hay estudiantes activos
+        //         </div>
+        //     )
+        // }
+    }
+
     return (
         <div className="grid gap-6 p-4">
             <Card className="shadow-lg">
@@ -534,7 +810,7 @@ export default function AdminClassDetails() {
                                     Información de Horario
                                 </h3>
                                 <div className="space-y-2">
-                                    <div>
+                                    {/* <div>
                                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Días seleccionados:
                                         </span>{' '}
@@ -547,7 +823,7 @@ export default function AdminClassDetails() {
                                                 </Badge>
                                             ))}
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     <div>
                                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -569,9 +845,16 @@ export default function AdminClassDetails() {
                                             Horarios:
                                         </span>{' '}
                                         <div className="flex flex-wrap gap-1 mt-1">
+                                            <Badge
+                                                onClick={() => setActiveStudentFilterBoolean(false)}
+                                                variant="outline"
+                                                className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300">
+                                                Reset filter
+                                            </Badge>
                                             {schedule.timeslots.map(
                                                 (t: Timeslot) => (
                                                     <Badge
+                                                        onClick={() => filterStudentsByTimeslot(t.hour)}
                                                         key={t.id}
                                                         variant="outline"
                                                         className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300">
@@ -646,7 +929,7 @@ export default function AdminClassDetails() {
                             <div className="mb-4">
                                 <div className="flex justify-between items-center mb-3">
                                     <h3 className="text-lg font-medium">
-                                        Estudiantes Activos (
+                                        Total de estudiantes activos (
                                         {activeStudents.length})
                                     </h3>
                                     <Button
@@ -667,114 +950,7 @@ export default function AdminClassDetails() {
                                     </div>
                                 ) : (
                                     <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                                        {activeStudents.map(student => (
-                                            <li
-                                                key={`active-${student.student.id}`}
-                                                className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                                <div className="flex items-center flex-grow">
-                                                    <div className="flex-grow">
-                                                        <div className="font-medium">
-                                                            {
-                                                                student.student
-                                                                    .name
-                                                            }{' '}
-                                                            {
-                                                                student.student
-                                                                    .last_name
-                                                            }
-                                                        </div>
-                                                        <div className="text-sm text-gray-500">
-                                                            DNI:{' '}
-                                                            {
-                                                                student.student
-                                                                    .dni
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center flex-wrap gap-1 ml-2">
-                                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                            Activo
-                                                        </Badge>
-                                                        {student.timeslotsArray?.map(
-                                                            (
-                                                                timeslot: CompoundTimeslot,
-                                                            ) => (
-                                                                <Badge
-                                                                    key={
-                                                                        timeslot.scheduleTimeslotId
-                                                                    }
-                                                                    className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300">
-                                                                    {
-                                                                        timeslot.hour
-                                                                    }
-                                                                </Badge>
-                                                            ),
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center ml-2 flex-shrink-0">
-                                                    <TooltipProvider>
-                                                        <Tooltip>
-                                                            <TooltipTrigger
-                                                                asChild>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() => {
-                                                                        setEditingStudent(
-                                                                            student,
-                                                                        )
-                                                                        // Inicializar correctamente con los IDs de schedule_timeslot
-                                                                        setSelectedTimeslotsForEdit(
-                                                                            student.timeslotsArray?.map(
-                                                                                (
-                                                                                    t: CompoundTimeslot,
-                                                                                ) =>
-                                                                                    t.scheduleTimeslotId,
-                                                                            ) ||
-                                                                                [],
-                                                                        )
-                                                                    }}
-                                                                    className="hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                                                                    <Edit className="w-4 h-4" />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>
-                                                                    Editar
-                                                                    Horarios
-                                                                </p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </TooltipProvider>
-                                                    <TooltipProvider>
-                                                        <Tooltip>
-                                                            <TooltipTrigger
-                                                                asChild>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() =>
-                                                                        onRemoveStudentFromClass(
-                                                                            student,
-                                                                        )
-                                                                    }
-                                                                    className="hover:bg-red-50 hover:text-red-600 transition-colors">
-                                                                    <UserMinus className="w-4 h-4" />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>
-                                                                    Quitar
-                                                                    Estudiante
-                                                                    de la Clase
-                                                                </p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </TooltipProvider>
-                                                </div>
-                                            </li>
-                                        ))}
+                                        {renderedStudents()}
                                     </ul>
                                 )}
                             </div>
