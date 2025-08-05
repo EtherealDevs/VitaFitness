@@ -22,6 +22,13 @@ import { Button } from '@/app/admin/components/ui/button'
 import { type Payment, usePayments } from '@/hooks/payments'
 import { Input } from '@/app/admin/components/ui/input'
 import { Label } from '@/app/admin/components/ui/label'
+import { useClassSchedules } from '@/hooks/classSchedules'
+
+interface Plan {
+    id: string
+    name: string
+    classSchedules: string[]
+}
 
 // Helper function to format date
 const formatDate = (dateString: string) => {
@@ -56,10 +63,13 @@ const getRowColor = (status: string) => {
 export default function PaymentsPage() {
     const router = useRouter()
     const { getPayments, deletePayment, getPayment } = usePayments()
+    const { getClassScheduleClassNames } = useClassSchedules()
     const [payments, setPayments] = useState<Payment[]>([])
+    const [planNames, setPlanNames] = useState<Plan[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState<string>('')
+    const [filterPlan, setFilterPlan] = useState<string>('')
     const [filterStartDate, setFilterStartDate] = useState('')
     const [filterPaymentDate, setFilterPaymentDate] = useState('')
     const [filterExpirationDate, setFilterExpirationDate] = useState('')
@@ -117,6 +127,35 @@ export default function PaymentsPage() {
             isMounted = false
         }
     }, [getPayments])
+    // Fetch planNames
+    useEffect(() => {
+        let isMounted = true
+
+        const fetchPlanNames = async () => {
+            setLoading(true)
+            setError(null)
+
+            try {
+                const response = await getClassScheduleClassNames()
+                if (isMounted) {
+                    setPlanNames(response.planNames)
+                    setLoading(false)
+                }
+            } catch (err) {
+                if (isMounted) {
+                    setError('Error al cargar los datos de pagos')
+                    console.error(err)
+                    setLoading(false)
+                }
+            }
+        }
+
+        fetchPlanNames()
+
+        return () => {
+            isMounted = false
+        }
+    }, [getClassScheduleClassNames])
 
     // Handle sorting
     const handleSort = (key: keyof Payment) => {
@@ -206,7 +245,15 @@ export default function PaymentsPage() {
                               .includes(term)
                       )
                   })
-
+        // Filtrar por plan
+        
+        const planObject = planNames.find(plan => plan.id == filterPlan)
+        let noPlanFiltered = null
+        if (filterPlan == '') {
+            noPlanFiltered = true
+        }
+        const matchesPlan =
+            noPlanFiltered || planObject?.classSchedules.includes(payment.classSchedule_id)
         // Mejorar el filtrado de fechas
         const matchesStartDate =
             !filterStartDate ||
@@ -226,7 +273,8 @@ export default function PaymentsPage() {
             matchesSearch &&
             matchesStartDate &&
             matchesPaymentDate &&
-            matchesExpirationDate
+            matchesExpirationDate &&
+            matchesPlan
         )
     })
 
@@ -593,6 +641,23 @@ export default function PaymentsPage() {
                                     className="mt-1 dark:bg-[#363a3b] dark:border-slate-700 dark:text-white"
                                 />
                             </div>
+                            <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    Plan
+                                </p>
+                                <p className="font-medium dark:text-white">
+                                    <select onChange={e => setFilterPlan(e.target.value)} value={filterPlan} className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <option value="">
+                                            Sin plan
+                                        </option>
+                                        {planNames.map(plan => (
+                                            <option key={plan.id} value={plan.id}>
+                                                {plan.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </p>
+                            </div>
                         </div>
                         {/* Mostrar resultados de búsqueda */}
                         {searchTerm && (
@@ -741,7 +806,8 @@ export default function PaymentsPage() {
                                             {searchTerm ||
                                             filterStartDate ||
                                             filterPaymentDate ||
-                                            filterExpirationDate
+                                            filterExpirationDate ||
+                                            filterPlan
                                                 ? 'No se encontraron pagos que coincidan con los filtros'
                                                 : 'No se encontraron pagos'}
                                         </td>

@@ -6,6 +6,7 @@ use App\Http\Resources\ClassScheduleResource;
 use App\Models\Classe;
 use App\Models\ClassSchedule;
 use App\Models\ClassScheduleTimeslot;
+use App\Models\Plan;
 use App\Models\Schedule;
 use App\Models\TimeSlot;
 use Carbon\Carbon;
@@ -14,6 +15,38 @@ use Illuminate\Support\Facades\Log;
 
 class ClassScheduleController extends Controller
 {
+    public function classNames()
+    {
+        $classScheduleClassNames = ClassSchedule::join('classes', 'class_schedules.class_id', '=', 'classes.id')
+        ->select('class_schedules.id', 'classes.plan_id')
+        ->distinct()
+        ->get();
+        foreach ($classScheduleClassNames as $classScheduleClassName) {
+            $classScheduleClassName->plan = Plan::find($classScheduleClassName->plan_id)->id;
+        }
+        $plans = Plan::all();
+        $planAndClassSchedules = [];
+        foreach ($plans as $plan) {
+            $classSChedules = [];
+            foreach ($classScheduleClassNames as $classScheduleClassName) {
+                if ($classScheduleClassName->plan_id == $plan->id) {
+                    array_push($classSChedules, $classScheduleClassName->id);
+                }
+            }
+            array_push($planAndClassSchedules, [
+                'id' => $plan->id,
+                'name' => $plan->name,
+                'classSchedules' => $classSChedules,
+            ]);
+        }
+        $data = [
+            'classScheduleClassNames' => $classScheduleClassNames,
+            'planNames' => $planAndClassSchedules,
+            'message' => 'classScheduleClassNames retrieved successfully',
+            'status' => 'success (200)'
+        ];
+        return response()->json($data, 200);
+    }
     public function index()
     {
         try {

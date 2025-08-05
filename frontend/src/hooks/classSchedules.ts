@@ -35,6 +35,15 @@ export const useClassSchedules = () => {
             throw error
         }
     }, [])
+    const getClassScheduleClassNames = useCallback(async () => {
+        try {
+            const response = await axios.get(`/api/classSchedules/classNames`)
+            return response.data
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }, [])
     const createClassSchedule = async (formData: FormData) => {
         await csrf()
         try {
@@ -71,6 +80,7 @@ export const useClassSchedules = () => {
         }
     }
     return {
+        getClassScheduleClassNames,
         getClassSchedule,
         getClassSchedules,
         createClassSchedule,

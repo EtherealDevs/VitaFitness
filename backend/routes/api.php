@@ -36,6 +36,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('students', StudentController::class);
     Route::apiResource('branches', BranchController::class)->except(['index', 'show']);
     Route::apiResource('teachers', TeacherController::class);
+    Route::get('classSchedules/classNames', [ClassScheduleController::class, 'classNames']);
     Route::apiResource('classSchedules', ClassScheduleController::class);
     Route::apiResource('classes', ClasseController::class);
     Route::apiResource('class/students', ClassScheduleTimeslotStudentController::class);
