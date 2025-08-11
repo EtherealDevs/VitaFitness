@@ -246,14 +246,15 @@ export default function PaymentsPage() {
                       )
                   })
         // Filtrar por plan
-        
+
         const planObject = planNames.find(plan => plan.id == filterPlan)
         let noPlanFiltered = null
         if (filterPlan == '') {
             noPlanFiltered = true
         }
         const matchesPlan =
-            noPlanFiltered || planObject?.classSchedules.includes(payment.classSchedule_id)
+            noPlanFiltered ||
+            planObject?.classSchedules.includes(payment.classSchedule_id)
         // Mejorar el filtrado de fechas
         const matchesStartDate =
             !filterStartDate ||
@@ -601,7 +602,7 @@ export default function PaymentsPage() {
                             />
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <Label className="text-sm text-gray-600 dark:text-gray-400">
                                     Fecha de inicio
@@ -642,16 +643,21 @@ export default function PaymentsPage() {
                                 />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <label className="text-sm text-gray-600 dark:text-gray-400">
                                     Plan
-                                </p>
-                                <p className="font-medium dark:text-white">
-                                    <select onChange={e => setFilterPlan(e.target.value)} value={filterPlan} className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                        <option value="">
-                                            Sin plan
-                                        </option>
+                                </label>
+                                <p className="font-medium dark:text-white bg-white">
+                                    <select
+                                        onChange={e =>
+                                            setFilterPlan(e.target.value)
+                                        }
+                                        value={filterPlan}
+                                        className="w-full p-3 border h-10 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <option value="">Sin plan</option>
                                         {planNames.map(plan => (
-                                            <option key={plan.id} value={plan.id}>
+                                            <option
+                                                key={plan.id}
+                                                value={plan.id}>
                                                 {plan.name}
                                             </option>
                                         ))}
