@@ -33,6 +33,7 @@ class StudentResource extends JsonResource
                     'schedule_days' => $schedule->days,
                     'timeslot_hour' => $timeslot->hour,
                     'class_id' => $class->id,
+                    'class_price' => $class->precio,
                     'plan_id' => $class->plan->id,
                     'plan_name' => $class->plan->name
                 ];

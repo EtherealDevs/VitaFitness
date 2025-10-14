@@ -77,6 +77,7 @@ interface ScheduleData {
     timeslot_id: string
     timeslot_hour: string
     class_id: string
+    class_price: number
     plan_id: string
     plan_name: string
 }
@@ -86,6 +87,7 @@ interface Timeslot {
 }
 interface Class {
     class_id: string
+    class_price: number
     plan: [plan_id: string, name: string]
 }
 interface StudentFromServer {
@@ -282,7 +284,7 @@ export default function StudentManagement() {
             isMounted = false
         }
     }, [getStudents])
-
+    console.log(students)
     // Handle sorting
     const handleSort = (key: keyof Student) => {
         let direction: 'asc' | 'desc' = 'asc'
@@ -356,6 +358,7 @@ export default function StudentManagement() {
                 }
                 const newClass: Class = {
                     class_id: scheduleData.class_id,
+                    class_price: scheduleData.class_price,
                     plan: [scheduleData.plan_id, scheduleData.plan_name],
                 }
                 newSchedule.timeslots.push(newTimeslot)
@@ -484,6 +487,8 @@ export default function StudentManagement() {
                                 {renderScheduleTableForPlan(
                                     student.schedules,
                                     'Horarios generales',
+                                    'Sin plan',
+                                    0,
                                 )}
                             </div>
                         )}
@@ -498,6 +503,8 @@ export default function StudentManagement() {
                         {renderScheduleTableForPlan(
                             [schedule],
                             schedule.class.plan[1] || 'Plan sin nombre',
+                            schedule.class.plan[0],
+                            schedule.class.class_price,
                         )}
                     </div>
                 ))}
@@ -509,6 +516,8 @@ export default function StudentManagement() {
     const renderScheduleTableForPlan = (
         schedules: Schedule[],
         planName: string,
+        planId: string,
+        classPrice: number,
     ) => {
         if (!schedules || schedules.length === 0) {
             return (
@@ -554,6 +563,14 @@ export default function StudentManagement() {
                 <h5 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
                     <div className="w-3 h-3 bg-violet-500 rounded-full"></div>
                     {planName}
+                    -
+                     ${classPrice}
+                     -
+                     <button onClick={() => {
+                     router.push(
+                        '/admin/plans/edit/' + planId,
+                    )
+                    }} className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"> Ver plan </button>
                 </h5>
                 <div className="overflow-x-auto">
                     <table className="w-full border border-gray-200 dark:border-gray-600 rounded-lg">
