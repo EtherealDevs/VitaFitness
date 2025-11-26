@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Classe extends Model
 {
@@ -23,6 +24,14 @@ class Classe extends Model
     public function plan()
     {
         return $this->belongsTo(Plan::class);
+    }
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class, 'class_students', 'class_id', 'student_id');
+    }
+    public function teachers(): BelongsToMany
+    {
+        return $this->belongsToMany(Teacher::class, 'class_teachers', 'class_id', 'teacher_id');
     }
     public function schedules()
     {

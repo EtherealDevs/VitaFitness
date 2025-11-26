@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-            $table->json('days');
+            $table->string('day');
             $table->timestamps();
         });
     }
