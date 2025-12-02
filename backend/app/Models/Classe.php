@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Classe extends Model
 {
-    protected $with = ['branch', 'plan', 'classSchedules'];
+    protected $with = ['branch', 'plan', 'schedule', 'timeslot'];
     //'classSchedules'
 
-    protected $fillable = ['precio', 'max_students', 'branch_id', 'plan_id', 'schedule_id', 'teacher_id', 'student_id', 'timeslot_id'];
+    protected $fillable = ['precio', 'max_students', 'branch_id', 'plan_id', 'schedule_id', 'timeslot_id'];
 
 
     // public function classScheduleTimeslots()
@@ -33,9 +33,9 @@ class Classe extends Model
     {
         return $this->belongsToMany(Teacher::class, 'class_teachers', 'class_id', 'teacher_id');
     }
-    public function schedules()
+    public function schedule()
     {
-        return $this->belongsToMany(Schedule::class, 'class_schedules', 'class_id', 'schedule_id');
+        return $this->belongsTo(Schedule::class);
     }
     public function payment()
     {
@@ -46,15 +46,15 @@ class Classe extends Model
         return $this->hasMany(Payment::class);
     }
 
-    public function classSchedules()
-    {
-        return $this->hasMany(ClassSchedule::class, 'class_id', 'id');
-    }
-
-    // public function timeslot()
+    // public function classSchedules()
     // {
-    //     return $this->belongsTo(TimeSlot::class);
+    //     return $this->hasMany(ClassSchedule::class, 'class_id', 'id');
     // }
+
+    public function timeslot()
+    {
+        return $this->belongsTo(TimeSlot::class);
+    }
     // public function teacher()
     // {
     //     return $this->belongsTo(Teacher::class);

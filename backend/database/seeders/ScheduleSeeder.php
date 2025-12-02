@@ -13,17 +13,12 @@ class ScheduleSeeder extends Seeder
      */
     public function run(): void
     {
-        Schedule::create([
-            'days' => ['lunes', 'martes', 'miercoles', 'jueves']
-        ]);
-        Schedule::create([
-            'days' => ['viernes','sabado']
-        ]);
-        Schedule::create([
-            'days' => ['domingo']
-        ]);
-        Schedule::create([
-            'days' => ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
-        ]);
+        // A sequence that creates a schedule for each day of the week
+        $days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+        foreach ($days as $day) {
+            Schedule::create([
+                'day' => $day,
+            ]);
+        }
     }
 }
