@@ -68,15 +68,19 @@ class Student extends Model
 
     public function classes()
     {
-        return $this->hasManyThrough(
-            Classe::class,
-            ClassSchedule::class,
-            'id',
-            'id',
-            'id',
-            'class_id'
-        );
+        return $this->belongsToMany(Classe::class, 'class_students', 'student_id', 'class_id');
     }
+    // public function classes()
+    // {
+    //     return $this->hasManyThrough(
+    //         Classe::class,
+    //         ClassSchedule::class,
+    //         'id',
+    //         'id',
+    //         'id',
+    //         'class_id'
+    //     );
+    // }
     public function classScheduleTimeSlots()
     {
         return $this->belongsToMany(ClassScheduleTimeslot::class, 'class_schedule_timeslot_students', 'student_id', 'c_sch_ts_id');
