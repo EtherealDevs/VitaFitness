@@ -12,7 +12,7 @@ class ClasseController extends Controller
     {
         try {
             $classes = Classe::all();
-            $classes->load('classSchedules.classScheduleTimeslots.classStudents', 'classSchedules.classScheduleTimeslots.classTeachers', 'classSchedules.ClassScheduleTimeslots');
+            $classes->load('teachers, students');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

@@ -16,8 +16,7 @@ class ScheduleResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'days' => $this->days,
-            'timeslots' => TimeslotResource::collection($this->whenLoaded('timeslots')),
+            'day' => $this->days
         ];
     }
 }

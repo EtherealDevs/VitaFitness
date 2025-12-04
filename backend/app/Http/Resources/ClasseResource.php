@@ -36,30 +36,6 @@ class ClasseResource extends JsonResource
             $plan_status = $plan->status;
         }
 
-        $classSchedules = $this->whenLoaded('classSchedules');
-        if ($classSchedules instanceof \Illuminate\Http\Resources\MissingValue) {
-            $classSchedules = [];
-        } else {
-            $array = [];
-            foreach ($classSchedules as $classSchedule) {
-                $schedule = $classSchedule->schedule;
-                foreach ($classSchedule->classScheduleTimeslots as $classScheduleTimeslot) {
-                    $timeslot = $classScheduleTimeslot->timeslot;
-                    $newArray = [
-                        'class_id' => $classSchedule->class->id,
-                        'schedule_id' => $schedule->id,
-                        'classSchedule_id' => $classSchedule->id,
-                        'timeslot_id' => $timeslot->id,
-                        'classScheduleTimeslot_id' => $classScheduleTimeslot->id,
-                        'schedule_days' => $schedule->days,
-                        'timeslot_hour' => $timeslot->hour,
-                    ];
-                    array_push($array, $newArray);
-                }
-            }
-            $classSchedules = $array;
-        }
-
         return [
             'id' => $this->id,
             'class_id' => $this->id,
@@ -70,9 +46,12 @@ class ClasseResource extends JsonResource
             'plan_id' => $plan_id,
             'plan_name' => $plan_name,
             'plan_status' => $plan_status,
+            'timeslot_id' => $this->timeslot_id,
+            'schedule_id' => $this->schedule_id,
             'branch' => new BranchResource($this->branch),
             'plan' => new PlanResource($this->plan),
-            'schedules' => $classSchedules,
+            'timeslot' => new TimeSlotResource($this->timeslot),
+            'schedule' => new ScheduleResource($this->schedule),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
 
