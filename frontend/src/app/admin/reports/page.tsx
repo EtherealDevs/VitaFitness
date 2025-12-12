@@ -17,10 +17,12 @@ import {
     ChevronLeft,
     ChevronRight,
     Calendar,
+    Search,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/app/admin/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Input from '@/components/ui/Input'
 import { useStudents } from '@/hooks/students'
 import { useTeachers } from '@/hooks/teachers'
 import type {
@@ -39,6 +41,11 @@ export default function ReportsPage() {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date())
     const [loading, setLoading] = useState<boolean>(true)
     const [refreshing, setRefreshing] = useState<boolean>(false)
+    const [searchTerm, setSearchTerm] = useState<string>('')
+    const [activeTab, setActiveTab] = useState<
+        'overview' | 'classes' | 'teachers' | 'revenue'
+    >('overview')
+
     const [studentData, setStudentData] = useState<StudentReportData>({
         totalStudents: 0,
         activeStudents: 0,
@@ -90,7 +97,6 @@ export default function ReportsPage() {
         const nextMonth = new Date(selectedDate)
         nextMonth.setMonth(nextMonth.getMonth() + 1)
 
-        // Don't allow going beyond current month
         if (nextMonth <= now) {
             setSelectedDate(nextMonth)
         }
@@ -112,7 +118,6 @@ export default function ReportsPage() {
         try {
             setLoading(true)
 
-            // Fetch students and teachers
             const [studentsResponse, teachersResponse] = await Promise.all([
                 getStudents(),
                 getTeachers(),
@@ -135,7 +140,6 @@ export default function ReportsPage() {
                 59,
             )
 
-            // Process student data
             const activeStudents = students.filter(
                 s => s.status === 'activo',
             ).length
@@ -232,7 +236,7 @@ export default function ReportsPage() {
                 inactiveStudents,
                 studentsWithDebt,
                 studentsByClass,
-                studentsBySchedule: studentsBySchedule.slice(0, 10),
+                studentsBySchedule,
                 recentRegistrations,
             })
 
@@ -256,7 +260,6 @@ export default function ReportsPage() {
                         ) {
                             payment.classSchedule.schedule.timeslots.forEach(
                                 timeslot => {
-                                    // Find teacher for this schedule
                                     teachers.forEach(teacher => {
                                         if (
                                             teacher.schedules &&
@@ -277,7 +280,6 @@ export default function ReportsPage() {
                                                                 ) {
                                                                     const teacherFullName = `${teacher.name} ${teacher.last_name}`
 
-                                                                    // Count total students per teacher
                                                                     if (
                                                                         !teacherStudentCounts.has(
                                                                             teacherFullName,
@@ -296,7 +298,6 @@ export default function ReportsPage() {
                                                                             student.id,
                                                                         )
 
-                                                                    // Count students per teacher per class
                                                                     const className =
                                                                         payment
                                                                             .classSchedule
@@ -374,7 +375,7 @@ export default function ReportsPage() {
             setTeacherData({
                 totalTeachers: teachers.length,
                 teachersByStudents,
-                teachersByClass: teachersByClass.slice(0, 10),
+                teachersByClass,
             })
 
             let totalRevenue = 0
@@ -393,7 +394,6 @@ export default function ReportsPage() {
                             ? new Date(payment.payment_date)
                             : null
 
-                        // Only count payments from selected month
                         if (
                             paymentDate &&
                             paymentDate >= firstDayOfMonth &&
@@ -401,7 +401,6 @@ export default function ReportsPage() {
                         ) {
                             monthlyRevenue += amount
 
-                            // Revenue by class
                             const className =
                                 payment.classSchedule?.class?.name ||
                                 'Sin clase'
@@ -410,7 +409,6 @@ export default function ReportsPage() {
                                 (classRevenue.get(className) || 0) + amount,
                             )
 
-                            // Pending and overdue payments
                             if (payment.status === 'pendiente') {
                                 pendingPayments++
                             }
@@ -422,7 +420,6 @@ export default function ReportsPage() {
                             }
                         }
 
-                        // Total revenue (all time)
                         totalRevenue += amount
                     })
                 }
@@ -480,467 +477,654 @@ export default function ReportsPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
         )
     }
 
+    const filteredClassesData = studentData.studentsByClass.filter(item =>
+        item.className.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+
+    const filteredTeachersData = teacherData.teachersByClass.filter(
+        item =>
+            item.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.className.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+
+    const filteredRevenueData = paymentData.revenueByClass.filter(item =>
+        item.className.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+
     return (
-        <div className="min-h-screen w-full p-4 md:p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-            <div className="w-full max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="mb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                        <div className="flex items-center gap-4">
+        <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900">
+            <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="px-4 md:px-6 py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="flex items-center gap-3">
                             <Button
                                 variant="outline"
+                                size="sm"
                                 onClick={() => router.back()}
-                                className="dark:text-white dark:border-gray-600">
+                                className="dark:border-gray-600">
                                 <ArrowLeft className="h-4 w-4" />
                             </Button>
                             <div>
-                                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <BarChart3 className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-                                    Informes y Estadísticas
+                                <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <BarChart3 className="h-6 w-6 text-purple-600" />
+                                    Informes
                                 </h1>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    Vista general del rendimiento del gimnasio
-                                </p>
+                                <nav className="text-xs text-gray-500 dark:text-gray-400">
+                                    <Link
+                                        href="/admin"
+                                        className="hover:text-purple-600">
+                                        Admin
+                                    </Link>
+                                    {' / '}
+                                    <span>Informes</span>
+                                </nav>
                             </div>
                         </div>
-                        <div className="flex gap-2">
+
+                        <div className="flex items-center gap-2">
                             <Button
                                 variant="outline"
+                                size="sm"
                                 onClick={handleRefresh}
                                 disabled={refreshing}
-                                className="dark:text-white dark:border-gray-600 bg-transparent">
+                                className="dark:border-gray-600 bg-transparent">
                                 <RefreshCw
-                                    className={`h-4 w-4 mr-2 ${
+                                    className={`h-4 w-4 ${
                                         refreshing ? 'animate-spin' : ''
                                     }`}
                                 />
-                                Actualizar
                             </Button>
                             <Button
                                 variant="outline"
-                                className="dark:text-white dark:border-gray-600 bg-transparent">
-                                <Download className="h-4 w-4 mr-2" />
+                                size="sm"
+                                className="dark:border-gray-600 bg-transparent">
+                                <Download className="h-4 w-4 mr-1" />
                                 Exportar
                             </Button>
                         </div>
                     </div>
 
-                    {/* Breadcrumb */}
-                    <nav className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        <Link href="/admin" className="hover:text-purple-600">
-                            Admin
-                        </Link>
-                        {' > '}
-                        <span className="text-gray-900 dark:text-white">
-                            Informes
-                        </span>
-                    </nav>
+                    <div className="flex items-center justify-between gap-4 mt-4 bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={goToPreviousMonth}
+                            className="h-8 w-8 p-0">
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
 
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-purple-600" />
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white capitalize">
+                                {formatMonthYear(selectedDate)}
+                            </span>
+                            {!isCurrentMonth() && (
                                 <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     size="sm"
-                                    onClick={goToPreviousMonth}
-                                    className="dark:text-white dark:border-gray-600 bg-transparent">
-                                    <ChevronLeft className="h-4 w-4" />
+                                    onClick={goToCurrentMonth}
+                                    className="h-6 text-xs px-2">
+                                    Hoy
                                 </Button>
+                            )}
+                        </div>
 
-                                <div className="flex items-center gap-3">
-                                    <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                                    <div className="text-center">
-                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white capitalize">
-                                            {formatMonthYear(selectedDate)}
-                                        </h3>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            {isCurrentMonth()
-                                                ? 'Mes actual'
-                                                : 'Rendimiento histórico'}
-                                        </p>
-                                    </div>
-                                </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={goToNextMonth}
+                            disabled={isCurrentMonth()}
+                            className="h-8 w-8 p-0">
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
 
-                                <div className="flex items-center gap-2">
-                                    {!isCurrentMonth() && (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={goToCurrentMonth}
-                                            className="dark:text-white dark:border-gray-600 bg-transparent">
-                                            Hoy
-                                        </Button>
-                                    )}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={goToNextMonth}
-                                        disabled={isCurrentMonth()}
-                                        className="dark:text-white dark:border-gray-600 bg-transparent">
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
+            <div className="p-4 md:p-6 max-w-full">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                        Total Alumnos
+                                    </p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                                        {studentData.totalStudents}
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {studentData.activeStudents} activos
+                                    </p>
                                 </div>
+                                <Users className="h-8 w-8 text-purple-600 dark:text-purple-400 opacity-75" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                        Ingresos Mes
+                                    </p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                                        {formatCurrency(
+                                            paymentData.monthlyRevenue,
+                                        )}
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {formatCurrency(
+                                            paymentData.averagePayment,
+                                        )}{' '}
+                                        promedio
+                                    </p>
+                                </div>
+                                <DollarSign className="h-8 w-8 text-green-600 dark:text-green-400 opacity-75" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                        Profesores
+                                    </p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                                        {teacherData.totalTeachers}
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        activos
+                                    </p>
+                                </div>
+                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-400 opacity-75" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                        Nuevos
+                                    </p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                                        {studentData.recentRegistrations}
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        inscripciones
+                                    </p>
+                                </div>
+                                <TrendingUp className="h-8 w-8 text-orange-600 dark:text-orange-400 opacity-75" />
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Key Metrics Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <Card className="bg-gradient-to-br from-purple-500 to-purple-600 border-0 dark:text-white text-black">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium flex items-center gap-2 opacity-90">
-                                <Users className="h-4 w-4" />
-                                Total Alumnos
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold">
-                                {studentData.totalStudents}
-                            </div>
-                            <p className="text-xs opacity-80 mt-1">
-                                {studentData.activeStudents} activos,{' '}
-                                {studentData.inactiveStudents} inactivos
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-green-500 to-green-600 border-0 dark:text-white text-black">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium flex items-center gap-2 opacity-90">
-                                <DollarSign className="h-4 w-4" />
-                                Ingresos del Mes
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold">
-                                {formatCurrency(paymentData.monthlyRevenue)}
-                            </div>
-                            <p className="text-xs opacity-80 mt-1">
-                                {formatCurrency(paymentData.totalRevenue)} total
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 dark:text-white text-black">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium flex items-center gap-2 opacity-90">
-                                <UserCheck className="h-4 w-4" />
-                                Total Profesores
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold">
-                                {teacherData.totalTeachers}
-                            </div>
-                            <p className="text-xs opacity-80 mt-1">
-                                {teacherData.teachersByStudents.length > 0
-                                    ? `${teacherData.teachersByStudents[0].studentCount} alumnos (máx)`
-                                    : 'Sin datos'}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 dark:text-white text-black">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium flex items-center gap-2 opacity-90">
-                                <TrendingUp className="h-4 w-4" />
-                                Nuevas Inscripciones
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold">
-                                {studentData.recentRegistrations}
-                            </div>
-                            <p className="text-xs opacity-80 mt-1">
-                                En {formatMonthYear(selectedDate)}
-                            </p>
-                        </CardContent>
-                    </Card>
+                <div className="mb-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-lg">
+                    <div className="flex gap-1 px-4 pt-2">
+                        <button
+                            onClick={() => setActiveTab('overview')}
+                            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                activeTab === 'overview'
+                                    ? 'bg-gray-50 dark:bg-gray-900 text-purple-600 border-t border-x border-gray-200 dark:border-gray-700'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}>
+                            Vista General
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('classes')}
+                            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                activeTab === 'classes'
+                                    ? 'bg-gray-50 dark:bg-gray-900 text-purple-600 border-t border-x border-gray-200 dark:border-gray-700'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}>
+                            Por Clase
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('teachers')}
+                            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                activeTab === 'teachers'
+                                    ? 'bg-gray-50 dark:bg-gray-900 text-purple-600 border-t border-x border-gray-200 dark:border-gray-700'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}>
+                            Por Profesor
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('revenue')}
+                            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                activeTab === 'revenue'
+                                    ? 'bg-gray-50 dark:bg-gray-900 text-purple-600 border-t border-x border-gray-200 dark:border-gray-700'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}>
+                            Ingresos
+                        </button>
+                    </div>
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    {/* Students by Class */}
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                                <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                                Alumnos por Clase
+                <div className="mb-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                            type="text"
+                            placeholder="Buscar en la tabla..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="pl-10 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                        />
+                    </div>
+                </div>
+
+                {activeTab === 'overview' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Students by Class Table */}
+                        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                            <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                <CardTitle className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <BookOpen className="h-4 w-4 text-purple-600" />
+                                    Alumnos por Clase
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-auto max-h-96">
+                                    <table className="w-full text-sm">
+                                        <thead className="sticky top-0 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                                            <tr>
+                                                <th className="text-left px-4 py-2 font-semibold text-gray-700 dark:text-gray-300">
+                                                    #
+                                                </th>
+                                                <th className="text-left px-4 py-2 font-semibold text-gray-700 dark:text-gray-300">
+                                                    Clase
+                                                </th>
+                                                <th className="text-right px-4 py-2 font-semibold text-gray-700 dark:text-gray-300">
+                                                    Alumnos
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {studentData.studentsByClass
+                                                .length > 0 ? (
+                                                studentData.studentsByClass.map(
+                                                    (item, index) => (
+                                                        <tr
+                                                            key={index}
+                                                            className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                                                            <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                                                {index + 1}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                                                                {item.className}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right text-gray-900 dark:text-white font-semibold">
+                                                                {item.count}
+                                                            </td>
+                                                        </tr>
+                                                    ),
+                                                )
+                                            ) : (
+                                                <tr>
+                                                    <td
+                                                        colSpan={3}
+                                                        className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                        No hay datos disponibles
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Students by Schedule Table */}
+                        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                            <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                <CardTitle className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <Clock className="h-4 w-4 text-blue-600" />
+                                    Alumnos por Horario
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-auto max-h-96">
+                                    <table className="w-full text-sm">
+                                        <thead className="sticky top-0 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                                            <tr>
+                                                <th className="text-left px-4 py-2 font-semibold text-gray-700 dark:text-gray-300">
+                                                    Horario
+                                                </th>
+                                                <th className="text-right px-4 py-2 font-semibold text-gray-700 dark:text-gray-300">
+                                                    Alumnos
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {studentData.studentsBySchedule
+                                                .length > 0 ? (
+                                                studentData.studentsBySchedule.map(
+                                                    (item, index) => (
+                                                        <tr
+                                                            key={index}
+                                                            className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                                                            <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                                                                {item.schedule}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right text-gray-900 dark:text-white font-semibold">
+                                                                {item.count}
+                                                            </td>
+                                                        </tr>
+                                                    ),
+                                                )
+                                            ) : (
+                                                <tr>
+                                                    <td
+                                                        colSpan={2}
+                                                        className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                        No hay datos disponibles
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+
+                {activeTab === 'classes' && (
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                            <CardTitle className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <BookOpen className="h-4 w-4 text-purple-600" />
+                                Detalle de Clases
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            {studentData.studentsByClass.length > 0 ? (
-                                <div className="space-y-3">
-                                    {studentData.studentsByClass
-                                        .slice(0, 8)
-                                        .map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3 flex-1">
-                                                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-300 font-bold text-sm">
-                                                        {index + 1}
-                                                    </div>
-                                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                                        {item.className}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full max-w-[100px] h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-purple-500 rounded-full"
-                                                            style={{
-                                                                width: `${
-                                                                    (item.count /
-                                                                        studentData
-                                                                            .studentsByClass[0]
-                                                                            .count) *
-                                                                    100
-                                                                }%`,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm font-bold text-gray-900 dark:text-white min-w-[2rem] text-right">
-                                                        {item.count}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                    No hay datos disponibles
-                                </div>
-                            )}
+                        <CardContent className="p-0">
+                            <div className="overflow-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="sticky top-0 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                                        <tr>
+                                            <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                #
+                                            </th>
+                                            <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                Clase
+                                            </th>
+                                            <th className="text-right px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                Alumnos
+                                            </th>
+                                            <th className="text-right px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                % del Total
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredClassesData.length > 0 ? (
+                                            filteredClassesData.map(
+                                                (item, index) => {
+                                                    const percentage =
+                                                        studentData.totalStudents >
+                                                        0
+                                                            ? (
+                                                                  (item.count /
+                                                                      studentData.totalStudents) *
+                                                                  100
+                                                              ).toFixed(1)
+                                                            : '0.0'
+                                                    return (
+                                                        <tr
+                                                            key={index}
+                                                            className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                                                            <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                                                {index + 1}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                                                                {item.className}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right text-gray-900 dark:text-white font-semibold">
+                                                                {item.count}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">
+                                                                {percentage}%
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                },
+                                            )
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan={4}
+                                                    className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                    {searchTerm
+                                                        ? 'No se encontraron resultados'
+                                                        : 'No hay datos disponibles'}
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </CardContent>
                     </Card>
+                )}
 
-                    {/* Students by Schedule */}
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                                <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                Alumnos por Horario
+                {activeTab === 'teachers' && (
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                            <CardTitle className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Award className="h-4 w-4 text-green-600" />
+                                Profesores por Clase
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            {studentData.studentsBySchedule.length > 0 ? (
-                                <div className="space-y-3">
-                                    {studentData.studentsBySchedule.map(
-                                        (item, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3 flex-1">
-                                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                                                        <Clock className="h-4 w-4 text-blue-600 dark:text-blue-300" />
-                                                    </div>
-                                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        {item.schedule}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full max-w-[100px] h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-blue-500 rounded-full"
-                                                            style={{
-                                                                width: `${
-                                                                    (item.count /
-                                                                        studentData
-                                                                            .studentsBySchedule[0]
-                                                                            .count) *
-                                                                    100
-                                                                }%`,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm font-bold text-gray-900 dark:text-white min-w-[2rem] text-right">
-                                                        {item.count}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ),
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                    No hay datos disponibles
-                                </div>
-                            )}
+                        <CardContent className="p-0">
+                            <div className="overflow-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="sticky top-0 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                                        <tr>
+                                            <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                #
+                                            </th>
+                                            <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                Profesor
+                                            </th>
+                                            <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                Clase
+                                            </th>
+                                            <th className="text-right px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                Alumnos
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredTeachersData.length > 0 ? (
+                                            filteredTeachersData.map(
+                                                (item, index) => (
+                                                    <tr
+                                                        key={index}
+                                                        className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                                                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                                            {index + 1}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                                                            {item.teacherName}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                                            {item.className}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right text-gray-900 dark:text-white font-semibold">
+                                                            {item.studentCount}
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan={4}
+                                                    className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                    {searchTerm
+                                                        ? 'No se encontraron resultados'
+                                                        : 'No hay datos disponibles'}
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </CardContent>
                     </Card>
+                )}
 
-                    {/* Teachers by Students */}
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                                <Award className="h-5 w-5 text-green-600 dark:text-green-400" />
-                                Profesores con Más Alumnos
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {teacherData.teachersByStudents.length > 0 ? (
-                                <div className="space-y-3">
-                                    {teacherData.teachersByStudents
-                                        .slice(0, 8)
-                                        .map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3 flex-1">
-                                                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300 font-bold text-sm">
-                                                        {index + 1}
-                                                    </div>
-                                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                                        {item.teacherName}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full max-w-[100px] h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-green-500 rounded-full"
-                                                            style={{
-                                                                width: `${
-                                                                    (item.studentCount /
-                                                                        teacherData
-                                                                            .teachersByStudents[0]
-                                                                            .studentCount) *
-                                                                    100
-                                                                }%`,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm font-bold text-gray-900 dark:text-white min-w-[2rem] text-right">
-                                                        {item.studentCount}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                    No hay datos disponibles
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Revenue by Class */}
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                                <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                {activeTab === 'revenue' && (
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                            <CardTitle className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <DollarSign className="h-4 w-4 text-green-600" />
                                 Ingresos por Clase
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            {paymentData.revenueByClass.length > 0 ? (
-                                <div className="space-y-3">
-                                    {paymentData.revenueByClass
-                                        .slice(0, 8)
-                                        .map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3 flex-1">
-                                                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-300 font-bold text-sm">
-                                                        {index + 1}
-                                                    </div>
-                                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                                                        {item.className}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full max-w-[100px] h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-emerald-500 rounded-full"
-                                                            style={{
-                                                                width: `${
-                                                                    (item.revenue /
-                                                                        paymentData
-                                                                            .revenueByClass[0]
-                                                                            .revenue) *
-                                                                    100
-                                                                }%`,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm font-bold text-gray-900 dark:text-white min-w-[4rem] text-right">
-                                                        {formatCurrency(
-                                                            item.revenue,
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                    No hay datos disponibles
-                                </div>
-                            )}
+                        <CardContent className="p-0">
+                            <div className="overflow-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="sticky top-0 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                                        <tr>
+                                            <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                #
+                                            </th>
+                                            <th className="text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                Clase
+                                            </th>
+                                            <th className="text-right px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                Ingresos
+                                            </th>
+                                            <th className="text-right px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">
+                                                % del Total
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredRevenueData.length > 0 ? (
+                                            filteredRevenueData.map(
+                                                (item, index) => {
+                                                    const percentage =
+                                                        paymentData.monthlyRevenue >
+                                                        0
+                                                            ? (
+                                                                  (item.revenue /
+                                                                      paymentData.monthlyRevenue) *
+                                                                  100
+                                                              ).toFixed(1)
+                                                            : '0.0'
+                                                    return (
+                                                        <tr
+                                                            key={index}
+                                                            className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                                                            <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                                                {index + 1}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                                                                {item.className}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right text-gray-900 dark:text-white font-semibold">
+                                                                {formatCurrency(
+                                                                    item.revenue,
+                                                                )}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">
+                                                                {percentage}%
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                },
+                                            )
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan={4}
+                                                    className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                    {searchTerm
+                                                        ? 'No se encontraron resultados'
+                                                        : 'No hay datos disponibles'}
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                    <tfoot className="border-t-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900">
+                                        <tr>
+                                            <td
+                                                colSpan={2}
+                                                className="px-4 py-3 text-right font-bold text-gray-900 dark:text-white">
+                                                TOTAL:
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-white">
+                                                {formatCurrency(
+                                                    paymentData.monthlyRevenue,
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-white">
+                                                100%
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </CardContent>
                     </Card>
-                </div>
+                )}
 
-                {/* Additional Statistics */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">
                                 Pago Promedio
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            </p>
+                            <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
                                 {formatCurrency(paymentData.averagePayment)}
-                            </div>
+                            </p>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">
                                 Pagos Pendientes
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                            </p>
+                            <p className="text-lg font-bold text-orange-600 dark:text-orange-400 mt-1">
                                 {paymentData.pendingPayments}
-                            </div>
+                            </p>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">
                                 Pagos Vencidos
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                            </p>
+                            <p className="text-lg font-bold text-red-600 dark:text-red-400 mt-1">
                                 {paymentData.overduePayments}
-                            </div>
+                            </p>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-white/80 dark:bg-[#1f2122] backdrop-blur border-gray-200 dark:border-gray-700">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                Alumnos con Deuda
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                                Con Deuda
+                            </p>
+                            <p className="text-lg font-bold text-red-600 dark:text-red-400 mt-1">
                                 {studentData.studentsWithDebt}
-                            </div>
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
