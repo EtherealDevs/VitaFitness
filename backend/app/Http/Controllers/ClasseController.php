@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ClasseResource;
+use App\Http\Resources\PlanResource;
 use App\Models\Classe;
+use App\Models\Plan;
 use Illuminate\Http\Request;
 
 class ClasseController extends Controller
@@ -11,12 +13,28 @@ class ClasseController extends Controller
     public function index()
     {
         try {
-            $classes = Classe::all();
-            $classes->load('teachers, students');
+            $classes = Classe::with(['plan', 'branch', 'students', 'teachers'])->get();
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $classes = ClasseResource::collection($classes);
+            $classes = $classes->groupBy(fn($item) => $item->plan_id . '-' . $item->branch_id);
+        $classes = $classes->map(function ($items) {
+            return [
+                'plan_name'   => $items->first()->plan->name,
+                'branch_name' => $items->first()->branch->name,
+                'details'   => $items->map(function ($item) {
+                    return [
+                        'timeslot_id' => $item->timeslot_id,
+                        'schedule_id' => $item->schedule_id,
+                        'price'       => $item->precio,
+                        'max_students'=> $item->max_students,
+                        'students'    => $item->students,
+                        'teachers'    => $item->teachers,
+                    ];
+                })->values()->all()
+            ];
+        })->values();
+        // $classes = $classes->groupBy(['plan_id', 'branch_id']);
         // dd($classes);
         $data = [
             'classes' => $classes,
@@ -26,15 +44,14 @@ class ClasseController extends Controller
         return response()->json($data, 200);
     }
 
-
     public function show(string $id)
     {
         try {
-            $classe = Classe::with(['classSchedules.classScheduleTimeslots.classStudents', 'classSchedules.classScheduleTimeslots.classTeachers'])->find($id);
+            $classe = Classe::with(['plan', 'branch', 'students', 'teachers'])->find($id);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $classe = new ClasseResource($classe);
+        // $classe = new ClasseResource($classe);
         $data = [
             'classe' => $classe,
             'message' => 'Classe retrieved successfully',
@@ -50,13 +67,14 @@ class ClasseController extends Controller
             'plan_id' => 'required|exists:plans,id',
             'branch_id' => 'required|exists:branches,id',
             'precio' => 'required|integer',
+            'timeslot_id' => 'required|exists:timeslots,id',
+            'schedule_id' => 'required|exists:schedules,id',
         ]);
         try {
             $classe = Classe::create($request->all());
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $classe = new ClasseResource($classe);
         $data = [
             'classe' => $classe,
             'message' => 'Classe created successfully',
@@ -72,6 +90,8 @@ class ClasseController extends Controller
             'plan_id' => 'exists:plans,id',
             'branch_id' => 'exists:branches,id',
             'price' => 'integer',
+            'timeslot_id' => 'exists:timeslots,id',
+            'schedule_id' => 'exists:schedules,id',
         ]);
         try {
             $classe = Classe::find($id);
@@ -79,7 +99,6 @@ class ClasseController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $classe = new ClasseResource($classe);
         $data = [
             'classe' => $classe,
             'message' => 'Classe updated successfully',

@@ -18,6 +18,7 @@ class PlanResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'classes' => ClasseResource::collection($this->whenLoaded('classes')),
+            'branch' => new BranchResource($this->whenLoaded('branch')),
             'description' => $this->description,
             'status' => $this->status,
             'created_at' => $this->created_at,

@@ -16,7 +16,6 @@ class Plan extends Model
     {
         return $this->belongsToMany(Teacher::class);
     }
-
     public function payments()
     {
         return $this->hasMany(Payment::class);

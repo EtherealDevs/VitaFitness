@@ -17,10 +17,10 @@ class BranchResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'address' => $this->address,
-            'students' => StudentResource::collection($this->whenLoaded('students')),
-            'classes' => ClasseResource::collection($this->whenLoaded('classes')),
-            'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
+            'address' => $this->address
+            // 'students' => StudentResource::collection($this->whenLoaded('students')),
+            // 'classes' => ClasseResource::collection($this->whenLoaded('classes')),
+            // 'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
         ];
     }
 }
