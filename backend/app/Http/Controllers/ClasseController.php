@@ -6,6 +6,9 @@ use App\Http\Resources\ClasseResource;
 use App\Http\Resources\PlanResource;
 use App\Models\Classe;
 use App\Models\Plan;
+use App\Models\Schedule;
+use App\Models\TimeSlot;
+use Dotenv\Validator;
 use Illuminate\Http\Request;
 
 class ClasseController extends Controller
@@ -69,11 +72,29 @@ class ClasseController extends Controller
             'branch_id' => 'required|exists:branches,id',
             'precio' => 'required|integer',
         ]);
-        dd($request->all());
+        $schedules = [];
+        foreach ($request->days as $day) {
+            $item = Schedule::find($day);
+            array_push($schedules, $item);
+        }
+        $timeslots = TimeSlot::whereBetween('hour', [$request->time_start, $request->time_end])->get();
+        // return response()->json(['message' => [$schedules, $timeslots]], 500);
+        foreach ($timeslots as $timeslot) {
+        foreach ($schedules as $schedule) {
+        // Use Validator to validate Timeslots and Schedules
         try {
-            $classe = Classe::create($request->all());
+            $classe = Classe::create([
+                'precio' => $request->precio,
+                'max_students' => $request->max_students,
+                'branch_id' => $request->branch_id,
+                'plan_id' => $request->plan_id,
+                'schedule_id' => $schedule->id,
+                'timeslot_id' => $timeslot->id,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+        }
         }
         $data = [
             'classe' => $classe,
