@@ -30,18 +30,19 @@ import { toast } from '@/hooks/use-toast'
 import { useClasses } from '@/hooks/classes'
 import { type Plan, usePlans } from '@/hooks/plans'
 import { type Branch, useBranches } from '@/hooks/branches'
-import { useClassSchedules } from '@/hooks/classSchedules'
+import { type Schedule, useSchedules } from '@/hooks/schedules'
 
 export default function CreateClassPage() {
     const router = useRouter()
     const { createClass } = useClasses()
-    const { createClassSchedule } = useClassSchedules()
     const { getPlans } = usePlans()
     const { getBranches } = useBranches()
+    const { getSchedules } = useSchedules()
 
     const [isLoading, setIsLoading] = useState(false)
     const [plans, setPlans] = useState<Plan[]>([])
     const [branches, setBranches] = useState<Branch[]>([])
+    const [schedules, setSchedules] = useState<Schedule[]>([])
     const [selectedDays, setSelectedDays] = useState<string[]>([])
 
     const [formData, setFormData] = useState({
@@ -54,13 +55,13 @@ export default function CreateClassPage() {
     })
 
     const daysOfWeek = [
-        { id: 'lunes', label: 'Lunes' },
-        { id: 'martes', label: 'Martes' },
-        { id: 'miercoles', label: 'Miércoles' },
-        { id: 'jueves', label: 'Jueves' },
-        { id: 'viernes', label: 'Viernes' },
-        { id: 'sabado', label: 'Sábado' },
-        { id: 'domingo', label: 'Domingo' },
+        { id: '1', label: 'Lunes' },
+        { id: '2', label: 'Martes' },
+        { id: '3', label: 'Miércoles' },
+        { id: '4', label: 'Jueves' },
+        { id: '5', label: 'Viernes' },
+        { id: '6', label: 'Sábado' },
+        { id: '7', label: 'Domingo' },
     ]
 
     const generateHourOptions = () => {
@@ -77,18 +78,20 @@ export default function CreateClassPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [plansRes, branchesRes] = await Promise.all([
+                const [plansRes, branchesRes, schedulesRes] = await Promise.all([
                     getPlans(),
                     getBranches(),
+                    getSchedules(),
                 ])
                 setPlans(plansRes.plans || [])
                 setBranches(branchesRes.branches || [])
+                setSchedules(schedulesRes.schedules || [])
             } catch (error) {
                 console.error('Error fetching data:', error)
             }
         }
         fetchData()
-    }, [getPlans, getBranches])
+    }, [getPlans, getBranches, getSchedules])
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }))
@@ -107,24 +110,19 @@ export default function CreateClassPage() {
         setIsLoading(true)
 
         try {
+            
             const classFormData = new FormData()
             classFormData.append('plan_id', formData.selectedPlan)
             classFormData.append('branch_id', formData.selectedBranch)
             classFormData.append('precio', formData.price)
             classFormData.append('max_students', formData.maxStudents)
-
+            selectedDays.forEach((day, index) => {
+                classFormData.append(`days[${index}]`, day)
+            })
+            classFormData.append('time_start', formData.startTime)
+            classFormData.append('time_end', formData.endTime)
+                
             const res = await createClass(classFormData)
-
-            if (res.status === 'success (201)') {
-                const classScheduleFormData = new FormData()
-                classScheduleFormData.append('class_id', res.classe.id)
-                selectedDays.forEach((day, index) => {
-                    classScheduleFormData.append(`days[${index}]`, day)
-                })
-                classScheduleFormData.append('time_start', formData.startTime)
-                classScheduleFormData.append('time_end', formData.endTime)
-
-                await createClassSchedule(classScheduleFormData)
 
                 toast({
                     title: 'Clase creada exitosamente',
@@ -134,7 +132,7 @@ export default function CreateClassPage() {
                 })
 
                 router.push('/admin/classes')
-            }
+            
         } catch (error) {
             console.error('Error creating class:', error)
             toast({
@@ -142,7 +140,8 @@ export default function CreateClassPage() {
                 description: 'Hubo un error al crear la clase',
                 variant: 'destructive',
             })
-        } finally {
+        }
+        finally {
             setIsLoading(false)
         }
     }

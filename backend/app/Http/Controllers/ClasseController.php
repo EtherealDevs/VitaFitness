@@ -62,14 +62,14 @@ class ClasseController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'max_students' => 'required|integer',
             'plan_id' => 'required|exists:plans,id',
             'branch_id' => 'required|exists:branches,id',
             'precio' => 'required|integer',
-            'timeslot_id' => 'required|exists:timeslots,id',
-            'schedule_id' => 'required|exists:schedules,id',
         ]);
+        dd($request->all());
         try {
             $classe = Classe::create($request->all());
         } catch (\Exception $e) {
