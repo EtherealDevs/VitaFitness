@@ -128,6 +128,22 @@ export default function ClassPage() {
         return str.charAt(0).toUpperCase() + str.slice(1)
     }
 
+    const SCHEDULE_DAY_MAP: Record<number, string> = {
+            1: 'lunes',
+            2: 'martes',
+            3: 'miercoles',
+            4: 'jueves',
+            5: 'viernes',
+            6: 'sabado',
+            7: 'domingo',
+            }
+    const TIMESLOT_HOUR_MAP: Record<number, string> = Object.fromEntries(
+  Array.from({ length: 24 }, (_, i) => {
+    const hour = i.toString().padStart(2, '0')
+    return [i + 1, `${hour}:00`]
+  }),
+)
+
     const fetchClasses = useCallback(async () => {
         setLoading(true)
         setError(null)
@@ -136,69 +152,45 @@ export default function ClassPage() {
             const response = await getClasses()
 
             const classes: Class[] = []
-            const processedClasses = response.classes.map(
-                (classe: ClassData) => {
-                    const schedules: Schedule[] = []
+            const processedClasses = response.classes.map((item: any) => {
+            const schedulesMap = new Map<number, Schedule>()
 
-                    // Guardar los datos originales
-                    const originalScheduleData: ScheduleData[] =
-                        classe.schedules || []
-                    // Procesar los datos originales para crear Schedule[]
-                    originalScheduleData.forEach(
-                        (scheduleData: ScheduleData) => {
-                            let newSchedule = schedules.find(
-                                s =>
-                                    s.schedule_id ===
-                                        scheduleData.schedule_id &&
-                                    s.class_id === scheduleData.class_id,
-                            )
-                            if (newSchedule === undefined) {
-                                newSchedule = {
-                                    class_id: scheduleData.class_id,
-                                    schedule_id: scheduleData.schedule_id,
-                                    classSchedule_id:
-                                        scheduleData.classSchedule_id,
-                                    days: scheduleData.schedule_days,
-                                    timeslots: [],
-                                    students: [],
-                                    teachers: [],
-                                }
-                                schedules.push(newSchedule)
-                            }
-                            const newTimeslot: Timeslot = {
-                                id: scheduleData.timeslot_id,
-                                hour: scheduleData.timeslot_hour,
-                            }
-                            newSchedule.timeslots.push(newTimeslot)
-                        },
-                    )
-                    let newClass = classes.find(
-                        c => c.class_id === classe.class_id,
-                    )
-                    if (newClass === undefined) {
-                        newClass = {
-                            class_id: classe.class_id,
-                            plan: [classe.plan_id, classe.plan_name],
-                            plan_id: classe.plan_id,
-                            plan_name: classe.plan_name,
-                            plan_status: classe.plan_status,
-                            branch_id: classe.branch_id,
-                            branch_name: classe.branch_name,
-                            max_students: classe.max_students,
-                            precio: classe.precio,
-                            schedules: schedules,
-                        }
-                        classes.push(newClass)
-                    }
+            item.details.forEach((d: any) => {
+                if (!schedulesMap.has(d.schedule_id)) {
+                const day = SCHEDULE_DAY_MAP[d.schedule_id]
 
-                    return {
-                        ...classe,
-                        classes,
-                        schedules, // Schedule[] procesados
-                        originalScheduleData, // ScheduleData[] originales
-                    }
-                },
-            )
+                schedulesMap.set(d.schedule_id, {
+                    class_id: `${item.plan_name}-${item.branch_name}`, // synthetic but stable
+                    schedule_id: d.schedule_id,
+                    classSchedule_id: `${item.plan_name}-${d.schedule_id}`,
+                    days: day ? [day] : [],
+                    timeslots: [],
+                    students: d.students ?? [],
+                    teachers: d.teachers ?? [],
+                })
+                }
+
+                schedulesMap.get(d.schedule_id)!.timeslots.push({
+                id: d.timeslot_id,
+                hour: TIMESLOT_HOUR_MAP[d.timeslot_id] ?? '',
+                })
+            })
+
+            const schedules = Array.from(schedulesMap.values())
+            const firstDetail = item.details[0]
+
+            return {
+                class_id: `${item.plan_name}-${item.branch_name}`,
+                plan_id: item.plan_id ?? '',
+                plan_name: item.plan_name,
+                plan_status: item.plan_status ?? '',
+                branch_id: item.branch_id ?? '',
+                branch_name: item.branch_name,
+                max_students: firstDetail?.max_students ?? 0,
+                precio: firstDetail?.price ?? 0,
+                schedules,
+            }
+            })
             console.log(classes)
             setClasses(processedClasses)
         } catch (err) {
@@ -648,7 +640,7 @@ export default function ClassPage() {
                                 ) : (
                                     paginatedClasses.map(classe => (
                                         <tr
-                                            key={classe.class_id}
+                                            key={`${classe.plan_name}-${classe.branch_name}`}
                                             className={`hover:bg-gray-50/50 dark:hover:bg-slate-800/70 ${
                                                 selectedClass?.class_id ===
                                                 classe.class_id

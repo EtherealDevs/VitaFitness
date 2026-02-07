@@ -25,6 +25,14 @@ class ClasseController extends Controller
             return [
                 'plan_name'   => $items->first()->plan->name,
                 'branch_name' => $items->first()->branch->name,
+                'class_id' => $items->first()->id,
+                'plan_id' => $items->first()->plan_id,
+                'plan_name' => $items->first()->plan->name,
+                'plan_status' => $items->first()->plan->status,
+                'branch_id' => $items->first()->branch_id,
+                'branch_name' => $items->first()->branch->name,
+                'max_students' => $items->first()->max_students,
+                'precio' => $items->first()->precio,
                 'details'   => $items->map(function ($item) {
                     return [
                         'timeslot_id' => $item->timeslot_id,
