@@ -23,6 +23,16 @@ class ClasseResource extends JsonResource
             $branch_name = $branch->name;
             $branch_id = $branch->id;
         }
+        
+        $schedule = $this->whenLoaded('schedule');
+        $schedule_name = null;
+        $schedule_id = null;
+        if ($schedule instanceof \Illuminate\Http\Resources\MissingValue) {
+            $schedule = null;
+        } else {
+            $schedule_name = $schedule->day;
+            $schedule_id = $schedule->id;
+        }
 
         $plan = $this->whenLoaded('plan');
         $plan_name = null;
@@ -40,7 +50,9 @@ class ClasseResource extends JsonResource
             'id' => $this->id,
             'class_id' => $this->id,
             'max_students' => $this->max_students,
+            'schedule_day' => $schedule_name,
             'precio' => $this->precio,
+            'class_price' => $this->precio,
             'branch_id' => $branch_id,
             'branch_name' => $branch_name,
             'plan_id' => $plan_id,

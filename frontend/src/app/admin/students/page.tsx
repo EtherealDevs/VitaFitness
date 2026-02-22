@@ -40,7 +40,6 @@ interface Student {
     payments?: Payment[]
     attendances?: Attendances[]
     accountInfo?: AccountInfo
-    scheduleData: ScheduleData[]
     schedules: Schedule[]
     // Additional details for the expanded view
     address?: string
@@ -67,28 +66,32 @@ interface ClassSchedule {
 
 interface Schedule {
     schedule_id: string
-    days: string[]
-    timeslots: Timeslot[]
-    class: Class | null
+    day: string
+    classes: Class[] | null
+    plan_id: string
+    plan_name: string
+    branch_name: string
 }
 interface ScheduleData {
     schedule_id: string
-    schedule_days: string[]
-    timeslot_id: string
+    schedule_day: string
+    timeslot_id: number
     timeslot_hour: string
     class_id: string
     class_price: number
     plan_id: string
     plan_name: string
+    branch_name: string
 }
 interface Timeslot {
-    id: string
+    id: number
     hour: string
 }
 interface Class {
     class_id: string
     class_price: number
     plan: [plan_id: string, name: string]
+    timeslot: Timeslot
 }
 interface StudentFromServer {
     id: string
@@ -113,12 +116,6 @@ interface StudentFromServer {
     updated_at: string
 }
 
-// Definir una interfaz específica para los timeslots del estudiante
-// interface StudentTimeslot {
-//     id: string
-//     hour: string | string[]
-// }
-
 interface AccountInfo {
     balance: number
     lastEntryDate: string
@@ -126,6 +123,22 @@ interface AccountInfo {
     lastPaymentDate: string
     lastPaymentPlan: string
     lastPaymentAmount: number
+}
+const SCHEDULE_DAY_MAP: Record<number, string> = {
+  1: 'lunes',
+  2: 'martes',
+  3: 'miercoles',
+  4: 'jueves',
+  5: 'viernes',
+  6: 'sabado',
+  7: 'domingo',
+}
+
+// Maps timeslot_id (1–24) to hour string (00:00–23:00)
+const mapTimeslotIdToHour = (id: number): string => {
+    if (!id || id < 1 || id > 24) return ''
+    const hour = id - 1
+    return `${hour.toString().padStart(2, '0')}:00`
 }
 
 // Interface for schedule data extracted from payments
@@ -255,6 +268,7 @@ export default function StudentManagement() {
                             }
                             const schedules: Schedule[] = []
                             student.last_name = capitalize(student.last_name)
+                            
 
                             return {
                                 ...student,
@@ -284,7 +298,6 @@ export default function StudentManagement() {
             isMounted = false
         }
     }, [getStudents])
-    console.log(students)
     // Handle sorting
     const handleSort = (key: keyof Student) => {
         let direction: 'asc' | 'desc' = 'asc'
@@ -309,6 +322,7 @@ export default function StudentManagement() {
             // Make an API call to get the student data (This is done to load a student's attendances and payments)
             const response = await getStudent(student.id)
             const newStudent: StudentFromServer = response.student
+            console.log(newStudent)
             const sortedDates = newStudent.payments
                 ?.sort(
                     (a, b) =>
@@ -329,7 +343,7 @@ export default function StudentManagement() {
                 lastEntryTime: '',
                 lastPaymentDate: String(sortedDates?.[0]?.payment_date || ''),
                 lastPaymentPlan: String(
-                    sortedDates?.[0]?.classSchedule?.class?.name || '',
+                    sortedDates?.[0]?.plan_name || '',
                 ),
                 lastPaymentAmount: Number(sortedDates?.[0]?.amount || 0),
             }
@@ -340,30 +354,36 @@ export default function StudentManagement() {
                 newStudent.schedules || []
             // Procesar los datos originales para crear Schedule[]
             originalScheduleData.forEach((scheduleData: ScheduleData) => {
-                let newSchedule = schedules.find(
-                    s => s.schedule_id === scheduleData.schedule_id,
-                )
-                if (newSchedule === undefined) {
-                    newSchedule = {
-                        schedule_id: scheduleData.schedule_id,
-                        days: scheduleData.schedule_days,
-                        timeslots: [],
-                        class: null,
-                    }
-                    schedules.push(newSchedule)
-                }
-                const newTimeslot: Timeslot = {
-                    id: scheduleData.timeslot_id,
-                    hour: scheduleData.timeslot_hour,
-                }
-                const newClass: Class = {
-                    class_id: scheduleData.class_id,
-                    class_price: scheduleData.class_price,
-                    plan: [scheduleData.plan_id, scheduleData.plan_name],
-                }
-                newSchedule.timeslots.push(newTimeslot)
-                newSchedule.class = newClass
-            })
+    let newSchedule = schedules.find(
+        s => s.plan_name === scheduleData.plan_name && s.branch_name === scheduleData.branch_name && s.day === scheduleData.schedule_day,
+    )
+
+    if (newSchedule === undefined) {
+        newSchedule = {
+            schedule_id: scheduleData.schedule_id,
+            day: scheduleData.schedule_day,
+            classes: [],
+            plan_id: scheduleData.plan_id,
+            plan_name: scheduleData.plan_name,
+            branch_name: scheduleData.branch_name,
+        }
+        schedules.push(newSchedule)
+    }
+
+    const newTimeslot: Timeslot = {
+        id: scheduleData.timeslot_id,
+        hour: mapTimeslotIdToHour(scheduleData.timeslot_id),
+    }
+
+    const newClass: Class = {
+        class_id: scheduleData.class_id,
+        class_price: scheduleData.class_price,
+        plan: [scheduleData.plan_id, scheduleData.plan_name],
+        timeslot: newTimeslot,
+    }
+    
+    newSchedule.classes?.push(newClass)
+})
             const anotherNewStudent: Student = {
                 id: newStudent.id,
                 name: newStudent.name,
@@ -382,13 +402,13 @@ export default function StudentManagement() {
                 remainingClasses: newStudent.remainingClasses,
                 canAttend: newStudent.canAttend,
                 branch: newStudent.branch,
-                scheduleData: originalScheduleData,
                 schedules: schedules,
             }
             setSelectedStudent(anotherNewStudent) // Select the clicked student
             setAccountInfo(accountInfo)
         }
     }
+    console.log(selectedStudent)
 
     // Handle student deletion
     const handleDeleteStudent = async (id: string) => {
@@ -448,20 +468,6 @@ export default function StudentManagement() {
         }).format(amount)
     }
 
-    // Helper function to get day name in Spanish
-    const getDayName = (day: string) => {
-        const dayNames: { [key: string]: string } = {
-            monday: 'Lunes',
-            tuesday: 'Martes',
-            wednesday: 'Miércoles',
-            thursday: 'Jueves',
-            friday: 'Viernes',
-            saturday: 'Sábado',
-            sunday: 'Domingo',
-        }
-        return dayNames[day.toLowerCase()] || day
-    }
-
     // Function to render student schedule table
     const renderStudentScheduleTable = (student: Student) => {
         function hasValidClass(
@@ -473,28 +479,14 @@ export default function StudentManagement() {
         }
 
         if (!student.schedules || student.schedules.length === 0) {
-            return (
-                <div className="text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400 mb-4">
-                        Sin planes asignados
-                    </p>
-                    {student.scheduleData &&
-                        student.scheduleData.length > 0 && (
-                            <div>
-                                <h5 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
-                                    Horarios generales
-                                </h5>
-                                {renderScheduleTableForPlan(
-                                    student.schedules,
-                                    'Horarios generales',
-                                    'Sin plan',
-                                    0,
-                                )}
-                            </div>
-                        )}
-                </div>
-            )
-        }
+    return (
+        <div className="text-center py-8">
+            <p className="text-gray-500 dark:text-gray-400">
+                Sin planes asignados
+            </p>
+        </div>
+    )
+}
 
         return (
             <div className="space-y-6">
@@ -541,8 +533,8 @@ export default function StudentManagement() {
 
         schedules.forEach(schedule => {
             // Verificar que schedule.days existe y es un array
-            if (schedule.days && Array.isArray(schedule.days)) {
-                schedule.days.forEach(day =>
+            if (schedule.day && Array.isArray(schedule.day)) {
+                schedule.day.forEach(day =>
                     daysWithSchedules.add(day.toLowerCase()),
                 )
             }
@@ -580,7 +572,7 @@ export default function StudentManagement() {
                                     <th
                                         key={day}
                                         className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
-                                        {capitalize(getDayName(day))}
+                                        {capitalize(day)}
                                     </th>
                                 ))}
                             </tr>
@@ -591,9 +583,9 @@ export default function StudentManagement() {
                                     // Find schedules for this day
                                     const daySchedules = schedules.filter(
                                         schedule =>
-                                            schedule.days &&
-                                            Array.isArray(schedule.days) &&
-                                            schedule.days.some(
+                                            schedule.day &&
+                                            Array.isArray(schedule.day) &&
+                                            schedule.day.some(
                                                 scheduleDay =>
                                                     scheduleDay.toLowerCase() ===
                                                     day,
@@ -728,9 +720,17 @@ export default function StudentManagement() {
                                                         <p className="text-xs text-gray-600 dark:text-gray-400">
                                                             Plan:{' '}
                                                             {payment
-                                                                .classSchedule
-                                                                ?.class?.name ||
+                                                                .plan_name  ||
                                                                 'Sin plan especificado'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <User className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                            Sede:{' '}
+                                                            {payment
+                                                                .branch_name  ||
+                                                                'Sin sede especificada'}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -1245,13 +1245,8 @@ export default function StudentManagement() {
                                                         </p>
                                                         <p className="text-xs text-gray-500 dark:text-gray-400">
                                                             {payment
-                                                                .classSchedule
-                                                                ?.class?.name
-                                                                ? payment
-                                                                      .classSchedule
-                                                                      .class
-                                                                      .name
-                                                                : 'Sin clase'}
+                                                                .plan_name
+                                                                || 'Sin plan'}
                                                         </p>
                                                     </div>
                                                     <span className="font-medium dark:text-white">

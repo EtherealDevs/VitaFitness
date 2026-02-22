@@ -25,9 +25,12 @@ class Payment extends Model
     {
         return $this->hasOne(Image::class, 'imageable_id', 'id')->where('imageable_type', 'App\Models\Payment');
     }
-
     public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+    public function class()
+    {
+        return $this->belongsTo(Classe::class);
     }
 }
