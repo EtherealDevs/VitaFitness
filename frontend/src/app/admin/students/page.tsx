@@ -65,12 +65,12 @@ interface ClassSchedule {
 }
 
 interface Schedule {
-    schedule_id: string
-    day: string
-    classes: Class[] | null
     plan_id: string
     plan_name: string
     branch_name: string
+    schedule_id: string
+    day: string
+    classes: Class[] | null
 }
 interface ScheduleData {
     schedule_id: string
@@ -92,6 +92,8 @@ interface Class {
     class_price: number
     plan: [plan_id: string, name: string]
     timeslot: Timeslot
+    schedule_day: string
+    schedule_id: string
 }
 interface StudentFromServer {
     id: string
@@ -355,7 +357,7 @@ export default function StudentManagement() {
             // Procesar los datos originales para crear Schedule[]
             originalScheduleData.forEach((scheduleData: ScheduleData) => {
     let newSchedule = schedules.find(
-        s => s.plan_name === scheduleData.plan_name && s.branch_name === scheduleData.branch_name && s.day === scheduleData.schedule_day,
+        s => s.plan_name === scheduleData.plan_name && s.branch_name === scheduleData.branch_name,
     )
 
     if (newSchedule === undefined) {
@@ -380,6 +382,8 @@ export default function StudentManagement() {
         class_price: scheduleData.class_price,
         plan: [scheduleData.plan_id, scheduleData.plan_name],
         timeslot: newTimeslot,
+        schedule_day: scheduleData.schedule_day,
+        schedule_id: scheduleData.schedule_id,
     }
     
     newSchedule.classes?.push(newClass)
@@ -469,49 +473,54 @@ export default function StudentManagement() {
     }
 
     // Function to render student schedule table
-    const renderStudentScheduleTable = (student: Student) => {
-        function hasValidClass(
-            schedule: (typeof student.schedules)[number],
-        ): schedule is typeof schedule & {
-            class: NonNullable<typeof schedule.class>
-        } {
-            return schedule.class !== null && schedule.class !== undefined
-        }
+const renderStudentScheduleTable = (student: Student) => {
 
-        if (!student.schedules || student.schedules.length === 0) {
-    return (
-        <div className="text-center py-8">
-            <p className="text-gray-500 dark:text-gray-400">
-                Sin planes asignados
-            </p>
-        </div>
-    )
-}
+    function hasValidClasses(
+        schedule: (typeof student.schedules)[number],
+    ): schedule is typeof schedule & {
+        classes: Class[]
+    } {
+        return Array.isArray(schedule.classes) && schedule.classes.length > 0
+    }
 
+    if (!student.schedules || student.schedules.length === 0) {
         return (
-            <div className="space-y-6">
-                {student.schedules.filter(hasValidClass).map(schedule => (
-                    <div key={schedule.class.class_id}>
-                        {renderScheduleTableForPlan(
-                            [schedule],
-                            schedule.class.plan[1] || 'Plan sin nombre',
-                            schedule.class.plan[0],
-                            schedule.class.class_price,
-                        )}
-                    </div>
-                ))}
+            <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">
+                    Sin planes asignados
+                </p>
             </div>
         )
     }
 
+    return (
+        <div className="space-y-6">
+            {student.schedules
+                .filter(hasValidClasses)
+                .map(schedule => (
+                    <div
+                        key={`${schedule.plan_id}-${schedule.branch_name}`}
+                    >
+                        {renderScheduleTableForPlan(
+                            schedule,
+                            schedule.plan_id || 'Plan sin nombre',
+                            schedule.plan_name,
+                            schedule.branch_name
+                        )}
+                    </div>
+                ))}
+        </div>
+    )
+}
+
     // Function to render schedule table for a specific plan
     const renderScheduleTableForPlan = (
-        schedules: Schedule[],
+        schedule: Schedule,
         planName: string,
         planId: string,
-        classPrice: number,
+        branchName: string,
     ) => {
-        if (!schedules || schedules.length === 0) {
+        if (!schedule.classes || schedule.classes.length === 0) {
             return (
                 <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                     Sin horarios asignados
@@ -519,35 +528,24 @@ export default function StudentManagement() {
             )
         }
 
-        // Get all unique days from all schedules
-        const allDays = [
-            'lunes',
-            'martes',
-            'miercoles',
-            'jueves',
-            'viernes',
-            'sabado',
-            'domingo',
-        ]
-        const daysWithSchedules = new Set()
+        // Make an array of all unique days from one schedule
+        const activeDays = schedule.classes
+        ? [...new Set(schedule.classes.map(cls => cls.schedule_day))]
+        : []
+        const allDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
 
-        schedules.forEach(schedule => {
-            // Verificar que schedule.days existe y es un array
-            if (schedule.day && Array.isArray(schedule.day)) {
-                schedule.day.forEach(day =>
-                    daysWithSchedules.add(day.toLowerCase()),
-                )
-            }
-        })
+        const allClasses = schedule.classes ?? []
 
-        const activeDays = allDays.filter(day => daysWithSchedules.has(day))
+        const hours = [
+        ...new Set(allClasses.map(cls => cls.timeslot.hour))
+        ].sort()
 
-        if (activeDays.length === 0) {
-            return (
-                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                    Sin horarios asignados
-                </div>
-            )
+        const hasClass = (day: string, hour: string) => {
+        return allClasses.some(
+            cls =>
+            cls.schedule_day.toLowerCase() === day &&
+            cls.timeslot.hour === hour
+        )
         }
 
         return (
@@ -556,7 +554,7 @@ export default function StudentManagement() {
                     <div className="w-3 h-3 bg-violet-500 rounded-full"></div>
                     {planName}
                     -
-                     ${classPrice}
+                     {branchName}
                      -
                      <button onClick={() => {
                      router.push(
@@ -566,75 +564,45 @@ export default function StudentManagement() {
                 </h5>
                 <div className="overflow-x-auto">
                     <table className="w-full border border-gray-200 dark:border-gray-600 rounded-lg">
-                        <thead>
-                            <tr className="bg-gray-50 dark:bg-gray-700">
-                                {activeDays.map(day => (
-                                    <th
-                                        key={day}
-                                        className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
-                                        {capitalize(day)}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                {activeDays.map(day => {
-                                    // Find schedules for this day
-                                    const daySchedules = schedules.filter(
-                                        schedule =>
-                                            schedule.day &&
-                                            Array.isArray(schedule.day) &&
-                                            schedule.day.some(
-                                                scheduleDay =>
-                                                    scheduleDay.toLowerCase() ===
-                                                    day,
-                                            ),
-                                    )
+                <thead>
+                    <tr className="bg-gray-50 dark:bg-gray-700">
+                    {activeDays.map(day => (
+                        <th key={day} className="px-6 py-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600 last:border-r-0">
+                        {capitalize(day)}
+                        </th>
+                    ))}
+                    </tr>
+                </thead>
 
-                                    return (
-                                        <td
-                                            key={day}
-                                            className="px-4 py-6 text-center border-r border-gray-200 dark:border-gray-600 last:border-r-0 align-top">
-                                            {daySchedules.length > 0 ? (
-                                                <div className="space-y-2">
-                                                    {daySchedules.map(
-                                                        (
-                                                            schedule,
-                                                            scheduleIndex,
-                                                        ) =>
-                                                            schedule.timeslots &&
-                                                            Array.isArray(
-                                                                schedule.timeslots,
-                                                            )
-                                                                ? schedule.timeslots.map(
-                                                                      (
-                                                                          timeslot,
-                                                                          timeslotIndex,
-                                                                      ) => (
-                                                                          <div
-                                                                              key={`${day}-${schedule.schedule_id}-${timeslot.id}-${scheduleIndex}-${timeslotIndex}`}
-                                                                              className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium">
-                                                                              {
-                                                                                  timeslot.hour
-                                                                              }
-                                                                          </div>
-                                                                      ),
-                                                                  )
-                                                                : null,
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <span className="text-gray-400 text-sm">
-                                                    -
-                                                </span>
-                                            )}
-                                        </td>
-                                    )
-                                })}
-                            </tr>
-                        </tbody>
-                    </table>
+  <tbody>
+  <tr>
+    {activeDays.map(day => {
+      const classesForDay =
+        schedule.classes?.filter(
+          cls => cls.schedule_day === day
+        ) ?? []
+
+      return (
+        <td
+          key={day}
+          className="px-4 py-6 align-top border-r border-gray-200 dark:border-gray-600"
+        >
+          <div className="space-y-2">
+            {classesForDay.map(cls => (
+              <div
+                key={cls.class_id}
+                className="text-sm bg-violet-100 dark:bg-blue-900 text-violet-500 dark:text-blue-200 px-3 py-2 rounded-md font-medium"
+              >
+                {cls.timeslot.hour}
+              </div>
+            ))}
+          </div>
+        </td>
+      )
+    })}
+  </tr>
+</tbody>
+</table>
                 </div>
             </div>
         )
