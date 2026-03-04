@@ -121,6 +121,11 @@ export default function PaymentHistory() {
                     className:
                         p.classSchedule?.class?.name || 'Clase no disponible',
                     status: p.status.toLowerCase(),
+                    class_id: p.class_id || '',
+                    plan_id: p.plan_id || '',
+                    plan_name: p.plan_name || '',
+                    branch_id: p.branch_id || '',
+                    branch_name: p.branch_name || '',
                     classSchedule: p.classSchedule || null,
                     classSchedule_id: p.classSchedule?.id || '',
                     student_id: p.student_id || '',
