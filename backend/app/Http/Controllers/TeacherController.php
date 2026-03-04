@@ -19,7 +19,7 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
-        $teachers->load('schedules', 'classes', 'timeslots', 'classScheduleTimeslotTeachers');
+        $teachers->load('classes');
         $teachers = TeacherResource::collection($teachers);
 
         $data = [
