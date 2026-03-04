@@ -6,7 +6,6 @@ use App\Models\Attendance;
 use App\Models\Plan;
 use App\Models\Teacher;
 use App\Models\Classe;
-use App\Models\ClassScheduleTimeslot;
 use App\Models\Payment;
 use App\Models\Student;
 use Illuminate\Http\JsonResponse;
@@ -32,105 +31,78 @@ class StatisticsController extends Controller
         return Student::count();
     }
     protected function studentsPerPlan(): array
-    {
-        return Plan::withCount(['classes as students_count' => function ($query) {
-            $query->withCount(['classSchedules as schedules_count' => function ($q) {
-                $q->withCount('classScheduleTimeslots as timeslot_count');
-            }]);
-        }])->get()->mapWithKeys(function ($plan) {
-            $studentsCount = $plan->classes->flatMap(function ($class) {
-                return $class->classSchedules->flatMap(function ($schedule) {
-                    return $schedule->classScheduleTimeslots->flatMap(function ($timeslot) {
-                        return $timeslot->students->pluck('id');
-                    });
-                });
-            })->unique()->count();
+{
+    return Plan::with(['classes.students'])
+        ->get()
+        ->mapWithKeys(function ($plan) {
+            $studentsCount = $plan->classes
+                ->flatMap->students
+                ->pluck('id')
+                ->unique()
+                ->count();
 
             return [$plan->name => $studentsCount];
-        })->toArray();
+        })
+        ->toArray();
     }
 
     protected function studentsPerTeacher(): array
-    {
-        return Teacher::with('timeslots.students')->get()->mapWithKeys(function ($teacher) {
-            $students = $teacher->timeslots->flatMap(function ($slot) {
-                return $slot->students->pluck('id');
-            })->unique();
-
-            return [$teacher->name . ' ' . $teacher->last_name => $students->count()];
-        })->toArray();
-    }
+{
+    return Teacher::query()
+        ->selectRaw("CONCAT(teachers.name, ' ', teachers.last_name) as full_name")
+        ->selectRaw('COUNT(DISTINCT class_students.student_id) as total')
+        ->join('class_teachers', 'class_teachers.teacher_id', '=', 'teachers.id')
+        ->join('classes', 'classes.id', '=', 'class_teachers.class_id')
+        ->join('class_students', 'class_students.class_id', '=', 'classes.id')
+        ->groupBy('teachers.id', 'teachers.name', 'teachers.last_name')
+        ->pluck('total', 'full_name')
+        ->toArray();
+}
 
     public function studentsPerClass()
-    {
-        $classes = Classe::with([
-            'plan:id,name',
-            'classSchedules.classScheduleTimeslots.students',
-            'schedules.timeslots' => function ($query) {
-                $query->select('timeslots.id', 'hour');
-            },
-        ])->get();
+{
+    $rows = Classe::query()
+        ->select('plans.name as plan')
+        ->selectRaw('COUNT(DISTINCT class_students.student_id) as students_count')
+        ->join('plans', 'plans.id', '=', 'classes.plan_id')
+        ->leftJoin('class_students', 'class_students.class_id', '=', 'classes.id')
+        ->groupBy('plans.id', 'plans.name')
+        ->get();
 
-        $data = $classes->map(function ($class) {
-            $studentsCount = $class->classSchedules
-                ->flatMap(fn($schedule) => $schedule->classScheduleTimeslots)
-                ->flatMap(fn($timeslot) => $timeslot->students)
-                ->unique('id')
-                ->count();
-
-            // Recolectar horarios
-            $days = $class->schedules->pluck('days')->flatten()->unique();
-            $times = $class->schedules->flatMap->timeslots->map(function ($slot) {
-                return $slot->hour;
-            })->unique();
-
+    return [
+        'classes' => $rows->map(function ($row) {
             return [
-                'class_id' => $class->id,
-                'plan' => $class->plan?->name,
-                'students_count' => $studentsCount,
-                'days' => $days,
-                'times' => $times,
+                'plan' => $row->plan,
+                'students_count' => $row->students_count,
             ];
-        });
-
-        return [
-            'classes' => $data,
-        ];
-    }
+        })
+    ];
+}
     protected function studentsPerWeek(): array
-    {
-        $dias = [
-            1 => 'Lun',
-            2 => 'Mar',
-            3 => 'Mie',
-            4 => 'Jue',
-            5 => 'Vie',
-            6 => 'Sab',
-            7 => 'Dom',
+{
+    $diasOrdenados = ['Mon','Tue','Wed','Thu','Fri','Sat']; 
+    // change to ['Lun','Mar','Mie','Jue','Vie','Sab'] if Spanish
+
+    $asistencia = Attendance::query()
+        ->join('class_students', 'attendances.class_student_id', '=', 'class_students.id')
+        ->join('classes', 'classes.id', '=', 'class_students.class_id')
+        ->join('schedules', 'schedules.id', '=', 'classes.schedule_id')
+        ->select('schedules.day')
+        ->selectRaw('COUNT(DISTINCT class_students.student_id) as total')
+        ->groupBy('schedules.day')
+        ->pluck('total', 'schedules.day');
+
+    $resultado = [];
+
+    foreach ($diasOrdenados as $dia) {
+        $resultado[] = [
+            'name' => $dia,
+            'total' => $asistencia->get($dia, 0),
         ];
-
-        // Obtenemos la cantidad de estudiantes únicos por día de la semana (1 = Lunes, ..., 7 = Domingo)
-        $asistencia = Attendance::join('class_schedule_timeslot_students', 'attendances.c_sch_ts_student_id', '=', 'class_schedule_timeslot_students.id')
-            ->selectRaw('WEEKDAY(attendances.date) + 1 as weekday, COUNT(DISTINCT class_schedule_timeslot_students.student_id) as total')
-            ->groupBy('weekday')
-            ->get()
-            ->mapWithKeys(function ($item) use ($dias) {
-                return [$dias[$item->weekday] => $item->total];
-            });
-
-        // Aseguramos que todos los días estén presentes, aunque sea con total = 0
-        $resultado = [];
-        foreach ([1, 2, 3, 4, 5, 6] as $i) { // Solo Lunes a Sábado
-            $nombre = $dias[$i];
-            $resultado[] = [
-                'name' => $nombre,
-                'total' => $asistencia->get($nombre, 0),
-            ];
-        }
-
-        return $resultado;
     }
 
+    return $resultado;
+}
     protected function paymentsPerMonth(): array
     {
         $meses = [
@@ -175,35 +147,36 @@ class StatisticsController extends Controller
             ->sum('amount');
     }
     protected function classesToday(): array
-    {
-        $hoy = now()->format('D'); // 'Mon', 'Tue', etc.
+{
+    $hoy = now()->format('D'); // Or numeric weekday
 
-        // Buscar timeslots donde el día actual esté incluido en el array 'days' del schedule
-        $timeslots = ClassScheduleTimeslot::with([
-            'classSchedule.classe.plan',
-            'classSchedule.schedule',
-            'teachers',
-            'timeslot'
-        ])
-            ->whereHas('classSchedule.schedule', function ($q) use ($hoy) {
-                $q->whereJsonContains('days', $hoy);
-            })
-            ->get();
+    $classes = Classe::with([
+        'plan',
+        'teachers',
+        'timeslot',
+        'schedule'
+    ])
+    ->whereHas('schedule', function ($q) use ($hoy) {
+        $q->whereJsonContains('day', $hoy);
+    })
+    ->get();
 
-        $data = $timeslots->map(function ($ts) {
-            return [
-                'class_id' => $ts->classSchedule->class_id,
-                'class_name' => $ts->classSchedule->classe->name ?? 'Clase sin nombre',
-                'plan' => $ts->classSchedule->classe->plan->name ?? 'Sin plan',
-                'teacher' => $ts->teachers->map(fn($t) => $t->name . ' ' . $t->last_name)->join(', '),
-                'hour' => $ts->timeslot->hour,
-            ];
-        });
-
+    $data = $classes->map(function ($class) {
         return [
-            'day' => $hoy,
-            'total_classes' => $data->count(),
-            'classes' => $data,
+            'class_id' => $class->id,
+            'class_name' => $class->name,
+            'plan' => $class->plan?->name ?? 'Sin plan',
+            'teacher' => $class->teachers
+                ->map(fn($t) => $t->name . ' ' . $t->last_name)
+                ->join(', '),
+            'hour' => $class->timeslot?->hour,
         ];
-    }
+    });
+
+    return [
+        'day' => $hoy,
+        'total_classes' => $data->count(),
+        'classes' => $data,
+    ];
+}
 }
