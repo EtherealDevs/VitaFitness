@@ -17,28 +17,29 @@ class ClassScheduleController extends Controller
 {
     public function classNames()
     {
-        $classScheduleClassNames = ClassSchedule::join('classes', 'class_schedules.class_id', '=', 'classes.id')
-        ->select('class_schedules.id', 'classes.plan_id')
-        ->distinct()
-        ->get();
-        foreach ($classScheduleClassNames as $classScheduleClassName) {
-            $classScheduleClassName->plan = Plan::find($classScheduleClassName->plan_id)->id;
+        $classScheduleClassNames = Classe::select('id', 'plan_id')
+    ->distinct()
+    ->get();
+
+$plans = Plan::all();
+
+$planAndClassSchedules = [];
+
+foreach ($plans as $plan) {
+    $classesForPlan = [];
+
+    foreach ($classScheduleClassNames as $classItem) {
+        if ($classItem->plan_id == $plan->id) {
+            $classesForPlan[] = $classItem->id;
         }
-        $plans = Plan::all();
-        $planAndClassSchedules = [];
-        foreach ($plans as $plan) {
-            $classSChedules = [];
-            foreach ($classScheduleClassNames as $classScheduleClassName) {
-                if ($classScheduleClassName->plan_id == $plan->id) {
-                    array_push($classSChedules, $classScheduleClassName->id);
-                }
-            }
-            array_push($planAndClassSchedules, [
-                'id' => $plan->id,
-                'name' => $plan->name,
-                'classSchedules' => $classSChedules,
-            ]);
-        }
+    }
+
+    $planAndClassSchedules[] = [
+        'id' => $plan->id,
+        'name' => $plan->name,
+        'classSchedules' => $classesForPlan,
+    ];
+}
         $data = [
             'classScheduleClassNames' => $classScheduleClassNames,
             'planNames' => $planAndClassSchedules,
