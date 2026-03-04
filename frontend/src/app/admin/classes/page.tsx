@@ -18,9 +18,9 @@ import { useClasses } from '@/hooks/classes'
 
 // Types for our student data
 
-interface GetClassesResponse {
-  classes: ApiClass[]
-}
+// interface GetClassesResponse {
+//   classes: ApiClass[]
+// }
 
 interface ApiClass {
   plan_id: string
@@ -71,31 +71,31 @@ interface Schedule {
     teachers: Teacher[]
     students: Student[]
 }
-interface ScheduleData {
-    class_id: string
-    schedule_id: string
-    classSchedule_id: string
-    schedule_days: string[]
-    timeslot_id: string
-    timeslot_hour: string
-    teachers: Teacher[]
-    students: Student[]
-}
+// interface ScheduleData {
+//     class_id: string
+//     schedule_id: string
+//     classSchedule_id: string
+//     schedule_days: string[]
+//     timeslot_id: string
+//     timeslot_hour: string
+//     teachers: Teacher[]
+//     students: Student[]
+// }
 interface Timeslot {
     id: number
     hour: string
 }
-interface ClassData {
-    class_id: string
-    plan_id: string
-    plan_name: string
-    plan_status: string
-    branch_id: string
-    branch_name: string
-    max_students: number
-    precio: number
-    schedules: ScheduleData[]
-}
+// interface ClassData {
+//     class_id: string
+//     plan_id: string
+//     plan_name: string
+//     plan_status: string
+//     branch_id: string
+//     branch_name: string
+//     max_students: number
+//     precio: number
+//     schedules: ScheduleData[]
+// }
 interface Class {
     class_id: string
     plan_id: string

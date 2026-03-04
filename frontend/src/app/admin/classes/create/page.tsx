@@ -30,14 +30,14 @@ import { toast } from '@/hooks/use-toast'
 import { useClasses } from '@/hooks/classes'
 import { type Plan, usePlans } from '@/hooks/plans'
 import { type Branch, useBranches } from '@/hooks/branches'
-import { type Schedule, useSchedules } from '@/hooks/schedules'
+// import { type Schedule, useSchedules } from '@/hooks/schedules'
 
 export default function CreateClassPage() {
     const router = useRouter()
     const { createClass } = useClasses()
     const { getPlans } = usePlans()
     const { getBranches } = useBranches()
-    const { getSchedules } = useSchedules()
+    // const { getSchedules } = useSchedules()
 
     const [isLoading, setIsLoading] = useState(false)
     const [plans, setPlans] = useState<Plan[]>([])
@@ -77,10 +77,10 @@ export default function CreateClassPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [plansRes, branchesRes, schedulesRes] = await Promise.all([
+                const [plansRes, branchesRes] = await Promise.all([
                     getPlans(),
                     getBranches(),
-                    getSchedules(),
+                    // getSchedules(),
                 ])
                 setPlans(plansRes.plans || [])
                 setBranches(branchesRes.branches || [])
@@ -89,7 +89,7 @@ export default function CreateClassPage() {
             }
         }
         fetchData()
-    }, [getPlans, getBranches, getSchedules])
+    }, [getPlans, getBranches])
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }))
