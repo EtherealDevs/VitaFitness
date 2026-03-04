@@ -17,6 +17,31 @@ import { Button } from '@/app/admin/components/ui/button'
 import { useClasses } from '@/hooks/classes'
 
 // Types for our student data
+
+interface GetClassesResponse {
+  classes: ApiClass[]
+}
+
+interface ApiClass {
+  plan_id: string
+  plan_name: string
+  plan_status: string
+  branch_id: string
+  branch_name: string
+  max_students: number
+  precio: number
+  details: ApiClassDetail[]
+}
+
+interface ApiClassDetail {
+  schedule_id: number
+  timeslot_id: number
+  max_students: number
+  price: number
+  students?: Student[]
+  teachers?: Teacher[]
+}
+
 interface Teacher {
     id: string
     name: string
@@ -38,7 +63,7 @@ interface Student {
 }
 interface Schedule {
     class_id: string
-    schedule_id: string
+    schedule_id: number
     classSchedule_id: string
     days: string[]
     timeslots: Timeslot[]
@@ -57,7 +82,7 @@ interface ScheduleData {
     students: Student[]
 }
 interface Timeslot {
-    id: string
+    id: number
     hour: string
 }
 interface ClassData {
@@ -152,10 +177,10 @@ export default function ClassPage() {
             const response = await getClasses()
 
             const classes: Class[] = []
-            const processedClasses = response.classes.map((item: any) => {
+            const processedClasses = response.classes.map((item: ApiClass) => {
             const schedulesMap = new Map<number, Schedule>()
 
-            item.details.forEach((d: any) => {
+            item.details.forEach((d: ApiClassDetail) => {
                 if (!schedulesMap.has(d.schedule_id)) {
                 const day = SCHEDULE_DAY_MAP[d.schedule_id]
 

@@ -42,7 +42,6 @@ export default function CreateClassPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [plans, setPlans] = useState<Plan[]>([])
     const [branches, setBranches] = useState<Branch[]>([])
-    const [schedules, setSchedules] = useState<Schedule[]>([])
     const [selectedDays, setSelectedDays] = useState<string[]>([])
 
     const [formData, setFormData] = useState({
@@ -85,7 +84,6 @@ export default function CreateClassPage() {
                 ])
                 setPlans(plansRes.plans || [])
                 setBranches(branchesRes.branches || [])
-                setSchedules(schedulesRes.schedules || [])
             } catch (error) {
                 console.error('Error fetching data:', error)
             }
@@ -130,7 +128,7 @@ export default function CreateClassPage() {
                         'La clase y su horario han sido configurados correctamente',
                     variant: 'default',
                 })
-
+                console.log(res)
                 router.push('/admin/classes')
             
         } catch (error) {

@@ -126,15 +126,15 @@ interface AccountInfo {
     lastPaymentPlan: string
     lastPaymentAmount: number
 }
-const SCHEDULE_DAY_MAP: Record<number, string> = {
-  1: 'lunes',
-  2: 'martes',
-  3: 'miercoles',
-  4: 'jueves',
-  5: 'viernes',
-  6: 'sabado',
-  7: 'domingo',
-}
+// const SCHEDULE_DAY_MAP: Record<number, string> = {
+//   1: 'lunes',
+//   2: 'martes',
+//   3: 'miercoles',
+//   4: 'jueves',
+//   5: 'viernes',
+//   6: 'sabado',
+//   7: 'domingo',
+// }
 
 // Maps timeslot_id (1–24) to hour string (00:00–23:00)
 const mapTimeslotIdToHour = (id: number): string => {
@@ -532,21 +532,21 @@ const renderStudentScheduleTable = (student: Student) => {
         const activeDays = schedule.classes
         ? [...new Set(schedule.classes.map(cls => cls.schedule_day))]
         : []
-        const allDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+        // const allDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
 
-        const allClasses = schedule.classes ?? []
+        // const allClasses = schedule.classes ?? []
 
-        const hours = [
-        ...new Set(allClasses.map(cls => cls.timeslot.hour))
-        ].sort()
+        // const hours = [
+        // ...new Set(allClasses.map(cls => cls.timeslot.hour))
+        // ].sort()
 
-        const hasClass = (day: string, hour: string) => {
-        return allClasses.some(
-            cls =>
-            cls.schedule_day.toLowerCase() === day &&
-            cls.timeslot.hour === hour
-        )
-        }
+        // const hasClass = (day: string, hour: string) => {
+        // return allClasses.some(
+        //     cls =>
+        //     cls.schedule_day.toLowerCase() === day &&
+        //     cls.timeslot.hour === hour
+        // )
+        // }
 
         return (
             <div className="mb-6">
