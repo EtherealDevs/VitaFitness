@@ -16,6 +16,11 @@ export interface Payment {
     id: string
     classSchedule: ClassSchedule
     classSchedule_id: string
+    class_id: string
+    plan_id: string
+    plan_name: string
+    branch_name: string
+    branch_id: string
     student_id: string
     student: Student
     student_full_name: string

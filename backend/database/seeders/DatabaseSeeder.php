@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
         //plans
         $this->call(PlanSeeder::class);
         //student
-        // $this->call(StudentSeeder::class);
+        $this->call(StudentSeeder::class);
         //teacher
         $this->call(TeacherSeeder::class);
         //schedule
@@ -38,14 +38,18 @@ class DatabaseSeeder extends Seeder
         $this->call(TimeSlotSeeder::class);
         //class
         $this->call(ClassSeeder::class);
+        //class_students
+        $this->call(ClassStudentSeeder::class);
+        //class_teacher
+        $this->call(ClassTeacherSeeder::class);
         //class_schedules
-        $this->call(ClassScheduleSeeder::class);
+        // $this->call(ClassScheduleSeeder::class);
         //schedule_timeslots
-        $this->call(ClassScheduleTimeslotSeeder::class);
+        // $this->call(ClassScheduleTimeslotSeeder::class);
         //class_schedule_timeslot_students
         // $this->call(ClassScheduleTimeslotStudentSeeder::class);
         //class_schedule_timeslot_teachers
-        $this->call(ClassScheduleTimeslotTeacherSeeder::class);
+        // $this->call(ClassScheduleTimeslotTeacherSeeder::class);
         //attendance
         // $this->call(AttendanceSeeder::class);
         //payment

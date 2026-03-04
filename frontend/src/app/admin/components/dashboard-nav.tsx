@@ -17,6 +17,7 @@ import {
     NotepadText,
     CalendarCheck2,
     Building,
+    Album,
 } from 'lucide-react'
 
 const navigation = [
@@ -37,8 +38,9 @@ const navigation = [
     { name: 'Productos', href: '/admin/products', icon: ShoppingBag },
     { name: 'Planes', href: '/admin/plans', icon: NotepadText },
     { name: 'Sucursales', href: '/admin/branches', icon: Building },
-    { name: 'Permisos', href: '/admin/permissions', icon: FileText },
     { name: 'Estadísticas', href: '/admin/statistics', icon: BarChart2 },
+    { name: 'Informes', href: '/admin/reports', icon: Album },
+    { name: 'Permisos', href: '/admin/permissions', icon: FileText },
 ]
 
 export function DashboardNav() {

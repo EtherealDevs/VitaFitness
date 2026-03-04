@@ -17,7 +17,7 @@ class BranchController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
-        $branches->load(['classes', 'teachers', 'students']);
+        // $branches->load(['classes', 'teachers', 'students']);
         $branches = BranchResource::collection($branches);
         $data = [
             'branches' => $branches,
