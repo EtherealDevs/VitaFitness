@@ -22,7 +22,7 @@ import { Button } from '@/app/admin/components/ui/button'
 import { type Payment, usePayments } from '@/hooks/payments'
 import { Input } from '@/app/admin/components/ui/input'
 import { Label } from '@/app/admin/components/ui/label'
-import { useClassSchedules } from '@/hooks/classSchedules'
+// import { useClassSchedules } from '@/hooks/classSchedules'
 
 interface Plan {
     id: string
@@ -63,7 +63,7 @@ const getRowColor = (status: string) => {
 export default function PaymentsPage() {
     const router = useRouter()
     const { getPayments, deletePayment, getPayment } = usePayments()
-    const { getClassScheduleClassNames } = useClassSchedules()
+    // const { getClassScheduleClassNames } = useClassSchedules()
     const [payments, setPayments] = useState<Payment[]>([])
     const [planNames, setPlanNames] = useState<Plan[]>([])
     const [loading, setLoading] = useState<boolean>(true)
@@ -128,34 +128,34 @@ export default function PaymentsPage() {
         }
     }, [getPayments])
     // Fetch planNames
-    useEffect(() => {
-        let isMounted = true
+    // useEffect(() => {
+    //     let isMounted = true
 
-        const fetchPlanNames = async () => {
-            setLoading(true)
-            setError(null)
+    //     const fetchPlanNames = async () => {
+    //         setLoading(true)
+    //         setError(null)
 
-            try {
-                const response = await getClassScheduleClassNames()
-                if (isMounted) {
-                    setPlanNames(response.planNames)
-                    setLoading(false)
-                }
-            } catch (err) {
-                if (isMounted) {
-                    setError('Error al cargar los datos de pagos')
-                    console.error(err)
-                    setLoading(false)
-                }
-            }
-        }
+    //         try {
+    //             const response = await getClassScheduleClassNames()
+    //             if (isMounted) {
+    //                 setPlanNames(response.planNames)
+    //                 setLoading(false)
+    //             }
+    //         } catch (err) {
+    //             if (isMounted) {
+    //                 setError('Error al cargar los datos de pagos')
+    //                 console.error(err)
+    //                 setLoading(false)
+    //             }
+    //         }
+    //     }
 
-        fetchPlanNames()
+    //     fetchPlanNames()
 
-        return () => {
-            isMounted = false
-        }
-    }, [getClassScheduleClassNames])
+    //     return () => {
+    //         isMounted = false
+    //     }
+    // }, [getClassScheduleClassNames])
 
     // Handle sorting
     const handleSort = (key: keyof Payment) => {
